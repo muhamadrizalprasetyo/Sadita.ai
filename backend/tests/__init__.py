@@ -1,0 +1,1 @@
+"""SADITA — tests package."""

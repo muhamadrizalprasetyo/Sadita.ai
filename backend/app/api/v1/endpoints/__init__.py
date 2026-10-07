@@ -1,0 +1,1 @@
+"""SADITA — endpoints package."""
