@@ -208,7 +208,7 @@ class AttendanceService:
             sub = db.scalars(
                 select(ClassEnrollment.class_id).where(
                     ClassEnrollment.student_id == student.id,
-                    ClassEnrollment.status.in_([EnrollmentStatus.AKTIF, "AKTIF", "ACTIVE"]),
+                    ClassEnrollment.status.in_([EnrollmentStatus.AKTIF, "AKTIF"]),
                 )
             ).all()
             session = db.scalar(

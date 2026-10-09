@@ -23,6 +23,7 @@ from app.schemas.lms import (
     LessonResponse,
     QuizCreateRequest,
     QuizResponse,
+    QuizDetailResponse,
     QuizQuestionCreateRequest,
     QuizQuestionResponse,
     QuizOptionCreateRequest,
@@ -469,6 +470,52 @@ def list_quizzes(class_id: int, current: CurrentUser, db: DBSession):
     from app.models.lms import Quiz
     quizzes = db.query(Quiz).filter(Quiz.class_id == class_id).all()
     return [QuizResponse.model_validate(q) for q in quizzes]
+
+
+@router.get("/quizzes/{quiz_id}", response_model=QuizDetailResponse, summary="Detail kuis beserta pertanyaan & opsi")
+def get_quiz_detail(quiz_id: int, current: CurrentUser, db: DBSession):
+    from app.models.lms import Quiz
+    quiz = db.get(Quiz, quiz_id)
+    if not quiz:
+        raise HTTPException(status_code=404, detail="Kuis tidak ditemukan")
+    require_class_access(db, current, quiz.class_id)
+    
+    resp = QuizDetailResponse.model_validate(quiz)
+    if current.role in (UserRole.MAHASISWA, UserRole.KETUA_KELAS):
+        for q in resp.questions:
+            for opt in q.options:
+                opt.is_correct = False
+    return resp
+
+
+@router.delete("/quizzes/{quiz_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Hapus kuis (Dosen)")
+def delete_quiz(quiz_id: int, current: RequireLecturer, db: DBSession):
+    from app.models.lms import Quiz
+    quiz = db.get(Quiz, quiz_id)
+    if not quiz:
+        raise HTTPException(status_code=404, detail="Kuis tidak ditemukan")
+    require_class_access(db, current, quiz.class_id)
+    audit(db, current.id, "DELETE_QUIZ", "quiz", quiz.id, before={"title": quiz.title})
+    db.delete(quiz)
+    db.commit()
+    return None
+
+
+@router.get("/quizzes/{quiz_id}/submissions", response_model=List[QuizSubmissionResponse], summary="Daftar submission kuis")
+def list_quiz_submissions(quiz_id: int, current: CurrentUser, db: DBSession):
+    from app.models.lms import Quiz, QuizSubmission
+    quiz = db.get(Quiz, quiz_id)
+    if not quiz:
+        raise HTTPException(status_code=404, detail="Kuis tidak ditemukan")
+    require_class_access(db, current, quiz.class_id)
+    query = db.query(QuizSubmission).filter(QuizSubmission.quiz_id == quiz_id)
+    if current.role in (UserRole.MAHASISWA, UserRole.KETUA_KELAS):
+        student = StudentRepository.get_by_user_id(db, current.id)
+        if not student:
+            return []
+        query = query.filter(QuizSubmission.student_id == student.id)
+    submissions = query.order_by(QuizSubmission.attempt_number.desc()).all()
+    return [QuizSubmissionResponse.model_validate(s) for s in submissions]
 
 
 @router.post(

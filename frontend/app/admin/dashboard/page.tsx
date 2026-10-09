@@ -1,170 +1,243 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { academicApi, attendanceApi, deviceApi, type CourseClass } from "@/lib/api";
+import { useEffect, useState, useCallback } from "react";
 import { 
   Users, 
   BookOpen, 
   Calendar, 
   Monitor, 
-  ClipboardList,
-  CheckCircle,
-  XCircle,
-  Clock
+  ClipboardList, 
+  CheckCircle, 
+  Clock, 
+  ArrowRight,
+  ShieldCheck,
+  RefreshCw,
+  Plus
 } from "lucide-react";
-
-interface DashboardStats {
-  total_students: number;
-  total_lecturers: number;
-  total_classes: number;
-  total_courses: number;
-  open_sessions: number;
-  devices_offline: number;
-  pending_approvals: number;
-  today_attendance: number;
-}
+import { academicApi, AdminDashboard, CourseClass, SaditaDevice, deviceApi } from "@/lib/api";
+import { StatCard, LoadingSpinner, EmptyState } from "@/components/ui";
+import Link from "next/link";
 
 export default function AdminDashboardPage() {
-  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [stats, setStats] = useState<AdminDashboard | null>(null);
+  const [classes, setClasses] = useState<CourseClass[]>([]);
+  const [devices, setDevices] = useState<SaditaDevice[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const loadData = () => {
+    setLoading(true);
+    void Promise.all([
+      academicApi.getDashboard(),
+      academicApi.getClasses(),
+      deviceApi.list(),
+    ])
+      .then(([statsRes, classesRes, devicesRes]) => {
+        if (statsRes.data) setStats(statsRes.data);
+        if (classesRes.data) setClasses(classesRes.data);
+        if (devicesRes.data) setDevices(devicesRes.data);
+      })
+      .catch(() => {
+        setError("Gagal memuat data dashboard operasional.");
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
   useEffect(() => {
-    loadDashboard();
+    void Promise.all([
+      academicApi.getDashboard(),
+      academicApi.getClasses(),
+      deviceApi.list(),
+    ])
+      .then(([statsRes, classesRes, devicesRes]) => {
+        if (statsRes.data) setStats(statsRes.data);
+        if (classesRes.data) setClasses(classesRes.data);
+        if (devicesRes.data) setDevices(devicesRes.data);
+      })
+      .catch(() => {
+        setError("Gagal memuat data dashboard operasional.");
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, []);
 
-  const loadDashboard = async () => {
-    try {
-      const result = await academicApi.getDashboard();
-      if (result.data) {
-        setStats(result.data);
-      } else {
-        setError(result.error || "Gagal memuat data");
-      }
-    } catch (err) {
-      setError("Terjadi kesalahan saat memuat data");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-slate-500">Memuat data...</div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-        {error}
-      </div>
-    );
-  }
-
-  if (!stats) {
-    return (
-      <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded">
-        Belum ada data tersedia
-      </div>
-    );
-  }
-
-  const cards = [
-    { label: "Mahasiswa", value: stats.total_students, icon: Users, color: "blue" },
-    { label: "Dosen", value: stats.total_lecturers, icon: Users, color: "green" },
-    { label: "Kelas", value: stats.total_classes, icon: BookOpen, color: "purple" },
-    { label: "Mata Kuliah", value: stats.total_courses, icon: BookOpen, color: "indigo" },
-    { label: "Sesi Aktif", value: stats.open_sessions, icon: Calendar, color: "orange" },
-    { label: "Device Offline", value: stats.devices_offline, icon: Monitor, color: "red" },
-    { label: "Approval Pending", value: stats.pending_approvals, icon: ClipboardList, color: "yellow" },
-    { label: "Presensi Hari Ini", value: stats.today_attendance, icon: CheckCircle, color: "green" },
-  ];
-
-  const colorClasses = {
-    blue: "bg-blue-500",
-    green: "bg-green-500",
-    purple: "bg-purple-500",
-    indigo: "bg-indigo-500",
-    orange: "bg-orange-500",
-    red: "bg-red-500",
-    yellow: "bg-yellow-500",
-  };
+  if (loading) return <LoadingSpinner text="Memuat data operasional kampus..." />;
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-slate-900">Dashboard Admin</h1>
-        <p className="text-slate-600 mt-">Ringkasan operasional sistem SADITA</p>
+    <div style={{ display: "grid", gap: "2rem" }}>
+      {/* Header */}
+      <div className="page-header">
+        <div>
+          <h1 className="page-title">Dashboard Administrator</h1>
+          <p className="page-subtitle">Sistem Akademik Terintegrasi & Monitoring Presensi IoT</p>
+        </div>
+        <div style={{ display: "flex", gap: "0.75rem" }}>
+          <button onClick={loadData} className="btn btn-secondary">
+            <RefreshCw size={16} />
+            <span>Segarkan</span>
+          </button>
+          <Link href="/admin/akademik" className="btn btn-primary">
+            <Plus size={16} />
+            <span>Kelola Akademik</span>
+          </Link>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {cards.map((card) => {
-          const Icon = card.icon;
-          return (
-            <div
-              key={card.label}
-              className="bg-white rounded-lg shadow-sm border border-slate-200 p-6 hover:shadow-md transition-shadow"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-slate-">{card.label}</p>
-                  <p className="text-3xl font-bold text-slate-900 mt-2">{card.value}</p>
-                </div>
-                <div className={`p-3 rounded-full ${colorClasses[card.color as keyof typeof colorClasses]} bg-opacity-10`}>
-                  <Icon className={`w-6 h-6 text-${card.color}-500`} />
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+      {error && (
+        <div style={{ padding: "1rem", borderRadius: "var(--radius-lg)", background: "var(--error-bg)", border: "1px solid var(--error-border)", color: "var(--error)" }}>
+          {error}
+        </div>
+      )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
-          <h2 className="text-lg font-semibold text-slate-900 mb-4">Aksi Cepat</h2>
-          <div className="space-y-3">
-            <button className="w-full text-left px-4 py-3 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors flex items-center gap-3">
-              <Calendar className="w-5 h-5 text-slate-600" />
-              <span className="text-slate-700">Buka Sesi Presensi Baru</span>
-            </button>
-            <button className="w-full text-left px-4 py-3 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors flex items-center gap-3">
-              <ClipboardList className="w-5 h-5 text-slate-600" />
-              <span className="text-slate-700">Review Approval Presensi</span>
-            </button>
-            <button className="w-full text-left px-4 py-3 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors flex items-center gap-3">
-              <Monitor className="w-5 h-5 text-slate-600" />
-              <span className="text-slate-700">Cek Status Perangkat</span>
-            </button>
+      {/* Metrics Stat Grid */}
+      {stats && (
+        <div className="stat-grid">
+          <StatCard
+            label="Total Mahasiswa"
+            value={stats.total_students}
+            icon={Users}
+            color="blue"
+            subtext="Terdaftar di prodi"
+          />
+          <StatCard
+            label="Dosen Pengampu"
+            value={stats.total_lecturers}
+            icon={Users}
+            color="green"
+            subtext="Aktif mengajar"
+          />
+          <StatCard
+            label="Kelas Perkuliahan"
+            value={stats.total_classes}
+            icon={BookOpen}
+            color="purple"
+            subtext="Semester berjalan"
+          />
+          <StatCard
+            label="Mata Kuliah"
+            value={stats.total_courses}
+            icon={BookOpen}
+            color="indigo"
+            subtext="Kurikulum aktif"
+          />
+          <StatCard
+            label="Sesi Presensi Aktif"
+            value={stats.open_sessions}
+            icon={Calendar}
+            color="orange"
+            subtext="Sedang dibuka dosen"
+          />
+          <StatCard
+            label="Perangkat Offline"
+            value={stats.devices_offline}
+            icon={Monitor}
+            color={stats.devices_offline > 0 ? "red" : "green"}
+            subtext="ESP32 Meja Dosen"
+          />
+          <StatCard
+            label="Pending Approval"
+            value={stats.pending_approvals}
+            icon={ClipboardList}
+            color="yellow"
+            subtext="Pengajuan presensi"
+          />
+          <StatCard
+            label="Presensi Hari Ini"
+            value={stats.today_attendance}
+            icon={CheckCircle}
+            color="green"
+            subtext="Tap RFID & Biometrik"
+          />
+        </div>
+      )}
+
+      {/* Realtime Overview Section */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(22rem, 1fr))", gap: "1.5rem" }}>
+        {/* Classes Table */}
+        <div className="card">
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.25rem" }}>
+            <h2 style={{ fontSize: "1.1rem", fontWeight: 700 }}>Kelas Perkuliahan Aktif</h2>
+            <Link href="/admin/akademik" className="btn btn-outline btn-sm">
+              Semua Kelas <ArrowRight size={14} />
+            </Link>
           </div>
+
+          {classes.length === 0 ? (
+            <p style={{ color: "var(--text-muted)", fontSize: "0.875rem" }}>Belum ada kelas terdaftar.</p>
+          ) : (
+            <div className="table-container">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>Kode / Kelas</th>
+                    <th>Mata Kuliah</th>
+                    <th>Jadwal</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {classes.slice(0, 5).map((c) => (
+                    <tr key={c.id}>
+                      <td style={{ fontWeight: 600 }}>{c.name}</td>
+                      <td>{c.course?.name || "Mata Kuliah"}</td>
+                      <td style={{ fontSize: "0.8rem", color: "var(--text-secondary)" }}>
+                        Hari ke-{c.day_of_week} ({c.start_time} - {c.end_time})
+                      </td>
+                      <td>
+                        <span className="badge badge-success">Aktif</span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
-          <h2 className="text-lg font-semibold text-slate-900 mb-4">Status Sistem</h2>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-slate-600">Backend API</span>
-              <span className="flex items-center gap-2 text-green-600">
-                <CheckCircle className="w-4 h-4" />
-                Online
-              </span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-slate-600">Database</span>
-              <span className="flex items-center gap-2 text-green-600">
-                <CheckCircle className="w-4 h-4" />
-                Connected
-              </span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-slate-600">MQTT Broker</span>
-              <span className="flex items-center gap-2 text-green-600">
-                <CheckCircle className="w-4 h-4" />
-                Connected
-              </span>
-            </div>
+        {/* Hardware Monitoring Card */}
+        <div className="card">
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.25rem" }}>
+            <h2 style={{ fontSize: "1.1rem", fontWeight: 700 }}>Status Perangkat Presensi IoT</h2>
+            <Link href="/admin/perangkat" className="btn btn-outline btn-sm">
+              Detail <ArrowRight size={14} />
+            </Link>
+          </div>
+
+          <div style={{ display: "grid", gap: "0.75rem" }}>
+            {devices.map((d) => (
+              <div
+                key={d.id}
+                style={{
+                  padding: "0.85rem 1rem",
+                  borderRadius: "var(--radius-lg)",
+                  background: "rgba(255, 255, 255, 0.03)",
+                  border: "1px solid var(--border-subtle)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
+              >
+                <div>
+                  <p style={{ fontWeight: 600, fontSize: "0.9rem" }}>{d.nama}</p>
+                  <p style={{ fontSize: "0.75rem", color: "var(--text-muted)", marginTop: "0.15rem" }}>
+                    ID: {d.device_id} • IP: {d.ip_address || "192.168.1.x"}
+                  </p>
+                </div>
+                <span className={`badge ${d.status === "ACTIVE" ? "badge-success" : "badge-error"}`}>
+                  {d.status}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ marginTop: "1.5rem", padding: "1rem", borderRadius: "var(--radius-md)", background: "rgba(56, 189, 248, 0.05)", border: "1px solid rgba(56, 189, 248, 0.15)", display: "flex", alignItems: "center", gap: "0.75rem" }}>
+            <ShieldCheck size={20} color="var(--primary-light)" />
+            <p style={{ fontSize: "0.8rem", color: "var(--text-secondary)" }}>
+              Broker MQTT terhubung pada port 1883. Heartbeat perangkat otomatis disinkronkan ke database.
+            </p>
           </div>
         </div>
       </div>

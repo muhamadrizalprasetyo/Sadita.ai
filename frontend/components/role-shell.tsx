@@ -3,45 +3,83 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
+import { 
+  LayoutDashboard, 
+  BookOpen, 
+  Calendar, 
+  Users, 
+  GraduationCap, 
+  Clock, 
+  FileText, 
+  CheckSquare, 
+  Radio, 
+  Award, 
+  HelpCircle, 
+  LogOut, 
+  Building2,
+  Sparkles,
+  type LucideIcon
+} from "lucide-react";
 import { authApi, clearStoredToken, getStoredToken, type User } from "@/lib/api";
+import { KobarAssistant } from "./kobar-assistant";
 
-type Role = "ADMIN" | "DOSEN" | "MAHASISWA";
+export type Role = "ADMIN" | "KAPRODI" | "DOSEN" | "KETUA_KELAS" | "MAHASISWA";
 
-const navigation: Record<Role, { href: string; label: string }[]> = {
+interface NavItem {
+  href: string;
+  label: string;
+  icon: LucideIcon;
+}
+
+const navigation: Record<Role, NavItem[]> = {
   ADMIN: [
-    { href: "/admin/dashboard", label: "Dashboard" },
-    { href: "/admin/akademik/tahun-akademik", label: "Tahun Akademik" },
-    { href: "/admin/akademik/mata-kuliah", label: "Mata Kuliah" },
-    { href: "/admin/akademik/kelas", label: "Kelas & KRS" },
-    { href: "/admin/akademik/dosen", label: "Dosen" },
-    { href: "/admin/akademik/mahasiswa", label: "Mahasiswa" },
-    { href: "/admin/presensi/sesi", label: "Sesi Presensi" },
-    { href: "/admin/lms/materi", label: "Materi" },
-    { href: "/admin/lms/tugas", label: "Tugas" },
-    { href: "/admin/perangkat/devices", label: "Perangkat" },
+    { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/admin/akademik", label: "Master Akademik", icon: Building2 },
+    { href: "/admin/presensi", label: "Sesi Presensi", icon: Clock },
+    { href: "/admin/lms", label: "Materi & Tugas", icon: BookOpen },
+    { href: "/admin/perangkat", label: "Perangkat IoT", icon: Radio },
+  ],
+  KAPRODI: [
+    { href: "/kaprodi/dashboard", label: "Dashboard Prodi", icon: LayoutDashboard },
+    { href: "/kaprodi/dosen", label: "Monitoring Dosen", icon: Users },
+    { href: "/kaprodi/mahasiswa", label: "Monitoring Mahasiswa", icon: GraduationCap },
+    { href: "/kaprodi/kurikulum", label: "Kurikulum & Kelas", icon: BookOpen },
+    { href: "/kaprodi/presensi", label: "Analisis Presensi", icon: Clock },
   ],
   DOSEN: [
-    { href: "/dosen/dashboard", label: "Dashboard" },
-    { href: "/dosen/kelas", label: "Kelas Saya" },
-    { href: "/dosen/presensi", label: "Presensi" },
-    { href: "/dosen/materi", label: "Materi" },
-    { href: "/dosen/tugas", label: "Tugas" },
-    { href: "/dosen/nilai", label: "Nilai" },
+    { href: "/dosen/dashboard", label: "Dashboard Pengajar", icon: LayoutDashboard },
+    { href: "/dosen/kelas", label: "Kelas Saya", icon: BookOpen },
+    { href: "/dosen/presensi", label: "Sesi Presensi", icon: Clock },
+    { href: "/dosen/materi", label: "Materi Kuliah", icon: FileText },
+    { href: "/dosen/tugas", label: "Tugas & Submission", icon: CheckSquare },
+    { href: "/dosen/kuis", label: "Kuis Online", icon: HelpCircle },
+    { href: "/dosen/nilai", label: "Rekap Nilai", icon: Award },
+  ],
+  KETUA_KELAS: [
+    { href: "/ketua-kelas/dashboard", label: "Dashboard Kelas", icon: LayoutDashboard },
+    { href: "/ketua-kelas/presensi", label: "Verifikasi Presensi", icon: Clock },
+    { href: "/ketua-kelas/rekan", label: "Daftar Mahasiswa", icon: Users },
+    { href: "/ketua-kelas/materi", label: "Materi Kuliah", icon: FileText },
+    { href: "/ketua-kelas/jadwal", label: "Jadwal & Ruang", icon: Calendar },
   ],
   MAHASISWA: [
-    { href: "/mahasiswa/dashboard", label: "Dashboard" },
-    { href: "/mahasiswa/jadwal", label: "Jadwal" },
-    { href: "/mahasiswa/presensi", label: "Presensi" },
-    { href: "/mahasiswa/presensi/verifikasi", label: "Verifikasi Presensi" },
-    { href: "/mahasiswa/mata-kuliah", label: "Mata Kuliah" },
-    { href: "/mahasiswa/materi", label: "Materi" },
-    { href: "/mahasiswa/tugas", label: "Tugas" },
-    { href: "/mahasiswa/nilai", label: "Nilai" },
+    { href: "/mahasiswa/dashboard", label: "Dashboard Belajar", icon: LayoutDashboard },
+    { href: "/mahasiswa/mata-kuliah", label: "Mata Kuliah & Materi", icon: BookOpen },
+    { href: "/mahasiswa/tugas", label: "Tugas Saya", icon: CheckSquare },
+    { href: "/mahasiswa/kuis", label: "Kuis Online", icon: HelpCircle },
+    { href: "/mahasiswa/presensi", label: "Riwayat Presensi", icon: Clock },
+    { href: "/mahasiswa/nilai", label: "KHS & Nilai", icon: Award },
   ],
 };
 
-function homeFor(role: Role) {
-  return role === "ADMIN" ? "/admin/dashboard" : role === "DOSEN" ? "/dosen/dashboard" : "/mahasiswa/dashboard";
+export function homeFor(role: Role): string {
+  switch (role) {
+    case "ADMIN": return "/admin/dashboard";
+    case "KAPRODI": return "/kaprodi/dashboard";
+    case "DOSEN": return "/dosen/dashboard";
+    case "KETUA_KELAS": return "/ketua-kelas/dashboard";
+    case "MAHASISWA": return "/mahasiswa/dashboard";
+  }
 }
 
 export function RoleShell({ role, children }: { role: Role; children: ReactNode }) {
@@ -66,15 +104,88 @@ export function RoleShell({ role, children }: { role: Role; children: ReactNode 
     });
   }, [role, router]);
 
-  if (!user) return <main className="screen-center">Memverifikasi akses…</main>;
+  if (!user) {
+    return (
+      <main style={{ minHeight: "100vh", display: "grid", placeItems: "center" }}>
+        <div style={{ textAlign: "center" }}>
+          <div style={{ width: "2.5rem", height: "2.5rem", border: "3px solid var(--border-subtle)", borderTopColor: "var(--primary-light)", borderRadius: "50%", animation: "spin 0.8s linear infinite", margin: "0 auto 1rem" }} />
+          <p style={{ color: "var(--text-secondary)" }}>Memverifikasi otentikasi SADITA…</p>
+        </div>
+      </main>
+    );
+  }
 
-  return <div className="app-shell">
-    <aside className="sidebar">
-      <Link className="brand" href={homeFor(role)}>SADITA.ai</Link>
-      <p className="user-name">{user.full_name}</p><small>{user.role}</small>
-      <nav>{navigation[role].map((item) => <Link key={item.href} className={pathname === item.href ? "nav-active" : ""} href={item.href}>{item.label}</Link>)}</nav>
-      <button className="secondary" onClick={() => { clearStoredToken(); router.replace("/login"); }}>Logout</button>
-    </aside>
-    <main className="content">{children}</main>
-  </div>;
+  const items = navigation[role] || [];
+
+  return (
+    <div className="app-shell">
+      <aside className="sidebar">
+        {/* Brand */}
+        <div className="sidebar-brand">
+          <div className="brand-icon-box">
+            <Sparkles size={20} />
+          </div>
+          <div>
+            <div className="brand-title">SADITA.ai</div>
+            <div className="brand-badge">Teknologi Informasi</div>
+          </div>
+        </div>
+
+        {/* User Card */}
+        <div className="sidebar-user">
+          <div className="user-avatar">
+            {user.full_name.charAt(0).toUpperCase()}
+          </div>
+          <div className="user-meta">
+            <div className="user-name" title={user.full_name}>{user.full_name}</div>
+            <span className="user-role-badge badge badge-info" style={{ marginTop: "0.25rem", display: "inline-flex" }}>
+              {user.role}
+            </span>
+          </div>
+        </div>
+
+        {/* Navigation */}
+        <nav className="sidebar-nav">
+          <div className="sidebar-section-title">Menu Utama</div>
+          {items.map((item) => {
+            const Icon = item.icon;
+            const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`nav-link ${isActive ? "active" : ""}`}
+              >
+                <Icon size={18} />
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* Footer */}
+        <div className="sidebar-footer">
+          <button
+            className="btn btn-secondary w-full"
+            style={{ width: "100%", justifyContent: "flex-start", gap: "0.75rem" }}
+            onClick={() => {
+              clearStoredToken();
+              router.replace("/login");
+            }}
+          >
+            <LogOut size={16} />
+            <span>Keluar Sistem</span>
+          </button>
+        </div>
+      </aside>
+
+      {/* Main Content Area */}
+      <main className="content-area">
+        {children}
+      </main>
+
+      {/* Embedded SI KOBAR AI Assistant */}
+      <KobarAssistant user={user} />
+    </div>
+  );
 }

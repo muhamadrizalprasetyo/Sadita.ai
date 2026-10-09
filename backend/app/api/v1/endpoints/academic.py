@@ -148,7 +148,7 @@ def list_classes(
         if current.role == UserRole.DOSEN:
             lecturer = LecturerRepository.get_by_user_id(db, current.id)
             classes = [item for item in classes if lecturer and item.lecturer_id == lecturer.id]
-        elif current.role == UserRole.MAHASISWA:
+        elif current.role in (UserRole.MAHASISWA, UserRole.KETUA_KELAS):
             student = StudentRepository.get_by_user_id(db, current.id)
             enrolled_ids = {item.class_id for item in db.scalars(select(ClassEnrollment).where(ClassEnrollment.student_id == student.id, ClassEnrollment.status == EnrollmentStatus.AKTIF)).all()} if student else set()
             classes = [item for item in classes if item.id in enrolled_ids]

@@ -15,11 +15,15 @@ def require_class_access(db: Session, user: User, class_id: int, *, leader: bool
         raise HTTPException(status_code=404, detail="Kelas tidak ditemukan")
     if user.role == UserRole.ADMIN:
         return course_class
+    if user.role == UserRole.KAPRODI:
+        lecturer = LecturerRepository.get_by_user_id(db, user.id)
+        if lecturer and course_class.course and course_class.course.prodi_id == lecturer.prodi_id:
+            return course_class
     if user.role == UserRole.DOSEN:
         lecturer = LecturerRepository.get_by_user_id(db, user.id)
         if lecturer and course_class.lecturer_id == lecturer.id:
             return course_class
-    elif user.role == UserRole.MAHASISWA:
+    elif user.role in (UserRole.MAHASISWA, UserRole.KETUA_KELAS):
         student = StudentRepository.get_by_user_id(db, user.id)
         if student:
             if leader:

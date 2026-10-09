@@ -100,7 +100,7 @@ export interface User {
   id: number;
   email: string;
   full_name: string;
-  role: "ADMIN" | "DOSEN" | "MAHASISWA";
+  role: "ADMIN" | "KAPRODI" | "DOSEN" | "KETUA_KELAS" | "MAHASISWA";
   is_active: boolean;
   student_profile?: StudentProfile;
   lecturer_profile?: LecturerProfile;
@@ -229,14 +229,40 @@ export const lecturerApi = {
   getById: (id: number) => apiFetch<LecturerProfile>(`/api/v1/lecturers/${id}`),
 };
 
+export const usersApi = {
+  list: (skip = 0, limit = 100) => apiFetch<User[]>(`/api/v1/users?skip=${skip}&limit=${limit}`),
+  getById: (id: number) => apiFetch<User>(`/api/v1/users/${id}`),
+};
+
 export const academicApi = {
   getTerms: () => apiFetch<AcademicTerm[]>("/api/v1/academic/terms"),
+  createTerm: (data: { name: string; start_date: string; end_date: string; is_active?: boolean }) =>
+    apiFetch<AcademicTerm>("/api/v1/academic/terms", { method: "POST", body: JSON.stringify(data) }),
   getCourses: () => apiFetch<Course[]>("/api/v1/academic/courses"),
+  createCourse: (data: { code: string; name: string; credits: number; semester_ke?: number; description?: string }) =>
+    apiFetch<Course>("/api/v1/academic/courses", { method: "POST", body: JSON.stringify(data) }),
+  getRooms: () => apiFetch<{ id: number; kode: string; name: string; capacity: number; gedung?: string; lantai?: number }[]>("/api/v1/academic/rooms"),
+  createRoom: (data: { name: string; capacity: number; kode?: string; gedung?: string; lantai?: number }) =>
+    apiFetch<{ id: number; kode: string; name: string }>("/api/v1/academic/rooms", { method: "POST", body: JSON.stringify(data) }),
   getClasses: () => apiFetch<CourseClass[]>("/api/v1/academic/classes"),
-  getClassById: (id: number) =>
-    apiFetch<CourseClass>(`/api/v1/academic/classes/${id}`),
-  getClassStudents: (id: number) =>
-    apiFetch<ClassEnrollment[]>(`/api/v1/academic/classes/${id}/students`),
+  getClassById: (id: number) => apiFetch<CourseClass>(`/api/v1/academic/classes/${id}`),
+  createClass: (data: {
+    name: string;
+    course_id: number;
+    term_id: number;
+    lecturer_id: number;
+    room_id?: number;
+    day_of_week: number;
+    start_time: string;
+    end_time: string;
+    class_type?: string;
+  }) => apiFetch<CourseClass>("/api/v1/academic/classes", { method: "POST", body: JSON.stringify(data) }),
+  getClassStudents: (id: number) => apiFetch<ClassEnrollment[]>(`/api/v1/academic/classes/${id}/students`),
+  enrollStudent: (classId: number, studentId: number) =>
+    apiFetch<ClassEnrollment>(`/api/v1/academic/classes/${classId}/enroll`, {
+      method: "POST",
+      body: JSON.stringify({ student_id: studentId }),
+    }),
   getDashboard: () => apiFetch<AdminDashboard>("/api/v1/academic/dashboard"),
 };
 
@@ -305,7 +331,7 @@ export const attendanceApi = {
 // ---------------------------------------------------------------------------
 // LMS Types & API
 // ---------------------------------------------------------------------------
-export type MaterialType = "DOCUMENT" | "LINK" | "TEXT";
+export type MaterialType = "DOCUMENT" | "LINK" | "TEXT" | "VIDEO" | "SCORM";
 export type SubmissionStatus = "SUBMITTED" | "LATE" | "GRADED";
 
 export interface CourseMaterial {
@@ -368,6 +394,53 @@ export interface AttendanceRequest {
 }
 export interface ClassLeader { id: number; class_id: number; student_id: number; assigned_at: string; assigned_by: number; is_active: boolean; }
 
+export interface QuizOption {
+  id: number;
+  question_id: number;
+  option_text: string;
+  is_correct?: boolean;
+  option_number: number;
+}
+
+export interface QuizQuestion {
+  id: number;
+  quiz_id: number;
+  question_text: string;
+  question_type: "SINGLE_CHOICE" | "MULTIPLE_CHOICE" | "TEXT";
+  points: number;
+  question_number: number;
+  explanation?: string;
+  options: QuizOption[];
+}
+
+export interface Quiz {
+  id: number;
+  class_id: number;
+  lesson_id?: number;
+  session_id?: number;
+  title: string;
+  description?: string;
+  passing_score: number;
+  max_attempts: number;
+  time_limit_minutes?: number;
+  shuffle_questions: boolean;
+  is_published: boolean;
+  created_at: string;
+  question_count?: number;
+  questions?: QuizQuestion[];
+}
+
+export interface QuizSubmission {
+  id: number;
+  quiz_id: number;
+  student_id: number;
+  attempt_number: number;
+  score: number;
+  passed: boolean;
+  started_at: string;
+  submitted_at?: string;
+}
+
 // ---------------------------------------------------------------------------
 // Grading Types & API
 // ---------------------------------------------------------------------------
@@ -394,6 +467,11 @@ export const gradingApi = {
   getStudentGrade: (classId: number, studentId: number) =>
     apiFetch<StudentGrade>(`/api/v1/lms/classes/${classId}/students/${studentId}/grade`),
   updateGrade: (classId: number, studentId: number, component: string, score: number) =>
+    apiFetch<StudentGrade>(`/api/v1/lms/classes/${classId}/students/${studentId}/grade`, {
+      method: "PUT",
+      body: JSON.stringify({ component, score }),
+    }),
+  updateGradeComponent: (classId: number, studentId: number, component: string, score: number) =>
     apiFetch<StudentGrade>(`/api/v1/lms/classes/${classId}/students/${studentId}/grade`, {
       method: "PUT",
       body: JSON.stringify({ component, score }),
@@ -474,6 +552,38 @@ export const lmsApi = {
     apiFetch<AssignmentSubmission[]>(
       `/api/v1/lms/students/${studentId}/submissions${classId ? `?class_id=${classId}` : ""}`
     ),
+
+  getQuizzes: (classId: number) => apiFetch<Quiz[]>(`/api/v1/lms/quizzes?class_id=${classId}`),
+  getQuiz: (id: number) => apiFetch<Quiz>(`/api/v1/lms/quizzes/${id}`),
+  createQuiz: (data: {
+    class_id: number;
+    title: string;
+    description?: string;
+    passing_score?: number;
+    max_attempts?: number;
+    time_limit_minutes?: number;
+    shuffle_questions?: boolean;
+    is_published?: boolean;
+  }) => apiFetch<Quiz>("/api/v1/lms/quizzes", { method: "POST", body: JSON.stringify(data) }),
+  deleteQuiz: (id: number) => apiFetch<void>(`/api/v1/lms/quizzes/${id}`, { method: "DELETE" }),
+  addQuizQuestion: (quizId: number, data: {
+    question_text: string;
+    question_type?: "SINGLE_CHOICE" | "MULTIPLE_CHOICE" | "TEXT";
+    points?: number;
+    question_number: number;
+    explanation?: string;
+  }) => apiFetch<QuizQuestion>(`/api/v1/lms/quizzes/${quizId}/questions`, { method: "POST", body: JSON.stringify(data) }),
+  addQuizOption: (questionId: number, data: {
+    option_text: string;
+    is_correct: boolean;
+    option_number: number;
+  }) => apiFetch<QuizOption>(`/api/v1/lms/questions/${questionId}/options`, { method: "POST", body: JSON.stringify(data) }),
+  submitQuiz: (quizId: number, answers: { question_id: number; selected_option_id?: number; text_answer?: string }[]) =>
+    apiFetch<QuizSubmission>(`/api/v1/lms/quizzes/${quizId}/submit`, {
+      method: "POST",
+      body: JSON.stringify({ quiz_id: quizId, answers }),
+    }),
+  getQuizSubmissions: (quizId: number) => apiFetch<QuizSubmission[]>(`/api/v1/lms/quizzes/${quizId}/submissions`),
 };
 
 export const healthApi = {

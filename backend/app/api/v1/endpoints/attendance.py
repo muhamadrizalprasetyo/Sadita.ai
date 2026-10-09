@@ -269,5 +269,3 @@ def iot_record_attendance(
         session_id=session_id,
     )
     return AttendanceRecordResponse.model_validate(record)
-    require_class_access(db, current, session.class_id)
-    require_class_access(db, current, session.class_id)

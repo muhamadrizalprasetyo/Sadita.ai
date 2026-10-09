@@ -21,7 +21,7 @@ Write-Host "Creating database '$DbName'..." -ForegroundColor Cyan
 $createDb = "SELECT 'CREATE DATABASE $DbName' WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = '$DbName')\gexec"
 echo $createDb | psql -h $PgHost -p $PgPort -U $PgUser postgres
 
-Write-Host "Running Alembic migrations..." -ForegroundColor Cyan
-alembic upgrade head
+Write-Host "Creating database schema and seeding initial academic data..." -ForegroundColor Cyan
+& ".\.venv\Scripts\python.exe" -c "import app.models; from app.db.session import Base, engine; from app.db.seed import seed_database; Base.metadata.create_all(bind=engine); seed_database()"
 
-Write-Host "Database setup complete!" -ForegroundColor Green
+Write-Host "Database setup & seeding complete!" -ForegroundColor Green

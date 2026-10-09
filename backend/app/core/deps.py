@@ -99,3 +99,8 @@ CurrentUser = Annotated[User, Depends(get_current_user)]
 RequireAdmin = Annotated[User, Depends(require_roles(UserRole.ADMIN))]
 RequireLecturer = Annotated[User, Depends(require_roles(UserRole.ADMIN, UserRole.DOSEN))]
 RequireStudent = Annotated[User, Depends(require_roles(UserRole.ADMIN, UserRole.MAHASISWA))]
+RequireKaprodi = Annotated[User, Depends(require_roles(UserRole.ADMIN, UserRole.KAPRODI))]
+RequireKetuaKelas = Annotated[User, Depends(require_roles(UserRole.ADMIN, UserRole.KETUA_KELAS, UserRole.MAHASISWA))]
+RequireAny = Annotated[User, Depends(require_roles(
+    UserRole.ADMIN, UserRole.KAPRODI, UserRole.DOSEN, UserRole.KETUA_KELAS, UserRole.MAHASISWA
+))]

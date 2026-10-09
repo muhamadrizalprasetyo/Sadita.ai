@@ -1,6 +1,7 @@
 import asyncio
 import asyncpg
 import sys
+import os
 
 async def main():
     try:
@@ -13,8 +14,20 @@ async def main():
         else:
             print("Database 'sadita_db' already exists.")
         await conn.close()
+
+        # Initialize schema and seed data
+        backend_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "backend")
+        sys.path.insert(0, backend_dir)
+        import app.models  # noqa: F401
+        from app.db.session import Base, engine
+        from app.db.seed import seed_database
+        print("Creating database tables...")
+        Base.metadata.create_all(bind=engine)
+        print("Seeding initial academic dataset...")
+        seed_database()
+        print("Database ready for real university usage!")
     except Exception as e:
-        print("Connection failed:", e)
+        print("Connection/Initialization failed:", e)
         sys.exit(1)
 
 if __name__ == "__main__":

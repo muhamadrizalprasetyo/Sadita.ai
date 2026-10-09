@@ -222,8 +222,12 @@ class QuizResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class QuizDetailResponse(QuizResponse):
+    questions: List["QuizQuestionResponse"] = []
+
+
 class QuizQuestionCreateRequest(BaseModel):
-    quiz_id: int
+    quiz_id: Optional[int] = None
     question_text: str = Field(..., min_length=5)
     question_type: QuizQuestionType = QuizQuestionType.SINGLE_CHOICE
     points: float = Field(1.0, ge=0.0)
