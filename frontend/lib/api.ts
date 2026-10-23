@@ -5,6 +5,15 @@
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
+export function getFileUrl(pathOrUrl?: string | null): string {
+  if (!pathOrUrl) return "#";
+  if (pathOrUrl.startsWith("http://") || pathOrUrl.startsWith("https://")) {
+    return pathOrUrl;
+  }
+  const cleanPath = pathOrUrl.startsWith("/") ? pathOrUrl : `/${pathOrUrl}`;
+  return `${API_BASE}${cleanPath}`;
+}
+
 export interface ApiResponse<T> {
   data?: T;
   error?: string;
@@ -81,17 +90,33 @@ export interface StudentProfile {
   id: number;
   user_id: number;
   nim: string;
+  full_name?: string;
   department: string;
   batch_year: number;
+  academic_cohort?: number;
+  class_type?: "REGULER_PAGI" | "REGULER_MALAM" | "REGULER_SHIFT";
   phone?: string;
   rfid_uid?: string;
   fingerprint_template_id?: number;
+  ktm_status?: string;
+}
+
+export interface ScannedCardResult {
+  found: boolean;
+  rfid_uid?: string;
+  device_id?: string;
+  scanned_at?: string;
+  is_registered?: boolean;
+  registered_to_nim?: string;
+  registered_to_name?: string;
+  message?: string;
 }
 
 export interface LecturerProfile {
   id: number;
   user_id: number;
   nidn: string;
+  full_name?: string;
   department: string;
   phone?: string;
 }
@@ -130,6 +155,15 @@ export interface Course {
   description?: string;
 }
 
+export interface ClassRoom {
+  id: number;
+  name: string;
+  capacity: number;
+  code?: string;
+  building?: string;
+  floor?: number;
+}
+
 export interface CourseClass {
   id: number;
   name: string;
@@ -141,9 +175,11 @@ export interface CourseClass {
   start_time: string;
   end_time: string;
   is_active: boolean;
+  class_type?: "REGULER_PAGI" | "REGULER_MALAM" | "SHIFT";
   course?: Course;
   term?: AcademicTerm;
   lecturer?: LecturerProfile;
+  room?: ClassRoom;
 }
 
 export interface AdminDashboard {
@@ -186,8 +222,26 @@ export interface ClassEnrollment {
   class_id: number;
   student_id: number;
   status: string;
+  enrollment_type?: "REGULER" | "TAMBAH_SKS" | "MENGULANG";
   enrolled_at: string;
   student?: StudentProfile;
+  course_class?: CourseClass;
+}
+
+export interface KrsRequest {
+  id: number;
+  student_id: number;
+  class_id: number;
+  request_type: "TAMBAH_SKS" | "MENGULANG";
+  status: "PENDING_APPROVAL" | "APPROVED" | "REJECTED" | "CANCELLED";
+  alasan?: string;
+  submitted_at: string;
+  reviewed_at?: string;
+  reviewed_by?: number;
+  reviewer_notes?: string;
+  enrollment_id?: number;
+  student?: StudentProfile;
+  course_class?: CourseClass;
 }
 
 // ---------------------------------------------------------------------------
@@ -205,12 +259,42 @@ export const authApi = {
       method: "POST",
       body: JSON.stringify({ refresh_token }),
     }),
+  changePassword: (data: { current_password: string; new_password: string; confirm_password: string }) =>
+    apiFetch<{ message: string }>("/api/v1/auth/change-password", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
 };
 
 export const studentApi = {
-  list: (skip = 0, limit = 100) =>
-    apiFetch<StudentProfile[]>(`/api/v1/students?skip=${skip}&limit=${limit}`),
+  list: (paramsOrSkip?: number | { skip?: number; limit?: number; cohort?: number; class_type?: string; class_id?: number }, limit = 100) => {
+    let s = 0;
+    let l = limit;
+    let qs = "";
+    if (typeof paramsOrSkip === "object" && paramsOrSkip !== null) {
+      const q = new URLSearchParams();
+      if (paramsOrSkip.skip !== undefined) q.set("skip", String(paramsOrSkip.skip));
+      if (paramsOrSkip.limit !== undefined) q.set("limit", String(paramsOrSkip.limit));
+      if (paramsOrSkip.cohort !== undefined) q.set("cohort", String(paramsOrSkip.cohort));
+      if (paramsOrSkip.class_type) q.set("class_type", paramsOrSkip.class_type);
+      if (paramsOrSkip.class_id !== undefined) q.set("class_id", String(paramsOrSkip.class_id));
+      qs = q.toString() ? `?${q.toString()}` : "";
+    } else {
+      if (typeof paramsOrSkip === "number") s = paramsOrSkip;
+      qs = `?skip=${s}&limit=${l}`;
+    }
+    return apiFetch<StudentProfile[]>(`/api/v1/students${qs}`);
+  },
+  getMyProfile: () => apiFetch<StudentProfile>("/api/v1/students/me"),
   getById: (id: number) => apiFetch<StudentProfile>(`/api/v1/students/${id}`),
+  updateStudentProfile: (
+    id: number,
+    data: { academic_cohort?: number; class_type?: string; phone?: string; batch_year?: number }
+  ) =>
+    apiFetch<StudentProfile>(`/api/v1/students/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
   getByRfid: (rfidUid: string) =>
     apiFetch<StudentProfile>(`/api/v1/students/by-rfid/${rfidUid}`),
   assignHardware: (
@@ -221,11 +305,54 @@ export const studentApi = {
       method: "PUT",
       body: JSON.stringify(hardware),
     }),
+  registerMyKtm: (rfid_uid: string) =>
+    apiFetch<StudentProfile>("/api/v1/students/register-ktm", {
+      method: "POST",
+      body: JSON.stringify({ rfid_uid }),
+    }),
+  getLatestScannedCard: () =>
+    apiFetch<ScannedCardResult>("/api/v1/students/latest-scanned-card"),
+};
+
+export const krsApi = {
+  getAvailableClasses: (params?: { cohort?: number; search?: string }) => {
+    const q = new URLSearchParams();
+    if (params?.cohort !== undefined) q.set("cohort", String(params.cohort));
+    if (params?.search) q.set("search", params.search);
+    const qs = q.toString() ? `?${q.toString()}` : "";
+    return apiFetch<CourseClass[]>(`/api/v1/academic/krs/available-classes${qs}`);
+  },
+  requestKrs: (data: { class_id: number; request_type: "TAMBAH_SKS" | "MENGULANG"; alasan?: string }) =>
+    apiFetch<KrsRequest>("/api/v1/academic/krs/request", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  getMyRequests: () => apiFetch<KrsRequest[]>("/api/v1/academic/krs/my-requests"),
+  cancelRequest: (requestId: number) =>
+    apiFetch<KrsRequest>(`/api/v1/academic/krs/requests/${requestId}`, {
+      method: "DELETE",
+    }),
+  getLecturerRequests: (status?: string) =>
+    apiFetch<KrsRequest[]>(`/api/v1/academic/krs/lecturer-requests${status ? `?status=${status}` : ""}`),
+  reviewRequest: (requestId: number, data: { action: "APPROVE" | "REJECT"; notes?: string }) =>
+    apiFetch<KrsRequest>(`/api/v1/academic/krs/requests/${requestId}/review`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
 };
 
 export const lecturerApi = {
-  list: (skip = 0, limit = 100) =>
-    apiFetch<LecturerProfile[]>(`/api/v1/lecturers?skip=${skip}&limit=${limit}`),
+  list: (skipOrParams?: number | { skip?: number; limit?: number }, limit = 100) => {
+    let s = 0;
+    let l = limit;
+    if (typeof skipOrParams === "object" && skipOrParams !== null) {
+      s = skipOrParams.skip ?? 0;
+      l = skipOrParams.limit ?? 100;
+    } else if (typeof skipOrParams === "number") {
+      s = skipOrParams;
+    }
+    return apiFetch<LecturerProfile[]>(`/api/v1/lecturers?skip=${s}&limit=${l}`);
+  },
   getById: (id: number) => apiFetch<LecturerProfile>(`/api/v1/lecturers/${id}`),
 };
 
@@ -263,6 +390,21 @@ export const academicApi = {
       method: "POST",
       body: JSON.stringify({ student_id: studentId }),
     }),
+  updateClass: (id: number, data: Partial<{
+    name: string;
+    course_id: number;
+    term_id: number;
+    lecturer_id: number;
+    room_id: number;
+    day_of_week: number;
+    start_time: string;
+    end_time: string;
+    is_active: boolean;
+  }>) =>
+    apiFetch<CourseClass>(`/api/v1/academic/classes/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    }),
   getDashboard: () => apiFetch<AdminDashboard>("/api/v1/academic/dashboard"),
 };
 
@@ -293,6 +435,33 @@ export interface AttendanceRecord {
   notes?: string;
   student?: StudentProfile;
 }
+
+export interface UploadResponse {
+  file_url: string;
+  original_filename: string;
+  file_size_bytes: number;
+  content_type?: string;
+}
+
+export const uploadApi = {
+  upload: async (file: File): Promise<{ status: number; data?: UploadResponse; error?: string }> => {
+    const token = typeof window !== "undefined" ? localStorage.getItem("sadita_access_token") : null;
+    const formData = new FormData();
+    formData.append("file", file);
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/uploads`, {
+        method: "POST",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok) return { status: res.status, error: data?.detail ?? `HTTP ${res.status}` };
+      return { status: res.status, data: data as UploadResponse };
+    } catch {
+      return { status: 0, error: "Upload gagal — periksa koneksi jaringan" };
+    }
+  },
+};
 
 export const attendanceApi = {
   getSessions: (classId: number) =>
@@ -518,6 +687,7 @@ export const lmsApi = {
     description?: string;
     max_score?: number;
     allow_late?: boolean;
+    is_published?: boolean;
   }) =>
     apiFetch<Assignment>("/api/v1/lms/assignments", {
       method: "POST",
@@ -616,6 +786,55 @@ export const workflowApi = {
   verifyPresence: (classId: number, requestId: number) => apiFetch<AttendanceRequest>(`/api/v1/academic/classes/${classId}/presence/${requestId}/verify`, { method: "POST" }),
   approve: (requestId: number) => apiFetch<AttendanceRequest>(`/api/v1/attendance/requests/${requestId}/approve`, { method: "POST" }),
   reject: (requestId: number, reason: string) => apiFetch<AttendanceRequest>(`/api/v1/attendance/requests/${requestId}/reject`, { method: "POST", body: JSON.stringify({ reason }) }),
+};
+
+export interface UserItem {
+  id: number;
+  email: string;
+  full_name: string;
+  role: "ADMIN" | "DOSEN" | "MAHASISWA" | "KETUA_KELAS";
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  student_profile?: StudentProfile;
+  lecturer_profile?: LecturerProfile;
+}
+
+export const userApi = {
+  list: (params?: { role?: string; skip?: number; limit?: number }) => {
+    const q = new URLSearchParams();
+    if (params?.role) q.set("role", params.role);
+    if (params?.skip) q.set("skip", String(params.skip));
+    if (params?.limit) q.set("limit", String(params.limit));
+    const qs = q.toString();
+    return apiFetch<UserItem[]>(`/api/v1/users${qs ? `?${qs}` : ""}`);
+  },
+  getById: (id: number) => apiFetch<UserItem>(`/api/v1/users/${id}`),
+  create: (data: {
+    email: string;
+    full_name: string;
+    role: string;
+    password: string;
+    is_active?: boolean;
+    student_profile?: {
+      nim: string;
+      department?: string;
+      batch_year?: number;
+      phone?: string;
+      rfid_uid?: string;
+      academic_cohort?: number;
+      class_type?: "REGULER_PAGI" | "REGULER_MALAM" | "REGULER_SHIFT";
+    };
+    lecturer_profile?: { nidn: string; department?: string; phone?: string };
+  }) => apiFetch<UserItem>("/api/v1/users", { method: "POST", body: JSON.stringify(data) }),
+  update: (id: number, data: {
+    full_name?: string;
+    email?: string;
+    role?: string;
+    is_active?: boolean;
+    password?: string;
+  }) => apiFetch<UserItem>(`/api/v1/users/${id}`, { method: "PATCH", body: JSON.stringify(data) }),
+  delete: (id: number) => apiFetch<void>(`/api/v1/users/${id}`, { method: "DELETE" }),
 };
 
 export default apiFetch;

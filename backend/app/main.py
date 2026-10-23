@@ -12,6 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.v1.router import router as api_v1_router
 from app.core.config import settings
 from app.db.seed import seed_database
+from app.db.seed_schedule import seed_schedule
 from app.db.session import Base, engine
 from app.mqtt.client import mqtt_client
 from app.mqtt.handlers import register_all_handlers
@@ -35,6 +36,10 @@ def ensure_database_ready() -> None:
     """
     Base.metadata.create_all(bind=engine)
     seed_database()
+    try:
+        seed_schedule()
+    except Exception as exc:
+        logger.warning("seed_schedule error/warning: %s", exc)
 
 
 # ---------------------------------------------------------------------------

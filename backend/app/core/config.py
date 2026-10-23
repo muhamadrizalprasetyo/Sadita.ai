@@ -60,6 +60,18 @@ class Settings(BaseSettings):
     JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
     JWT_REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
+    @field_validator("JWT_SECRET_KEY", "SECRET_KEY")
+    @classmethod
+    def validate_secrets_in_production(cls, v: str, info) -> str:
+        env = str(info.data.get("APP_ENV", "development")).lower()
+        if env == "production":
+            if v in ("change-me", "change-me-jwt", "") or len(v) < 32:
+                raise ValueError(
+                    "Insecure default secret key detected in production. "
+                    "Please set SECRET_KEY and JWT_SECRET_KEY with at least 32 random characters."
+                )
+        return v
+
     # --- MQTT ---
     MQTT_BROKER_HOST: str = "localhost"
     MQTT_BROKER_PORT: int = 1883

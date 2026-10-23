@@ -129,6 +129,59 @@ def handle_rfid(device_id: str, payload: dict) -> None:
                     pesan=f"RFID valid: {student.nim} ({student.user.full_name if student.user else ''})",
                 )
 
+                # Mode 1FA (RFID Only) - Fingerprint bypassed
+                mode = payload.get("mode", "")
+                if mode == "rfid_only":
+                    from app.models.attendance import AttendanceStatus
+                    from app.services.attendance_service import AttendanceService
+                    try:
+                        record = AttendanceService.record_attendance_by_rfid_and_fingerprint(
+                            db,
+                            rfid_uid=uid,
+                            fingerprint_template_id=None,
+                            confidence=100,
+                        )
+                        _log_attendance_event(
+                            db,
+                            device_id=device_id,
+                            event_type=AttendanceEventType.ATTENDANCE_RECORDED,
+                            student_id=student.id,
+                            session_id=record.session_id,
+                            rfid_uid=uid,
+                            berhasil=True,
+                            pesan=f"Presensi 1FA (RFID) berhasil: {student.nim} ({record.status.value})",
+                        )
+                        status_str = "HADIR" if record.status == AttendanceStatus.HADIR else "TERLAMBAT"
+                        name_short = (student.user.full_name if student.user else student.nim)[:16]
+                        mqtt_client.publish_command(device_id, {
+                            "action": "success",
+                            "status": "ABSEN_BERHASIL",
+                            "attendance_status": record.status.value,
+                            "lcd_line1": "ABSEN BERHASIL",
+                            "lcd_line2": f"{name_short[:10]} {status_str}",
+                            "led": "GREEN",
+                            "buzzer": "SUCCESS",
+                            "nim": student.nim,
+                            "student_name": student.user.full_name if student.user else "",
+                            "check_in_time": record.check_in_time.strftime("%H:%M:%S") if record.check_in_time else "",
+                        })
+                        logger.info("RFID 1FA Attendance recorded: NIM=%s status=%s on device=%s", student.nim, status_str, device_id)
+                        return
+                    except Exception as service_err:
+                        logger.warning("Attendance service error on RFID 1FA: %s", service_err)
+                        err_msg = getattr(service_err, "detail", str(service_err))
+                        mqtt_client.publish_command(device_id, {
+                            "action": "reject",
+                            "status": "VALIDATION_FAILED",
+                            "reason": err_msg[:30],
+                            "lcd_line1": "PRESENSI GAGAL",
+                            "lcd_line2": err_msg[:16],
+                            "led": "RED",
+                            "buzzer": "ERROR",
+                            "rfid_uid": uid,
+                        })
+                        return
+
                 # Send command to device: prompt fingerprint scan
                 fp_slot = student.fingerprint_template_id
                 mqtt_client.publish_command(device_id, {

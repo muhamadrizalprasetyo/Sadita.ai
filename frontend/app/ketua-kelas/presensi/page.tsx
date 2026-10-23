@@ -18,7 +18,16 @@ export default function KetuaKelasPresensiPage() {
   const [sessions, setSessions] = useState<AttendanceSession[]>([]);
   const [records, setRecords] = useState<AttendanceRecord[]>([]);
   const [activeSession, setActiveSession] = useState<AttendanceSession | null>(null);
+  const [pendingRequests, setPendingRequests] = useState<AttendanceRequest[]>([]);
+  const [students, setStudents] = useState<Record<number, { name: string; nim: string }>>({});
   const [loading, setLoading] = useState(true);
+  const [verifyingId, setVerifyingId] = useState<number | null>(null);
+  const [feedback, setFeedback] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  const reloadPending = async (classId: number) => {
+    const res = await workflowApi.pendingPresence(classId);
+    setPendingRequests(res.data ?? []);
+  };
 
   useEffect(() => {
     void academicApi.getClasses().then(r => {
@@ -41,8 +50,33 @@ export default function KetuaKelasPresensiPage() {
           setRecords([]);
         }
       });
+      void reloadPending(selected);
+      void academicApi.getClassStudents(selected).then(r => {
+        const map: Record<number, { name: string; nim: string }> = {};
+        for (const enr of r.data ?? []) {
+          map[enr.student_id] = {
+            name: enr.student?.full_name ?? "—",
+            nim: enr.student?.nim ?? String(enr.student_id),
+          };
+        }
+        setStudents(map);
+      });
     }
   }, [selected]);
+
+  const handleVerify = async (requestId: number) => {
+    if (!selected) return;
+    setVerifyingId(requestId);
+    setFeedback(null);
+    const res = await workflowApi.verifyPresence(selected, requestId);
+    setVerifyingId(null);
+    if (res.error) {
+      setFeedback({ type: "error", text: res.error });
+    } else {
+      setFeedback({ type: "success", text: "Kehadiran mahasiswa berhasil diverifikasi! Menunggu persetujuan dosen." });
+      void reloadPending(selected);
+    }
+  };
 
   if (loading) return <LoadingSpinner text="Memuat panel verifikasi presensi..." />;
 
@@ -67,6 +101,15 @@ export default function KetuaKelasPresensiPage() {
         </div>
       </div>
 
+      {feedback && (
+        <div className={`alert alert-${feedback.type === "error" ? "error" : "success"}`} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <span>{feedback.text}</span>
+          <button type="button" className="btn btn-outline btn-sm" onClick={() => setFeedback(null)}>
+            Tutup
+          </button>
+        </div>
+      )}
+
       {/* Class Selector */}
       <div className="card" style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
         <label style={{ fontSize: "0.875rem", fontWeight: 600 }}>Pilih Kelas:</label>
@@ -78,6 +121,67 @@ export default function KetuaKelasPresensiPage() {
         >
           {classes.map(c => <option key={c.id} value={c.id}>{c.name} ({c.course?.name})</option>)}
         </select>
+      </div>
+
+      {/* Pending Attendance Requests (Verifikasi Ketua Kelas) */}
+      <div className="card">
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1rem" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+            <ShieldCheck size={20} color="var(--primary, #2563eb)" />
+            <h3 style={{ fontWeight: 700 }}>Pengajuan Presensi Mandiri Menunggu Verifikasi</h3>
+          </div>
+          <span className="badge badge-info">{pendingRequests.length} Menunggu</span>
+        </div>
+        {pendingRequests.length === 0 ? (
+          <p style={{ fontSize: "0.875rem", color: "var(--text-secondary)" }}>
+            Tidak ada pengajuan presensi mandiri yang sedang menunggu verifikasi untuk kelas ini.
+          </p>
+        ) : (
+          <div className="table-container">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Mahasiswa</th>
+                  <th>Waktu Pengajuan</th>
+                  <th>Status</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pendingRequests.map(req => {
+                  const stu = students[req.student_id];
+                  return (
+                    <tr key={req.id}>
+                      <td>
+                        <div style={{ fontWeight: 600 }}>{stu?.name ?? `Mahasiswa #${req.student_id}`}</div>
+                        <div style={{ fontSize: "0.78rem", color: "var(--text-muted)", fontFamily: "var(--font-mono)" }}>
+                          {stu?.nim ?? `ID: ${req.student_id}`}
+                        </div>
+                      </td>
+                      <td style={{ fontSize: "0.825rem" }}>
+                        {new Date(req.submitted_at).toLocaleString("id-ID")}
+                      </td>
+                      <td>
+                        <StatusBadge status="warning" label={req.status} />
+                      </td>
+                      <td>
+                        <button
+                          type="button"
+                          className="btn btn-primary btn-sm"
+                          disabled={verifyingId === req.id}
+                          onClick={() => void handleVerify(req.id)}
+                        >
+                          <CheckCircle size={14} />
+                          {verifyingId === req.id ? "Memverifikasi…" : "Verifikasi Hadir"}
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       {/* Active Session Info */}

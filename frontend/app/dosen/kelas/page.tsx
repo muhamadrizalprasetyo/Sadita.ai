@@ -1,1 +1,5 @@
-import { ClassesPage } from "@/components/operational-pages"; export default function Page(){return <ClassesPage mine/>;}
+import { DosenClassesPage } from "@/components/dosen/dosen-classes";
+
+export default function Page() {
+  return <DosenClassesPage />;
+}

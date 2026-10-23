@@ -3,7 +3,7 @@ SADITA — API v1 Router Aggregator
 """
 from fastapi import APIRouter
 
-from app.api.v1.endpoints import academic, attendance, audit, auth, devices, health, lecturers, lms, students, users, workflow
+from app.api.v1.endpoints import academic, attendance, audit, auth, devices, health, lecturers, lms, students, uploads, users, workflow
 
 router = APIRouter(prefix="/api/v1")
 
@@ -25,5 +25,6 @@ router.include_router(devices.router)
 router.include_router(workflow.router)
 router.include_router(audit.router)
 
-# LMS (Learning Management System)
+# LMS (Learning Management System) & Uploads
 router.include_router(lms.router)
+router.include_router(uploads.router)

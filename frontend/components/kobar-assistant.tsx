@@ -153,34 +153,36 @@ export function KobarAssistant({ user }: { user: User }) {
         <div className="kobar-window">
           {/* Header */}
           <div className="kobar-header">
-            <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
-              <div style={{ width: "2rem", height: "2rem", borderRadius: "50%", background: "var(--primary-gradient)", display: "flex", alignItems: "center", justifyContent: "center", color: "white" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", color: "white" }}>
                 <Sparkles size={16} />
               </div>
               <div>
-                <h4 style={{ fontSize: "0.95rem", fontWeight: 700 }}>SI KOBAR</h4>
-                <p style={{ fontSize: "0.7rem", color: "var(--primary-light)" }}>Asisten Pintar SADITA.ai</p>
+                <h4 style={{ fontSize: "14px", fontWeight: 700 }}>SI KOBAR</h4>
+                <p style={{ fontSize: "11px", opacity: 0.85 }}>Asisten Pintar SADITA.ai</p>
               </div>
             </div>
-            <button onClick={() => setIsOpen(false)} style={{ color: "var(--text-muted)" }}>
+            <button onClick={() => setIsOpen(false)} style={{ color: "rgba(255,255,255,0.7)", lineHeight: 1 }}>
               <X size={20} />
             </button>
           </div>
 
           {/* Quick Prompts Bar */}
-          <div style={{ padding: "0.6rem 0.8rem", background: "rgba(0,0,0,0.2)", borderBottom: "1px solid var(--border-subtle)", display: "flex", gap: "0.4rem", overflowX: "auto" }}>
+          <div style={{ padding: "8px 12px", background: "var(--bg)", borderBottom: "1px solid var(--line)", display: "flex", gap: "6px", overflowX: "auto" }}>
             {(quickPrompts[user.role] || quickPrompts.MAHASISWA).map((qp, i) => (
               <button
                 key={i}
                 onClick={() => handleSend(qp)}
                 style={{
-                  fontSize: "0.72rem",
-                  padding: "0.25rem 0.6rem",
+                  fontSize: "11px",
+                  padding: "4px 10px",
                   borderRadius: "var(--radius-full)",
-                  background: "rgba(56, 189, 248, 0.1)",
-                  border: "1px solid rgba(56, 189, 248, 0.25)",
-                  color: "var(--primary-light)",
+                  background: "rgba(18, 183, 106, 0.08)",
+                  border: "1px solid rgba(18, 183, 106, 0.2)",
+                  color: "var(--green)",
                   whiteSpace: "nowrap",
+                  cursor: "pointer",
+                  fontFamily: "inherit",
                 }}
               >
                 {qp}
@@ -213,9 +215,9 @@ export function KobarAssistant({ user }: { user: User }) {
               </div>
             ))}
             {loading && (
-              <div className="kobar-msg kobar-msg-bot" style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                <Sparkles size={14} className="animate-spin" />
-                <span>SI KOBAR sedang menganalisis data SADITA...</span>
+              <div className="kobar-msg kobar-msg-bot" style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <Sparkles size={14} />
+                <span style={{ color: "var(--muted)", fontSize: "12px" }}>SI KOBAR sedang menganalisis data...</span>
               </div>
             )}
             <div ref={chatBottomRef} />
@@ -235,15 +237,15 @@ export function KobarAssistant({ user }: { user: User }) {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               className="form-input"
-              style={{ padding: "0.5rem 0.8rem", fontSize: "0.85rem" }}
+              style={{ padding: "8px 12px", fontSize: "13px" }}
             />
             <button
               type="submit"
               disabled={loading || !input.trim()}
-              className="btn btn-primary"
-              style={{ padding: "0.5rem 0.75rem" }}
+              className="btn btn-primary btn-sm"
+              style={{ padding: "8px 12px", flexShrink: 0 }}
             >
-              <Send size={16} />
+              <Send size={14} />
             </button>
           </form>
         </div>

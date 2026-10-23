@@ -9,7 +9,9 @@ from sqlalchemy.orm import Session
 
 from app.models.student import StudentProfile
 from app.models.user import User, UserRole
-from app.repositories.user_repo import StudentRepository, UserRepository
+from app.repositories.user_repo import LecturerRepository, StudentRepository, UserRepository
+from app.schemas.user import UserCreate, UserUpdate
+from app.core.security import hash_password
 
 
 class UserService:
@@ -81,3 +83,92 @@ class UserService:
                 detail=f"Kartu RFID '{rfid_uid}' tidak terdaftar pada sistem",
             )
         return student
+
+    @staticmethod
+    def create_user(db: Session, req: UserCreate) -> User:
+        existing = UserRepository.get_by_email(db, req.email)
+        if existing:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Email '{req.email}' sudah terdaftar",
+            )
+        pwd_hash = hash_password(req.password)
+        user = UserRepository.create(
+            db,
+            email=req.email,
+            password_hash=pwd_hash,
+            full_name=req.full_name,
+            role=req.role,
+            is_active=req.is_active,
+        )
+        if req.role == UserRole.DOSEN:
+            nidn = req.lecturer_profile.nidn if req.lecturer_profile and req.lecturer_profile.nidn else f"00{user.id:06d}"
+            dept = req.lecturer_profile.department if req.lecturer_profile and req.lecturer_profile.department else "Teknik Informatika"
+            phone = req.lecturer_profile.phone if req.lecturer_profile else None
+            LecturerRepository.create(
+                db,
+                user_id=user.id,
+                nidn=nidn,
+                department=dept,
+                phone=phone,
+            )
+        elif req.role == UserRole.MAHASISWA:
+            nim = req.student_profile.nim if req.student_profile and req.student_profile.nim else f"2024{user.id:04d}"
+            dept = req.student_profile.department if req.student_profile and req.student_profile.department else "Teknik Informatika"
+            batch = req.student_profile.batch_year if req.student_profile and req.student_profile.batch_year else 2024
+            cohort = req.student_profile.academic_cohort if req.student_profile and req.student_profile.academic_cohort else 1
+            ctype = req.student_profile.class_type if req.student_profile and req.student_profile.class_type else None
+            phone = req.student_profile.phone if req.student_profile else None
+            rfid = req.student_profile.rfid_uid if req.student_profile else None
+            fp = req.student_profile.fingerprint_template_id if req.student_profile else None
+            StudentRepository.create(
+                db,
+                user_id=user.id,
+                nim=nim,
+                department=dept,
+                batch_year=batch,
+                academic_cohort=cohort,
+                class_type=ctype,
+                phone=phone,
+                rfid_uid=rfid,
+                fingerprint_template_id=fp,
+            )
+        user_fresh = UserRepository.get_by_id(db, user.id)
+        return user_fresh or user
+
+    @staticmethod
+    def update_user(db: Session, user_id: int, req: UserUpdate) -> User:
+        user = UserRepository.get_by_id(db, user_id)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"User ID {user_id} tidak ditemukan",
+            )
+        if req.email and req.email.lower() != user.email.lower():
+            dup = UserRepository.get_by_email(db, req.email)
+            if dup and dup.id != user_id:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Email '{req.email}' sudah dipakai pengguna lain",
+                )
+        pwd_hash = hash_password(req.password) if req.password else None
+        updated = UserRepository.update(
+            db,
+            user_id=user_id,
+            full_name=req.full_name,
+            email=req.email,
+            role=req.role,
+            is_active=req.is_active,
+            password_hash=pwd_hash,
+        )
+        return updated or user
+
+    @staticmethod
+    def delete_user(db: Session, user_id: int) -> bool:
+        user = UserRepository.get_by_id(db, user_id)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"User ID {user_id} tidak ditemukan",
+            )
+        return UserRepository.delete(db, user_id)

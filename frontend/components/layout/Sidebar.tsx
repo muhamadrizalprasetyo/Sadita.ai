@@ -59,12 +59,21 @@ export default function Sidebar({ role, className = "" }: SidebarProps) {
   const menuItems = role === "admin" ? adminMenu : role === "dosen" ? dosenMenu : mahasiswaMenu;
 
   return (
-    <aside className={`w-64 bg-slate-900 text-white min-h-screen ${className}`}>
-      <div className="p-6 border-b border-slate-700">
-        <h1 className="text-2xl font-bold text-blue-400">SADITA.ai</h1>
-        <p className="text-sm text-slate-400 mt-1 capitalize">{role} Portal</p>
+    <aside
+      className={className}
+      style={{
+        width: "16rem",
+        minHeight: "100vh",
+        borderRight: "1px solid #e2e8f0",
+        background: "linear-gradient(180deg, #ffffff 0%, #f4f7fb 100%)",
+        color: "#1f2937",
+      }}
+    >
+      <div style={{ borderBottom: "1px solid #e2e8f0", padding: "1.5rem" }}>
+        <img src="/logo.png" alt="SADITA.ai" style={{ width: "9rem", height: "auto", objectFit: "contain", display: "block" }} />
+        <p style={{ marginTop: "0.5rem", fontSize: "0.7rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "#64748b" }}>{role} Portal</p>
       </div>
-      <nav className="p-4">
+      <nav style={{ padding: "1rem" }}>
         <ul className="space-y-2">
           {menuItems.map((item) => {
             const Icon = item.icon;

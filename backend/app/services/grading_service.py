@@ -8,7 +8,7 @@ from typing import Optional
 from sqlalchemy.orm import Session
 
 from app.models.lms import StudentGrade, GradeScale
-from app.models.attendance import AttendanceStatus, AttendanceRecord
+from app.models.attendance import AttendanceStatus, AttendanceRecord, AttendanceSession
 
 
 class GradingService:
@@ -56,20 +56,15 @@ class GradingService:
         Calculate attendance score based on attendance records.
         Score = (HADIR + TERLAMBAT) / total_sessions * 100
         """
-        sessions = db.query(AttendanceRecord).filter(
-            AttendanceRecord.session_id.in_(
-                db.query(AttendanceRecord.session_id).filter(
-                    AttendanceRecord.session_id.in_(
-                        db.query(AttendanceRecord.id).join(
-                            AttendanceRecord.session
-                        ).filter(
-                            AttendanceRecord.session.has(class_id=class_id)
-                        )
-                    )
-                )
-            ),
-            AttendanceRecord.student_id == student_id
-        ).all()
+        sessions = (
+            db.query(AttendanceRecord)
+            .join(AttendanceSession, AttendanceRecord.session_id == AttendanceSession.id)
+            .filter(
+                AttendanceSession.class_id == class_id,
+                AttendanceRecord.student_id == student_id,
+            )
+            .all()
+        )
         
         if not sessions:
             return 0.0

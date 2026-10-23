@@ -47,10 +47,10 @@ export default function KetuaKelasJadwalPage() {
               <div
                 key={c.id}
                 style={{
-                  padding: "1rem 1.25rem",
-                  borderRadius: "var(--radius-lg)",
-                  background: "rgba(255, 255, 255, 0.03)",
-                  border: "1px solid var(--border-subtle)",
+                  padding: "14px 18px",
+                  borderRadius: "var(--radius-search)",
+                  background: "var(--bg)",
+                  border: "1px solid var(--line)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "space-between",

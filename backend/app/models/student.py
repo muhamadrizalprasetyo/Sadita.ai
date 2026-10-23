@@ -18,11 +18,12 @@ from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Integer, String, Tex
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.session import Base
+from app.models.academic import ClassType
 
 if TYPE_CHECKING:
     from app.models.user import User
     from app.models.program_studi import ProgramStudi
-    from app.models.academic import ClassEnrollment
+    from app.models.academic import ClassEnrollment, KrsRequest
     from app.models.attendance import AttendanceRecord
     from app.models.credential import RfidCredential, FingerprintCredential
 
@@ -61,6 +62,16 @@ class StudentProfile(Base):
     nim: Mapped[str] = mapped_column(String(30), unique=True, index=True, nullable=False)
     angkatan: Mapped[int] = mapped_column(Integer, nullable=False)
     # Tahun masuk, bukan tahun lahir. Contoh: 2024
+
+    # Tingkat akademik mahasiswa (TEKFO 1 s.d. TEKFO 8)
+    academic_cohort: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
+
+    # Jenis kelas reguler (REGULER_PAGI, REGULER_MALAM, REGULER_SHIFT)
+    class_type: Mapped[ClassType] = mapped_column(
+        Enum(ClassType, name="class_type_enum", create_constraint=False),
+        default=ClassType.REGULER_PAGI,
+        nullable=False,
+    )
 
     # Status KTM (bukan RFID UID langsung — itu di RfidCredential)
     ktm_status: Mapped[KtmStatus] = mapped_column(
@@ -109,6 +120,15 @@ class StudentProfile(Base):
         back_populates="student",
         cascade="all, delete-orphan",
     )
+    krs_requests: Mapped[List["KrsRequest"]] = relationship(
+        "KrsRequest",
+        back_populates="student",
+        cascade="all, delete-orphan",
+    )
+
+    @property
+    def full_name(self) -> Optional[str]:
+        return self.user.full_name if self.user else None
 
     @property
     def active_rfid(self) -> Optional["RfidCredential"]:

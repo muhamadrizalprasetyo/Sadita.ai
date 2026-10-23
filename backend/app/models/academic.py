@@ -49,6 +49,24 @@ class ClassType(str, enum.Enum):
     SHIFT = "SHIFT"
 
 
+class EnrollmentType(str, enum.Enum):
+    REGULER = "REGULER"
+    TAMBAH_SKS = "TAMBAH_SKS"
+    MENGULANG = "MENGULANG"
+
+
+class KrsRequestType(str, enum.Enum):
+    TAMBAH_SKS = "TAMBAH_SKS"
+    MENGULANG = "MENGULANG"
+
+
+class KrsRequestStatus(str, enum.Enum):
+    PENDING_APPROVAL = "PENDING_APPROVAL"
+    APPROVED = "APPROVED"
+    REJECTED = "REJECTED"
+    CANCELLED = "CANCELLED"
+
+
 class EnrollmentStatus(str, enum.Enum):
     AKTIF = "AKTIF"
     DROP = "DROP"           # Mahasiswa drop mata kuliah
@@ -225,6 +243,30 @@ class ClassRoom(Base):
     def name(self, val: str):
         self.nama = val
 
+    @property
+    def code(self) -> str:
+        return self.kode
+
+    @code.setter
+    def code(self, val: str):
+        self.kode = val
+
+    @property
+    def building(self) -> Optional[str]:
+        return self.gedung
+
+    @building.setter
+    def building(self, val: Optional[str]):
+        self.gedung = val
+
+    @property
+    def floor(self) -> Optional[int]:
+        return self.lantai
+
+    @floor.setter
+    def floor(self, val: Optional[int]):
+        self.lantai = val
+
     def __repr__(self) -> str:
         return f"<ClassRoom id={self.id} kode='{self.kode}' nama='{self.nama}'>"
 
@@ -381,6 +423,11 @@ class ClassEnrollment(Base):
         default=EnrollmentStatus.AKTIF,
         nullable=False,
     )
+    enrollment_type: Mapped[EnrollmentType] = mapped_column(
+        Enum(EnrollmentType, name="enrollment_type_enum", create_constraint=False),
+        default=EnrollmentType.REGULER,
+        nullable=False,
+    )
     enrolled_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
@@ -401,4 +448,51 @@ class ClassEnrollment(Base):
         super().__init__(**kwargs)
 
     def __repr__(self) -> str:
-        return f"<ClassEnrollment id={self.id} class_id={self.class_id} student_id={self.student_id} status={self.status}>"
+        return f"<ClassEnrollment id={self.id} class_id={self.class_id} student_id={self.student_id} status={self.status} type={self.enrollment_type}>"
+
+
+class KrsRequest(Base):
+    """
+    Permohonan Tambah SKS / Mengulang Mata Kuliah oleh Mahasiswa.
+    Memerlukan persetujuan Dosen Pengampu kelas terkait.
+    """
+    __tablename__ = "krs_requests"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    student_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("student_profiles.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    class_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("course_classes.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    request_type: Mapped[KrsRequestType] = mapped_column(
+        Enum(KrsRequestType, name="krs_request_type_enum", create_constraint=False),
+        nullable=False,
+    )
+    status: Mapped[KrsRequestStatus] = mapped_column(
+        Enum(KrsRequestStatus, name="krs_request_status_enum", create_constraint=False),
+        default=KrsRequestStatus.PENDING_APPROVAL,
+        nullable=False,
+        index=True,
+    )
+    alasan: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    submitted_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        nullable=False,
+    )
+    reviewed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    reviewed_by: Mapped[Optional[int]] = mapped_column(
+        Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
+    reviewer_notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    enrollment_id: Mapped[Optional[int]] = mapped_column(
+        Integer, ForeignKey("class_enrollments.id", ondelete="SET NULL"), nullable=True
+    )
+
+    student: Mapped["StudentProfile"] = relationship("StudentProfile")
+    course_class: Mapped["CourseClass"] = relationship("CourseClass")
+    enrollment: Mapped[Optional["ClassEnrollment"]] = relationship("ClassEnrollment")
+
+    def __repr__(self) -> str:
+        return f"<KrsRequest id={self.id} student={self.student_id} class={self.class_id} type={self.request_type} status={self.status}>"

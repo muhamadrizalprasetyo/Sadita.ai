@@ -11,7 +11,7 @@ from app.schemas.user import UserResponse, StudentProfileCreate, LecturerProfile
 
 
 class LoginRequest(BaseModel):
-    email: EmailStr
+    email: str = Field(..., min_length=1, description="Email atau NPM/NIM")
     password: str = Field(..., min_length=1)
 
 

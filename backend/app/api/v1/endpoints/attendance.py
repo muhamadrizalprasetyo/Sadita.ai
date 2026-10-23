@@ -75,10 +75,12 @@ def list_sessions(
     class_id: int,
     db: DBSession,
     current: Annotated[User | None, Depends(get_current_user_optional)] = None,
+    limit: int = Query(100, ge=1, le=500),
+    offset: int = Query(0, ge=0),
 ):
     if current is not None:
         require_class_access(db, current, class_id)
-    sessions = AttendanceRepository.list_sessions_for_class(db, class_id)
+    sessions = AttendanceRepository.list_sessions_for_class(db, class_id, limit=limit, offset=offset)
     return [SessionResponse.model_validate(s) for s in sessions]
 
 

@@ -17,6 +17,7 @@ from app.models.attendance import (
     AttendanceStatus,
     SessionStatus,
 )
+from app.models.student import StudentProfile
 
 
 class AttendanceRepository:
@@ -59,13 +60,15 @@ class AttendanceRepository:
 
     @staticmethod
     def list_sessions_for_class(
-        db: Session, class_id: int
+        db: Session, class_id: int, limit: int = 100, offset: int = 0
     ) -> List[AttendanceSession]:
         return list(
             db.scalars(
                 select(AttendanceSession)
                 .where(AttendanceSession.class_id == class_id)
                 .order_by(AttendanceSession.pertemuan_ke)
+                .offset(offset)
+                .limit(limit)
             ).all()
         )
 
@@ -135,7 +138,7 @@ class AttendanceRepository:
         return list(
             db.scalars(
                 select(AttendanceRecord)
-                .options(joinedload(AttendanceRecord.student))
+                .options(joinedload(AttendanceRecord.student).joinedload(StudentProfile.user))
                 .where(AttendanceRecord.session_id == session_id)
                 .order_by(AttendanceRecord.check_in_time)
             ).unique().all()

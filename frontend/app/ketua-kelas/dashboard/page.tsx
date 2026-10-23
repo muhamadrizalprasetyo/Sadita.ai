@@ -74,29 +74,29 @@ export default function KetuaKelasDashboardPage() {
       </div>
 
       {/* Identity Banner */}
-      <div className="card" style={{ background: "linear-gradient(135deg, rgba(56, 189, 248, 0.08), rgba(139, 92, 246, 0.06))", border: "1px solid rgba(56, 189, 248, 0.2)" }}>
+      <div className="card" style={{ background: "rgba(18, 183, 106, 0.05)", border: "1px solid rgba(18, 183, 106, 0.2)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-          <div style={{ width: "3rem", height: "3rem", borderRadius: "var(--radius-lg)", background: "var(--primary-gradient)", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: 800, fontSize: "1.25rem" }}>
+          <div style={{ width: "44px", height: "44px", borderRadius: "50%", background: "var(--grad-green)", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontWeight: 700, fontSize: "16px" }}>
             {user?.full_name?.charAt(0) || "K"}
           </div>
           <div>
-            <h3 style={{ fontSize: "1.1rem", fontWeight: 700 }}>{user?.full_name}</h3>
-            <p style={{ fontSize: "0.8rem", color: "var(--text-secondary)" }}>
+            <h3 style={{ fontSize: "15px", fontWeight: 600, color: "var(--text)" }}>{user?.full_name}</h3>
+            <p style={{ fontSize: "12.5px", color: "var(--muted)" }}>
               Ketua Kelas • NIM: {user?.student_profile?.nim || "202401002"} • S1 Teknologi Informasi
             </p>
           </div>
-          <span className="badge badge-info" style={{ marginLeft: "auto" }}>KETUA_KELAS</span>
+          <span className="badge badge-success" style={{ marginLeft: "auto" }}>KETUA_KELAS</span>
         </div>
       </div>
 
       {/* Metric Cards */}
-      <div className="stat-grid">
+      <div className="stats">
         <StatCard
-          label="Kelas Diampu"
+          label="Mata Kuliah Diambil"
           value={classes.length}
           icon={BookOpen}
           color="indigo"
-          subtext="Terdaftar di semester ini"
+          subtext="Total KRS semester aktif"
         />
         <StatCard
           label="Sesi Presensi Aktif"
@@ -122,25 +122,25 @@ export default function KetuaKelasDashboardPage() {
       </div>
 
       {/* Main Grid */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(22rem, 1fr))", gap: "1.5rem" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(22rem, 1fr))", gap: "20px" }}>
         {/* Classes List */}
         <div className="card">
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.25rem" }}>
-            <h2 style={{ fontSize: "1.1rem", fontWeight: 700 }}>Kelas Perkuliahan</h2>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "14px" }}>
+            <h2 style={{ fontSize: "14px", fontWeight: 600, color: "var(--text)" }}>Kelas Perkuliahan</h2>
             <Link href="/ketua-kelas/jadwal" className="btn btn-outline btn-sm">
               Jadwal <ArrowRight size={14} />
             </Link>
           </div>
 
-          <div style={{ display: "grid", gap: "0.75rem" }}>
+          <div style={{ display: "grid", gap: "10px" }}>
             {classes.map(c => (
               <div
                 key={c.id}
                 style={{
-                  padding: "1rem",
-                  borderRadius: "var(--radius-lg)",
-                  background: "rgba(255, 255, 255, 0.03)",
-                  border: "1px solid var(--border-subtle)",
+                  padding: "12px 14px",
+                  borderRadius: "var(--radius-search)",
+                  background: "var(--bg)",
+                  border: "1px solid var(--line)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "space-between",

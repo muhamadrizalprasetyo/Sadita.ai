@@ -18,6 +18,8 @@ import {
   LogOut, 
   Building2,
   Sparkles,
+  Search,
+  Settings,
   type LucideIcon
 } from "lucide-react";
 import { authApi, clearStoredToken, getStoredToken, type User } from "@/lib/api";
@@ -34,6 +36,7 @@ interface NavItem {
 const navigation: Record<Role, NavItem[]> = {
   ADMIN: [
     { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/admin/users", label: "Manajemen User", icon: Users },
     { href: "/admin/akademik", label: "Master Akademik", icon: Building2 },
     { href: "/admin/presensi", label: "Sesi Presensi", icon: Clock },
     { href: "/admin/lms", label: "Materi & Tugas", icon: BookOpen },
@@ -48,7 +51,7 @@ const navigation: Record<Role, NavItem[]> = {
   ],
   DOSEN: [
     { href: "/dosen/dashboard", label: "Dashboard Pengajar", icon: LayoutDashboard },
-    { href: "/dosen/kelas", label: "Kelas Saya", icon: BookOpen },
+    { href: "/dosen/kelas", label: "Kelas & Persetujuan", icon: BookOpen },
     { href: "/dosen/presensi", label: "Sesi Presensi", icon: Clock },
     { href: "/dosen/materi", label: "Materi Kuliah", icon: FileText },
     { href: "/dosen/tugas", label: "Tugas & Submission", icon: CheckSquare },
@@ -64,11 +67,13 @@ const navigation: Record<Role, NavItem[]> = {
   ],
   MAHASISWA: [
     { href: "/mahasiswa/dashboard", label: "Dashboard Belajar", icon: LayoutDashboard },
+    { href: "/mahasiswa/krs", label: "Rencana Studi (KRS)", icon: Calendar },
     { href: "/mahasiswa/mata-kuliah", label: "Mata Kuliah & Materi", icon: BookOpen },
     { href: "/mahasiswa/tugas", label: "Tugas Saya", icon: CheckSquare },
     { href: "/mahasiswa/kuis", label: "Kuis Online", icon: HelpCircle },
     { href: "/mahasiswa/presensi", label: "Riwayat Presensi", icon: Clock },
     { href: "/mahasiswa/nilai", label: "KHS & Nilai", icon: Award },
+    { href: "/mahasiswa/pengaturan", label: "Profil & Akun", icon: Settings },
   ],
 };
 
@@ -80,6 +85,14 @@ export function homeFor(role: Role): string {
     case "KETUA_KELAS": return "/ketua-kelas/dashboard";
     case "MAHASISWA": return "/mahasiswa/dashboard";
   }
+}
+
+function getGreeting() {
+  const h = new Date().getHours();
+  if (h < 11) return "Selamat Pagi";
+  if (h < 15) return "Selamat Siang";
+  if (h < 19) return "Selamat Sore";
+  return "Selamat Malam";
 }
 
 export function RoleShell({ role, children }: { role: Role; children: ReactNode }) {
@@ -106,74 +119,67 @@ export function RoleShell({ role, children }: { role: Role; children: ReactNode 
 
   if (!user) {
     return (
-      <main style={{ minHeight: "100vh", display: "grid", placeItems: "center" }}>
+      <main style={{ minHeight: "100vh", display: "grid", placeItems: "center", background: "#e9ebef" }}>
         <div style={{ textAlign: "center" }}>
-          <div style={{ width: "2.5rem", height: "2.5rem", border: "3px solid var(--border-subtle)", borderTopColor: "var(--primary-light)", borderRadius: "50%", animation: "spin 0.8s linear infinite", margin: "0 auto 1rem" }} />
-          <p style={{ color: "var(--text-secondary)" }}>Memverifikasi otentikasi SADITA…</p>
+          <div className="spinner" style={{ margin: "0 auto 16px" }} />
+          <p style={{ color: "var(--muted)", fontSize: "13px" }}>Memverifikasi otentikasi SADITA…</p>
         </div>
       </main>
     );
   }
 
   const items = navigation[role] || [];
+  const initials = user.full_name.split(" ").map((w: string) => w[0]).join("").slice(0, 2).toUpperCase();
 
   return (
     <div className="app-shell">
+      {/* Sidebar */}
       <aside className="sidebar">
         {/* Brand */}
         <div className="sidebar-brand">
-          <div className="brand-icon-box">
-            <Sparkles size={20} />
-          </div>
-          <div>
-            <div className="brand-title">SADITA.ai</div>
-            <div className="brand-badge">Teknologi Informasi</div>
-          </div>
+          <img src="/logo.png" alt="SADITA.ai" className="brand-logo" />
+          <div className="brand-badge">Sistem Akademik Terintegrasi</div>
         </div>
 
         {/* User Card */}
         <div className="sidebar-user">
-          <div className="user-avatar">
-            {user.full_name.charAt(0).toUpperCase()}
-          </div>
+          <div className="user-avatar">{initials}</div>
           <div className="user-meta">
             <div className="user-name" title={user.full_name}>{user.full_name}</div>
-            <span className="user-role-badge badge badge-info" style={{ marginTop: "0.25rem", display: "inline-flex" }}>
-              {user.role}
-            </span>
+            <span className="user-role-badge">{user.role}</span>
           </div>
         </div>
 
         {/* Navigation */}
-        <nav className="sidebar-nav">
-          <div className="sidebar-section-title">Menu Utama</div>
+        <ul className="sidebar-nav">
           {items.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
             return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`nav-link ${isActive ? "active" : ""}`}
-              >
-                <Icon size={18} />
-                <span>{item.label}</span>
-              </Link>
+              <li key={item.href}>
+                <Link
+                  href={item.href}
+                  className={`nav-link ${isActive ? "active" : ""}`}
+                >
+                  <Icon size={20} />
+                  <span>{item.label}</span>
+                </Link>
+              </li>
             );
           })}
-        </nav>
+        </ul>
 
         {/* Footer */}
         <div className="sidebar-footer">
           <button
-            className="btn btn-secondary w-full"
-            style={{ width: "100%", justifyContent: "flex-start", gap: "0.75rem" }}
+            className="nav-link"
+            style={{ width: "100%", background: "none", border: "none", textAlign: "left", cursor: "pointer" }}
             onClick={() => {
               clearStoredToken();
               router.replace("/login");
             }}
           >
-            <LogOut size={16} />
+            <LogOut size={20} />
             <span>Keluar Sistem</span>
           </button>
         </div>
@@ -181,6 +187,19 @@ export function RoleShell({ role, children }: { role: Role; children: ReactNode 
 
       {/* Main Content Area */}
       <main className="content-area">
+        {/* Topbar */}
+        <div className="topbar">
+          <div className="topbar-greeting">
+            <span>{getGreeting()}, {user.full_name.split(" ")[0]}!</span>
+            <span className="wave">👋</span>
+          </div>
+          <label className="topbar-search">
+            <Search size={18} />
+            <input type="text" placeholder="Cari..." />
+          </label>
+          <div className="topbar-avatar">{initials}</div>
+        </div>
+
         {children}
       </main>
 

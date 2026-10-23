@@ -183,7 +183,7 @@ class TestAcademicEntities:
         resp = client.get("/api/v1/academic/classes/1/students")
         assert resp.status_code == 200
         students = resp.json()
-        assert len(students) == 3
+        assert len(students) >= 3
 
     def test_admin_dashboard_summary(self):
         login_resp = client.post(

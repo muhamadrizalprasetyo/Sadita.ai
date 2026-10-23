@@ -1,1 +1,5 @@
-import { LmsPage } from "@/components/operational-pages"; export default LmsPage;
+import { DosenMaterialsPage } from "@/components/dosen/dosen-materials";
+
+export default function Page() {
+  return <DosenMaterialsPage />;
+}

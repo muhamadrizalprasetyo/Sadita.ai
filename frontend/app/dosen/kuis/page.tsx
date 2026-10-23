@@ -1,37 +1,38 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { 
-  HelpCircle, 
-  Plus, 
-  Trash2, 
-  Clock, 
-  Award, 
-  CheckCircle, 
-  Users,
-  Check,
-  ChevronDown
-} from "lucide-react";
-import { academicApi, lmsApi, CourseClass, Quiz, QuizQuestion, QuizSubmission } from "@/lib/api";
-import { LoadingSpinner, EmptyState, Modal, StatusBadge } from "@/components/ui";
+import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { HelpCircle, Plus, Trash2, ListChecks } from "lucide-react";
+import {
+  lmsApi,
+  type Quiz,
+  type QuizSubmission,
+} from "@/lib/api";
+import { ClassToolbar } from "@/components/dosen/class-toolbar";
+import { useInitialClassId } from "@/components/dosen/use-class-query";
+import { useLecturerClasses } from "@/components/dosen/use-lecturer-classes";
+import { EmptyState, LoadingSpinner, Modal } from "@/components/ui";
 
 export default function DosenKuisPage() {
-  const [classes, setClasses] = useState<CourseClass[]>([]);
-  const [selectedClass, setSelectedClass] = useState<number>();
+  const { classes, loading: classesLoading, error: classesError, reload } = useLecturerClasses();
+  const [classId, setClassId] = useInitialClassId(classes);
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string>();
+
   const [isQuizModalOpen, setIsQuizModalOpen] = useState(false);
   const [isQuestionModalOpen, setIsQuestionModalOpen] = useState(false);
   const [selectedQuiz, setSelectedQuiz] = useState<Quiz | null>(null);
+  const [submissionsQuiz, setSubmissionsQuiz] = useState<Quiz | null>(null);
+  const [submissions, setSubmissions] = useState<QuizSubmission[]>([]);
+  const [submissionsLoading, setSubmissionsLoading] = useState(false);
 
-  // Forms
   const [quizForm, setQuizForm] = useState({
     title: "",
     description: "",
     passing_score: 70,
     max_attempts: 2,
     time_limit_minutes: 30,
-    is_published: true,
+    is_published: false,
   });
 
   const [questionForm, setQuestionForm] = useState({
@@ -45,64 +46,62 @@ export default function DosenKuisPage() {
     ],
   });
 
-  const loadQuizzes = async (classId: number) => {
-    const res = await lmsApi.getQuizzes(classId);
-    if (res.data) setQuizzes(res.data);
-  };
-
-  useEffect(() => {
-    void academicApi.getClasses().then(r => {
-      setClasses(r.data ?? []);
-      if (r.data && r.data.length > 0) {
-        setSelectedClass(r.data[0].id);
-        void loadQuizzes(r.data[0].id);
-      }
-      setLoading(false);
-    });
+  const loadQuizzes = useCallback(async (id: number) => {
+    setLoading(true);
+    setError(undefined);
+    const res = await lmsApi.getQuizzes(id);
+    if (res.error) {
+      setError(res.error);
+      setQuizzes([]);
+    } else {
+      setQuizzes(res.data ?? []);
+    }
+    setLoading(false);
   }, []);
 
-  const handleClassChange = (classId: number) => {
-    setSelectedClass(classId);
+  useEffect(() => {
+    if (classId) void loadQuizzes(classId);
+  }, [classId, loadQuizzes]);
+
+  const handleCreateQuiz = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!classId) return;
+    const res = await lmsApi.createQuiz({ class_id: classId, ...quizForm });
+    if (res.error) {
+      alert(res.error);
+      return;
+    }
+    setIsQuizModalOpen(false);
+    setQuizForm({
+      title: "",
+      description: "",
+      passing_score: 70,
+      max_attempts: 2,
+      time_limit_minutes: 30,
+      is_published: false,
+    });
     void loadQuizzes(classId);
   };
 
-  const handleCreateQuiz = async (e: React.FormEvent) => {
+  const handleAddQuestion = async (e: FormEvent) => {
     e.preventDefault();
-    if (!selectedClass) return;
+    if (!selectedQuiz || !classId) return;
 
-    const res = await lmsApi.createQuiz({
-      class_id: selectedClass,
-      ...quizForm,
-    });
+    const detail = await lmsApi.getQuiz(selectedQuiz.id);
+    const nextNumber = (detail.data?.questions?.length ?? detail.data?.question_count ?? 0) + 1;
 
-    if (res.data) {
-      setIsQuizModalOpen(false);
-      setQuizForm({ title: "", description: "", passing_score: 70, max_attempts: 2, time_limit_minutes: 30, is_published: true });
-      loadQuizzes(selectedClass);
-    } else {
-      alert(res.error || "Gagal membuat kuis");
-    }
-  };
-
-  const handleAddQuestion = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedQuiz) return;
-
-    // 1. Create question
     const qRes = await lmsApi.addQuizQuestion(selectedQuiz.id, {
       question_text: questionForm.question_text,
       points: questionForm.points,
-      question_number: 1,
+      question_number: nextNumber,
     });
 
     if (!qRes.data) {
-      alert(qRes.error || "Gagal membuat pertanyaan");
+      alert(qRes.error || "Gagal menambah pertanyaan");
       return;
     }
 
     const questionId = qRes.data.id;
-
-    // 2. Add options
     for (let i = 0; i < questionForm.options.length; i++) {
       const opt = questionForm.options[i];
       if (opt.text.trim()) {
@@ -125,161 +124,180 @@ export default function DosenKuisPage() {
         { text: "", is_correct: false },
       ],
     });
-    alert("Pertanyaan berhasil ditambahkan ke kuis!");
-    if (selectedClass) loadQuizzes(selectedClass);
+    void loadQuizzes(classId);
   };
 
   const handleDeleteQuiz = async (id: number) => {
     if (!confirm("Hapus kuis ini?")) return;
-    await lmsApi.deleteQuiz(id);
-    if (selectedClass) loadQuizzes(selectedClass);
+    const res = await lmsApi.deleteQuiz(id);
+    if (res.error) alert(res.error);
+    else if (classId) void loadQuizzes(classId);
   };
 
-  if (loading) return <LoadingSpinner text="Memuat kuis online..." />;
+  const openSubmissions = async (quiz: Quiz) => {
+    setSubmissionsQuiz(quiz);
+    setSubmissionsLoading(true);
+    const res = await lmsApi.getQuizSubmissions(quiz.id);
+    setSubmissions(res.data ?? []);
+    setSubmissionsLoading(false);
+  };
+
+  if (classesLoading) return <LoadingSpinner text="Memuat kelas…" />;
 
   return (
     <div>
       <div className="page-header">
         <div>
-          <h1 className="page-title">Manajemen Kuis Online</h1>
-          <p className="page-subtitle">Evaluasi pemahaman mahasiswa dengan penilaian otomatis</p>
+          <h1 className="page-title">Kuis Online</h1>
+          <p className="page-subtitle">Susun pertanyaan, publikasikan kuis, dan tinjau hasil percobaan mahasiswa.</p>
         </div>
-        <button className="btn btn-primary" onClick={() => setIsQuizModalOpen(true)}>
-          <Plus size={16} /> Buat Kuis Baru
+        <button type="button" className="btn btn-primary" disabled={!classId} onClick={() => setIsQuizModalOpen(true)}>
+          <Plus size={16} /> Buat kuis
         </button>
       </div>
 
-      {/* Class Selector */}
-      <div className="card" style={{ marginBottom: "1.5rem", display: "flex", alignItems: "center", gap: "1rem" }}>
-        <label style={{ fontSize: "0.875rem", fontWeight: 600 }}>Pilih Kelas Perkuliahan:</label>
-        <select
-          className="form-select"
-          style={{ maxWidth: "20rem" }}
-          value={selectedClass ?? ""}
-          onChange={e => handleClassChange(Number(e.target.value))}
-        >
-          {classes.map(c => <option key={c.id} value={c.id}>{c.name} ({c.course?.name})</option>)}
-        </select>
-      </div>
-
-      {/* Quizzes List */}
-      {quizzes.length === 0 ? (
-        <EmptyState
-          icon={HelpCircle}
-          title="Belum Ada Kuis Terdaftar"
-          description="Buat kuis pertama untuk menguji pemahaman materi pertemuan mahasiswa."
-          action={
-            <button className="btn btn-primary" onClick={() => setIsQuizModalOpen(true)}>
-              <Plus size={16} /> Buat Kuis
-            </button>
-          }
-        />
-      ) : (
-        <div style={{ display: "grid", gap: "1rem" }}>
-          {quizzes.map(q => (
-            <div key={q.id} className="card" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "1rem" }}>
-              <div>
-                <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
-                  <h3 style={{ fontSize: "1.1rem", fontWeight: 700 }}>{q.title}</h3>
-                  <StatusBadge status={q.is_published ? "success" : "neutral"} label={q.is_published ? "Dipublikasikan" : "Draft"} />
-                </div>
-                <p style={{ fontSize: "0.85rem", color: "var(--text-secondary)", marginTop: "0.25rem" }}>
-                  {q.description || "Tidak ada deskripsi."}
-                </p>
-                <div style={{ display: "flex", gap: "1rem", marginTop: "0.5rem", fontSize: "0.75rem", color: "var(--text-muted)" }}>
-                  <span>Passing Score: <strong style={{ color: "var(--text-primary)" }}>{q.passing_score}</strong></span>
-                  <span>Batas Waktu: <strong style={{ color: "var(--text-primary)" }}>{q.time_limit_minutes || 30} Menit</strong></span>
-                  <span>Max Percobaan: <strong style={{ color: "var(--text-primary)" }}>{q.max_attempts}x</strong></span>
-                </div>
-              </div>
-
-              <div style={{ display: "flex", gap: "0.5rem" }}>
-                <button
-                  className="btn btn-secondary btn-sm"
-                  onClick={() => {
-                    setSelectedQuiz(q);
-                    setIsQuestionModalOpen(true);
-                  }}
-                >
-                  <Plus size={14} /> Tambah Soal
-                </button>
-                <button
-                  className="btn btn-danger btn-sm"
-                  onClick={() => handleDeleteQuiz(q.id)}
-                >
-                  <Trash2 size={14} />
-                </button>
-              </div>
-            </div>
-          ))}
+      {classesError && (
+        <div className="alert alert-error">
+          {classesError}{" "}
+          <button type="button" className="btn btn-outline btn-sm" onClick={() => void reload()}>
+            Coba lagi
+          </button>
         </div>
       )}
 
-      {/* Modal Buat Kuis */}
-      <Modal isOpen={isQuizModalOpen} onClose={() => setIsQuizModalOpen(false)} title="Buat Kuis Baru">
+      <ClassToolbar classes={classes} selectedId={classId} onChange={setClassId} />
+      {error && <div className="alert alert-error">{error}</div>}
+
+      {loading ? (
+        <LoadingSpinner text="Memuat kuis…" />
+      ) : quizzes.length === 0 ? (
+        <EmptyState
+          icon={HelpCircle}
+          title="Belum ada kuis"
+          description="Buat kuis untuk kelas yang dipilih, lalu tambahkan pertanyaan sebelum dipublikasikan."
+          action={
+            classId ? (
+              <button type="button" className="btn btn-primary" onClick={() => setIsQuizModalOpen(true)}>
+                Buat kuis
+              </button>
+            ) : undefined
+          }
+        />
+      ) : (
+        <div className="table-container">
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>Judul</th>
+                <th>Status</th>
+                <th>Soal</th>
+                <th>Passing</th>
+                <th>Batas waktu</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              {quizzes.map((q) => (
+                <tr key={q.id}>
+                  <td>
+                    <div style={{ fontWeight: 600 }}>{q.title}</div>
+                    {q.description && (
+                      <div style={{ fontSize: "0.8125rem", color: "var(--text-secondary)" }}>{q.description}</div>
+                    )}
+                  </td>
+                  <td>{q.is_published ? "Dipublikasikan" : "Draft"}</td>
+                  <td>{q.question_count ?? "—"}</td>
+                  <td>{q.passing_score}</td>
+                  <td>{q.time_limit_minutes ? `${q.time_limit_minutes} menit` : "—"}</td>
+                  <td style={{ display: "flex", flexWrap: "wrap", gap: "0.35rem" }}>
+                    <button
+                      type="button"
+                      className="btn btn-outline btn-sm"
+                      onClick={() => {
+                        setSelectedQuiz(q);
+                        setIsQuestionModalOpen(true);
+                      }}
+                    >
+                      <Plus size={14} /> Soal
+                    </button>
+                    <button type="button" className="btn btn-outline btn-sm" onClick={() => void openSubmissions(q)}>
+                      <ListChecks size={14} /> Hasil
+                    </button>
+                    <button type="button" className="btn btn-danger btn-sm" onClick={() => void handleDeleteQuiz(q.id)}>
+                      <Trash2 size={14} />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      <Modal isOpen={isQuizModalOpen} onClose={() => setIsQuizModalOpen(false)} title="Buat kuis">
         <form onSubmit={handleCreateQuiz} style={{ display: "grid", gap: "1rem" }}>
           <div className="form-group">
-            <label className="form-label">Judul Kuis</label>
-            <input required placeholder="Kuis 1: Pengenalan IoT & RFID" className="form-input" value={quizForm.title} onChange={e => setQuizForm({ ...quizForm, title: e.target.value })} />
+            <label className="form-label">Judul</label>
+            <input required className="form-input" value={quizForm.title} onChange={(e) => setQuizForm({ ...quizForm, title: e.target.value })} />
           </div>
           <div className="form-group">
-            <label className="form-label">Deskripsi</label>
-            <textarea rows={2} className="form-textarea" placeholder="Instruksi dan cakupan materi kuis..." value={quizForm.description} onChange={e => setQuizForm({ ...quizForm, description: e.target.value })} />
+            <label className="form-label">Instruksi</label>
+            <textarea className="form-textarea" rows={2} value={quizForm.description} onChange={(e) => setQuizForm({ ...quizForm, description: e.target.value })} />
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "1rem" }}>
             <div className="form-group">
-              <label className="form-label">Passing Score</label>
-              <input type="number" min="0" max="100" className="form-input" value={quizForm.passing_score} onChange={e => setQuizForm({ ...quizForm, passing_score: Number(e.target.value) })} />
+              <label className="form-label">Nilai lulus</label>
+              <input type="number" min={0} max={100} className="form-input" value={quizForm.passing_score} onChange={(e) => setQuizForm({ ...quizForm, passing_score: Number(e.target.value) })} />
             </div>
             <div className="form-group">
-              <label className="form-label">Waktu (Menit)</label>
-              <input type="number" min="5" max="180" className="form-input" value={quizForm.time_limit_minutes} onChange={e => setQuizForm({ ...quizForm, time_limit_minutes: Number(e.target.value) })} />
+              <label className="form-label">Menit</label>
+              <input type="number" min={5} max={180} className="form-input" value={quizForm.time_limit_minutes} onChange={(e) => setQuizForm({ ...quizForm, time_limit_minutes: Number(e.target.value) })} />
             </div>
             <div className="form-group">
-              <label className="form-label">Max Percobaan</label>
-              <input type="number" min="1" max="5" className="form-input" value={quizForm.max_attempts} onChange={e => setQuizForm({ ...quizForm, max_attempts: Number(e.target.value) })} />
+              <label className="form-label">Max percobaan</label>
+              <input type="number" min={1} max={5} className="form-input" value={quizForm.max_attempts} onChange={(e) => setQuizForm({ ...quizForm, max_attempts: Number(e.target.value) })} />
             </div>
           </div>
-          <button type="submit" className="btn btn-primary">Simpan Kuis</button>
+          <label style={{ display: "flex", gap: "0.5rem", fontSize: "0.875rem", alignItems: "center" }}>
+            <input type="checkbox" checked={quizForm.is_published} onChange={(e) => setQuizForm({ ...quizForm, is_published: e.target.checked })} />
+            Publikasikan setelah dibuat
+          </label>
+          <button type="submit" className="btn btn-primary">
+            Simpan
+          </button>
         </form>
       </Modal>
 
-      {/* Modal Tambah Soal */}
       {selectedQuiz && (
-        <Modal isOpen={isQuestionModalOpen} onClose={() => setIsQuestionModalOpen(false)} title={`Tambah Soal ke ${selectedQuiz.title}`}>
+        <Modal isOpen={isQuestionModalOpen} onClose={() => setIsQuestionModalOpen(false)} title={`Tambah soal — ${selectedQuiz.title}`}>
           <form onSubmit={handleAddQuestion} style={{ display: "grid", gap: "1rem" }}>
             <div className="form-group">
               <label className="form-label">Pertanyaan</label>
-              <textarea required rows={3} placeholder="Tuliskan pertanyaan kuis..." className="form-textarea" value={questionForm.question_text} onChange={e => setQuestionForm({ ...questionForm, question_text: e.target.value })} />
+              <textarea required rows={3} className="form-textarea" value={questionForm.question_text} onChange={(e) => setQuestionForm({ ...questionForm, question_text: e.target.value })} />
             </div>
             <div className="form-group">
-              <label className="form-label">Poin Soal</label>
-              <input type="number" min="1" max="100" className="form-input" value={questionForm.points} onChange={e => setQuestionForm({ ...questionForm, points: Number(e.target.value) })} />
+              <label className="form-label">Poin</label>
+              <input type="number" min={1} max={100} className="form-input" value={questionForm.points} onChange={(e) => setQuestionForm({ ...questionForm, points: Number(e.target.value) })} />
             </div>
-
-            <div style={{ display: "grid", gap: "0.6rem" }}>
-              <label className="form-label">Pilihan Jawaban (Tandai yang Benar):</label>
+            <div style={{ display: "grid", gap: "0.5rem" }}>
+              <label className="form-label">Pilihan (tandai jawaban benar)</label>
               {questionForm.options.map((opt, idx) => (
-                <div key={idx} style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+                <div key={idx} style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
                   <input
                     type="radio"
                     name="correct_option"
                     checked={opt.is_correct}
                     onChange={() => {
-                      const newOpts = questionForm.options.map((o, i) => ({
-                        ...o,
-                        is_correct: i === idx,
-                      }));
+                      const newOpts = questionForm.options.map((o, i) => ({ ...o, is_correct: i === idx }));
                       setQuestionForm({ ...questionForm, options: newOpts });
                     }}
                   />
                   <input
-                    type="text"
                     required
-                    placeholder={`Opsi ${String.fromCharCode(65 + idx)}`}
                     className="form-input"
+                    placeholder={`Opsi ${String.fromCharCode(65 + idx)}`}
                     value={opt.text}
-                    onChange={e => {
+                    onChange={(e) => {
                       const newOpts = [...questionForm.options];
                       newOpts[idx].text = e.target.value;
                       setQuestionForm({ ...questionForm, options: newOpts });
@@ -288,9 +306,45 @@ export default function DosenKuisPage() {
                 </div>
               ))}
             </div>
-
-            <button type="submit" className="btn btn-primary" style={{ marginTop: "0.5rem" }}>Simpan Pertanyaan</button>
+            <button type="submit" className="btn btn-primary">
+              Simpan pertanyaan
+            </button>
           </form>
+        </Modal>
+      )}
+
+      {submissionsQuiz && (
+        <Modal isOpen onClose={() => setSubmissionsQuiz(null)} title={`Hasil kuis — ${submissionsQuiz.title}`}>
+          {submissionsLoading ? (
+            <LoadingSpinner text="Memuat percobaan…" />
+          ) : submissions.length === 0 ? (
+            <p style={{ fontSize: "0.875rem", color: "var(--text-secondary)" }}>Belum ada mahasiswa mengerjakan kuis ini.</p>
+          ) : (
+            <div className="table-container">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>Mahasiswa</th>
+                    <th>Percobaan</th>
+                    <th>Skor</th>
+                    <th>Lulus</th>
+                    <th>Selesai</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {submissions.map((s) => (
+                    <tr key={s.id}>
+                      <td>{s.student_id}</td>
+                      <td>{s.attempt_number}</td>
+                      <td>{s.score}</td>
+                      <td>{s.passed ? "Ya" : "Tidak"}</td>
+                      <td>{s.submitted_at ? new Date(s.submitted_at).toLocaleString("id-ID") : "—"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </Modal>
       )}
     </div>

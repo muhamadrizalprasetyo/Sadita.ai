@@ -79,10 +79,23 @@ def create_chapter(req: ChapterCreateRequest, current: RequireLecturer, db: DBSe
     response_model=List[ChapterResponse],
     summary="Daftar chapter kelas",
 )
-def list_chapters(class_id: int, current: CurrentUser, db: DBSession):
+def list_chapters(
+    class_id: int,
+    current: CurrentUser,
+    db: DBSession,
+    limit: int = Query(100, ge=1, le=500),
+    offset: int = Query(0, ge=0),
+):
     require_class_access(db, current, class_id)
     from app.models.lms import CourseChapter
-    chapters = db.query(CourseChapter).filter(CourseChapter.class_id == class_id).order_by(CourseChapter.chapter_number).all()
+    chapters = (
+        db.query(CourseChapter)
+        .filter(CourseChapter.class_id == class_id)
+        .order_by(CourseChapter.chapter_number)
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
     return [ChapterResponse.model_validate(c) for c in chapters]
 
 
@@ -136,13 +149,20 @@ def create_lesson(req: LessonCreateRequest, current: RequireLecturer, db: DBSess
 
 
 @router.get("/lessons", response_model=List[LessonResponse], summary="Daftar lesson kelas")
-def list_lessons(class_id: int, current: CurrentUser, db: DBSession, chapter_id: Optional[int] = Query(None)):
+def list_lessons(
+    class_id: int,
+    current: CurrentUser,
+    db: DBSession,
+    chapter_id: Optional[int] = Query(None),
+    limit: int = Query(100, ge=1, le=500),
+    offset: int = Query(0, ge=0),
+):
     require_class_access(db, current, class_id)
     from app.models.lms import CourseLesson
     query = db.query(CourseLesson).filter(CourseLesson.class_id == class_id)
     if chapter_id:
         query = query.filter(CourseLesson.chapter_id == chapter_id)
-    lessons = query.order_by(CourseLesson.lesson_number).all()
+    lessons = query.order_by(CourseLesson.lesson_number).offset(offset).limit(limit).all()
     return [LessonResponse.model_validate(l) for l in lessons]
 
 
@@ -196,9 +216,13 @@ def list_materials(
     current: CurrentUser,
     db: DBSession,
     session_id: Optional[int] = Query(None),
+    limit: int = Query(50, ge=1, le=200),
+    offset: int = Query(0, ge=0),
 ):
     require_class_access(db, current, class_id)
-    materials = LMSRepository.list_materials_for_class(db, class_id=class_id, session_id=session_id)
+    materials = LMSRepository.list_materials_for_class(
+        db, class_id=class_id, session_id=session_id, limit=limit, offset=offset
+    )
     return [MaterialResponse.model_validate(m) for m in materials]
 
 
@@ -251,6 +275,7 @@ def create_assignment(req: AssignmentCreateRequest, current: RequireLecturer, db
         description=req.description,
         max_score=req.max_score,
         allow_late=req.allow_late,
+        is_published=req.is_published,
     )
     audit(db, current.id, "CREATE_ASSIGNMENT", "assignment", assignment.id, after={"class_id": req.class_id}); db.commit()
     return AssignmentResponse.model_validate(assignment)
@@ -266,9 +291,13 @@ def list_assignments(
     current: CurrentUser,
     db: DBSession,
     session_id: Optional[int] = Query(None),
+    limit: int = Query(50, ge=1, le=200),
+    offset: int = Query(0, ge=0),
 ):
     require_class_access(db, current, class_id)
-    assignments = LMSRepository.list_assignments_for_class(db, class_id=class_id, session_id=session_id)
+    assignments = LMSRepository.list_assignments_for_class(
+        db, class_id=class_id, session_id=session_id, limit=limit, offset=offset
+    )
     results = []
     for a in assignments:
         resp = AssignmentResponse.model_validate(a)
@@ -355,11 +384,17 @@ def submit_assignment(
     response_model=List[SubmissionResponse],
     summary="Daftar pengumpulan tugas kelas (Dosen)",
 )
-def list_submissions(assignment_id: int, current: RequireLecturer, db: DBSession):
+def list_submissions(
+    assignment_id: int,
+    current: RequireLecturer,
+    db: DBSession,
+    limit: int = Query(50, ge=1, le=200),
+    offset: int = Query(0, ge=0),
+):
     assignment = LMSRepository.get_assignment_by_id(db, assignment_id)
     if not assignment: raise HTTPException(status_code=404, detail="Tugas tidak ditemukan")
     require_class_access(db, current, assignment.class_id)
-    submissions = LMSRepository.list_submissions_for_assignment(db, assignment_id)
+    submissions = LMSRepository.list_submissions_for_assignment(db, assignment_id, limit=limit, offset=offset)
     return [SubmissionResponse.model_validate(s) for s in submissions]
 
 

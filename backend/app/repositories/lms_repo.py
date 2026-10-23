@@ -64,12 +64,18 @@ class LMSRepository:
 
     @staticmethod
     def list_materials_for_class(
-        db: Session, class_id: int, session_id: Optional[int] = None
+        db: Session,
+        class_id: int,
+        session_id: Optional[int] = None,
+        limit: int = 50,
+        offset: int = 0,
     ) -> List[CourseMaterial]:
         stmt = (
             select(CourseMaterial)
             .where(CourseMaterial.class_id == class_id)
             .order_by(CourseMaterial.created_at.desc())
+            .offset(offset)
+            .limit(limit)
         )
         if session_id:
             stmt = stmt.where(CourseMaterial.session_id == session_id)
@@ -99,6 +105,7 @@ class LMSRepository:
         description: Optional[str] = None,
         max_score: float = 100.0,
         allow_late: bool = True,
+        is_published: bool = True,
     ) -> Assignment:
         assignment = Assignment(
             class_id=class_id,
@@ -108,6 +115,7 @@ class LMSRepository:
             due_date=due_date,
             max_score=max_score,
             allow_late=allow_late,
+            is_published=is_published,
         )
         db.add(assignment)
         db.commit()
@@ -128,13 +136,19 @@ class LMSRepository:
 
     @staticmethod
     def list_assignments_for_class(
-        db: Session, class_id: int, session_id: Optional[int] = None
+        db: Session,
+        class_id: int,
+        session_id: Optional[int] = None,
+        limit: int = 50,
+        offset: int = 0,
     ) -> List[Assignment]:
         stmt = (
             select(Assignment)
             .options(joinedload(Assignment.submissions))
             .where(Assignment.class_id == class_id)
             .order_by(Assignment.due_date.asc())
+            .offset(offset)
+            .limit(limit)
         )
         if session_id:
             stmt = stmt.where(Assignment.session_id == session_id)
@@ -208,7 +222,10 @@ class LMSRepository:
 
     @staticmethod
     def list_submissions_for_assignment(
-        db: Session, assignment_id: int
+        db: Session,
+        assignment_id: int,
+        limit: int = 50,
+        offset: int = 0,
     ) -> List[AssignmentSubmission]:
         return list(
             db.scalars(
@@ -219,6 +236,8 @@ class LMSRepository:
                 )
                 .where(AssignmentSubmission.assignment_id == assignment_id)
                 .order_by(AssignmentSubmission.submitted_at.desc())
+                .offset(offset)
+                .limit(limit)
             ).unique().all()
         )
 

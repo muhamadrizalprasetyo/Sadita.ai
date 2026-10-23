@@ -23,4 +23,14 @@ def reset_database():
     Base.metadata.create_all(bind=engine)
     seed_database()
     yield
-    Base.metadata.drop_all(bind=engine)
+
+
+def pytest_sessionfinish(session, exitstatus):
+    """Restore full dev database with schedule and student enrollments upon test completion."""
+    try:
+        from app.db.seed_schedule import seed_schedule
+        Base.metadata.create_all(bind=engine)
+        seed_database()
+        seed_schedule()
+    except Exception:
+        pass

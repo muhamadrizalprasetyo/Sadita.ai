@@ -150,15 +150,15 @@ class AttendanceService:
         db: Session,
         *,
         rfid_uid: str,
-        fingerprint_template_id: int,
-        confidence: int,
+        fingerprint_template_id: Optional[int] = None,
+        confidence: int = 100,
         event_timestamp: Optional[datetime] = None,
         session_id: Optional[int] = None,
     ) -> AttendanceRecord:
         """
         Core IoT attendance pipeline:
         1. Look up student by RFID UID
-        2. Verify fingerprint_template_id matches student record
+        2. Verify fingerprint_template_id matches student record (if provided / 2FA)
         3. Determine active session (either provided or auto-detected)
         4. Calculate HADIR vs TERLAMBAT based on session.opened_at + threshold
         5. Upsert attendance record (idempotent)
@@ -171,25 +171,26 @@ class AttendanceService:
                 detail=f"Kartu RFID '{rfid_uid}' tidak terdaftar di sistem",
             )
 
-        # 2. Verify fingerprint
-        matching_fps = [
-            fp for fp in student.fingerprint_credentials
-            if fp.is_active and fp.template_slot == fingerprint_template_id
-        ]
-        if not matching_fps and student.fingerprint_template_id != fingerprint_template_id:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail=(
-                    f"Sidik jari tidak cocok dengan data NIM {student.nim}. "
-                    f"Expected slot #{student.fingerprint_template_id}, got #{fingerprint_template_id}"
-                ),
-            )
+        # 2. Verify fingerprint (if 2FA mode)
+        if fingerprint_template_id is not None:
+            matching_fps = [
+                fp for fp in student.fingerprint_credentials
+                if fp.is_active and fp.template_slot == fingerprint_template_id
+            ]
+            if not matching_fps and student.fingerprint_template_id != fingerprint_template_id:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail=(
+                        f"Sidik jari tidak cocok dengan data NIM {student.nim}. "
+                        f"Expected slot #{student.fingerprint_template_id}, got #{fingerprint_template_id}"
+                    ),
+                )
 
-        if confidence < 40:
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail=f"Kepercayaan sidik jari terlalu rendah ({confidence}%). Minimum 40%.",
-            )
+            if confidence < 40:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail=f"Kepercayaan sidik jari terlalu rendah ({confidence}%). Minimum 40%.",
+                )
 
         # 3. Determine session
         if session_id:

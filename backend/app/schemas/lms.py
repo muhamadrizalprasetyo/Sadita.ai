@@ -130,7 +130,7 @@ class AssignmentCreateRequest(BaseModel):
     allow_late: bool = True
     show_answer: bool = False
     answer: Optional[str] = None
-    is_published: bool = False
+    is_published: bool = True
 
 
 class AssignmentResponse(BaseModel):

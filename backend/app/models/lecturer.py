@@ -73,6 +73,10 @@ class LecturerProfile(Base):
     def department(self) -> str:
         return self.program_studi.nama if self.program_studi else ""
 
+    @property
+    def full_name(self) -> Optional[str]:
+        return self.user.full_name if self.user else None
+
     @department.setter
     def department(self, val: str):
         pass

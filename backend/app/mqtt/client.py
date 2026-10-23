@@ -16,6 +16,7 @@ from __future__ import annotations
 import json
 import logging
 import threading
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from typing import Any, Callable, Dict, Optional
 
@@ -55,6 +56,7 @@ class SADITAMQTTClient:
         self._connected: bool = False
         self._handlers: Dict[str, list[EventHandler]] = {}
         self._lock = threading.Lock()
+        self._executor = ThreadPoolExecutor(max_workers=8, thread_name_prefix="mqtt_worker")
 
     # ------------------------------------------------------------------
     # Lifecycle
@@ -98,6 +100,7 @@ class SADITAMQTTClient:
             self._client.loop_stop()
             self._client.disconnect()
             logger.info("MQTT client disconnected")
+        self._executor.shutdown(wait=False)
 
     # ------------------------------------------------------------------
     # Callbacks
@@ -118,6 +121,12 @@ class SADITAMQTTClient:
         self._connected = False
         if reason_code != 0:
             logger.warning("MQTT unexpected disconnect, reason_code=%s", reason_code)
+
+    def _safe_dispatch(self, handler: EventHandler, device_id: str, payload: dict, event_type: str) -> None:
+        try:
+            handler(device_id, payload)
+        except Exception as exc:
+            logger.exception("Handler error for %s on device %s: %s", event_type, device_id, exc)
 
     def _on_message(
         self, client: mqtt.Client, userdata: Any, message: mqtt.MQTTMessage
@@ -144,10 +153,7 @@ class SADITAMQTTClient:
                 handlers = list(self._handlers.get(event_type, []))
 
             for handler in handlers:
-                try:
-                    handler(device_id, payload)
-                except Exception as exc:
-                    logger.exception("Handler error for %s: %s", event_type, exc)
+                self._executor.submit(self._safe_dispatch, handler, device_id, payload, event_type)
 
     # ------------------------------------------------------------------
     # Handler registration

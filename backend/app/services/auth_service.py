@@ -26,17 +26,16 @@ from app.schemas.user import UserResponse
 class AuthService:
     @staticmethod
     def authenticate(db: Session, email: str, password: str) -> User:
-        user = UserRepository.get_by_email(db, email)
+        ident = email.strip()
+        user = UserRepository.get_by_email(db, ident.lower())
         if not user:
+            student = StudentRepository.get_by_nim(db, ident)
+            if student and student.user:
+                user = student.user
+        if not user or not verify_password(password, user.password_hash):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Email atau password salah",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
-        if not verify_password(password, user.password_hash):
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Email atau password salah",
+                detail="Email/NPM atau kata sandi tidak valid",
                 headers={"WWW-Authenticate": "Bearer"},
             )
         if not user.is_active:

@@ -18,6 +18,7 @@ from app.models.academic import (
     Course,
     CourseClass,
     EnrollmentStatus,
+    EnrollmentType,
 )
 from app.models.attendance import (
     AttendanceRecord,
@@ -174,7 +175,7 @@ def seed_database():
                 device_id="SADITA-ESP32-LAB-01",
                 nama="ESP32-S3 Presensi Meja Dosen Lab IoT",
                 room_id=room.id,
-                status=DeviceStatus.ACTIVE,
+                status=DeviceStatus.OFFLINE,
                 firmware_version="v2.1.0-ESP32S3",
                 mac_address="30:30:F9:5A:12:34",
                 ip_address="192.168.1.150",
@@ -251,6 +252,8 @@ def seed_database():
                     prodi_id=prodi.id,
                     nim=s["nim"],
                     angkatan=s["angkatan"],
+                    academic_cohort=s.get("cohort", 1),
+                    class_type=s.get("class_type", ClassType.REGULER_PAGI),
                     ktm_status=s["ktm_status"],
                     phone="089876543210",
                     is_active=True,
@@ -414,6 +417,7 @@ def seed_database():
                     class_id=course_class.id,
                     student_id=stu.id,
                     status=EnrollmentStatus.AKTIF,
+                    enrollment_type=EnrollmentType.REGULER,
                 )
                 db.add(enrollment)
                 enrolled_count += 1
@@ -492,7 +496,7 @@ def seed_database():
                 session_id=session.id,
                 title="Modul 1: Pengenalan ESP32-S3 & Protokol Komunikasi MQTT SADITA",
                 material_type=MaterialType.DOCUMENT,
-                resource_url="https://unipi.ac.id/sadita/modul-01.pdf",
+                resource_url="/api/v1/uploads/files/modul-01.pdf",
                 description="Panduan pengkabelan sensor RC522, AS608, DS3231, LCD I2C, serta pengiriman payload MQTT ke broker Mosquitto.",
             )
             db.add(material)
@@ -563,6 +567,9 @@ def seed_database():
 
             db.commit()
             print("  ✅ Quiz 1: Dasar IoT & RFID created with 2 questions")
+
+        from app.db.seed_schedule import seed_schedule
+        seed_schedule()
 
         print("✨ Database seeding completed successfully with real UNIPI dataset!")
     finally:

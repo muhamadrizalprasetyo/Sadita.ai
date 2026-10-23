@@ -56,6 +56,9 @@ class CourseResponse(CourseBase):
 class ClassRoomBase(BaseModel):
     name: str = Field(..., max_length=100)
     capacity: int = Field(default=40, ge=1)
+    code: Optional[str] = None
+    building: Optional[str] = None
+    floor: Optional[int] = None
 
 
 class ClassRoomCreate(ClassRoomBase):
@@ -81,10 +84,23 @@ class CourseClassBase(BaseModel):
     start_time: time
     end_time: time
     is_active: bool = True
+    class_type: Optional[str] = "REGULER_PAGI"
 
 
 class CourseClassCreate(CourseClassBase):
     pass
+
+
+class CourseClassUpdate(BaseModel):
+    name: Optional[str] = Field(None, max_length=100)
+    course_id: Optional[int] = None
+    term_id: Optional[int] = None
+    lecturer_id: Optional[int] = None
+    room_id: Optional[int] = None
+    day_of_week: Optional[int] = Field(None, ge=1, le=7)
+    start_time: Optional[time] = None
+    end_time: Optional[time] = None
+    is_active: Optional[bool] = None
 
 
 class CourseClassResponse(CourseClassBase):
@@ -98,12 +114,16 @@ class CourseClassResponse(CourseClassBase):
     model_config = ConfigDict(from_attributes=True)
 
 
+from app.models.academic import EnrollmentType, KrsRequestStatus, KrsRequestType
+
+
 # ---------------------------------------------------------------------------
 # Class Enrollment
 # ---------------------------------------------------------------------------
 class ClassEnrollmentCreate(BaseModel):
     class_id: int
     student_id: int
+    enrollment_type: Optional[EnrollmentType] = EnrollmentType.REGULER
 
 
 class ClassEnrollmentResponse(BaseModel):
@@ -111,8 +131,42 @@ class ClassEnrollmentResponse(BaseModel):
     class_id: int
     student_id: int
     status: str
+    enrollment_type: Optional[str] = "REGULER"
     enrolled_at: datetime
     student: Optional[StudentProfileResponse] = None
+    course_class: Optional[CourseClassResponse] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+# ---------------------------------------------------------------------------
+# KRS Requests (Tambah SKS / Mengulang Mata Kuliah)
+# ---------------------------------------------------------------------------
+class KrsRequestCreate(BaseModel):
+    class_id: int
+    request_type: KrsRequestType
+    alasan: Optional[str] = Field(None, max_length=500)
+
+
+class KrsRequestReview(BaseModel):
+    action: str = Field(..., description="'APPROVE' atau 'REJECT'")
+    notes: Optional[str] = Field(None, max_length=500)
+
+
+class KrsRequestResponse(BaseModel):
+    id: int
+    student_id: int
+    class_id: int
+    request_type: KrsRequestType
+    status: KrsRequestStatus
+    alasan: Optional[str] = None
+    submitted_at: datetime
+    reviewed_at: Optional[datetime] = None
+    reviewed_by: Optional[int] = None
+    reviewer_notes: Optional[str] = None
+    enrollment_id: Optional[int] = None
+    student: Optional[StudentProfileResponse] = None
+    course_class: Optional[CourseClassResponse] = None
 
     model_config = ConfigDict(from_attributes=True)
 

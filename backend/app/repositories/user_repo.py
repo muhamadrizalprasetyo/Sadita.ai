@@ -4,7 +4,7 @@ Data access functions using SQLAlchemy Session.
 """
 from __future__ import annotations
 
-from typing import List, Optional
+from typing import Any, List, Optional
 from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
 
@@ -79,6 +79,43 @@ class UserRepository:
         if role:
             stmt = stmt.where(User.role == role)
         return list(db.scalars(stmt).unique().all())
+
+    @staticmethod
+    def update(
+        db: Session,
+        user_id: int,
+        *,
+        full_name: Optional[str] = None,
+        email: Optional[str] = None,
+        is_active: Optional[bool] = None,
+        password_hash: Optional[str] = None,
+        role: Optional[UserRole] = None,
+    ) -> Optional[User]:
+        user = db.get(User, user_id)
+        if not user:
+            return None
+        if full_name is not None:
+            user.full_name = full_name.strip()
+        if email is not None:
+            user.email = email.lower().strip()
+        if is_active is not None:
+            user.is_active = is_active
+        if password_hash is not None:
+            user.password_hash = password_hash
+        if role is not None:
+            user.role = role
+        db.commit()
+        db.refresh(user)
+        return UserRepository.get_by_id(db, user_id)
+
+    @staticmethod
+    def delete(db: Session, user_id: int) -> bool:
+        user = db.get(User, user_id)
+        if not user:
+            return False
+        db.delete(user)
+        db.commit()
+        return True
 
 
 class StudentRepository:
@@ -170,6 +207,8 @@ class StudentRepository:
         department: str = "Teknik Informatika",
         prodi_id: Optional[int] = None,
         batch_year: int = 2024,
+        academic_cohort: int = 1,
+        class_type: Optional[ClassType] = None,
         phone: Optional[str] = None,
         rfid_uid: Optional[str] = None,
         fingerprint_template_id: Optional[int] = None,
@@ -178,6 +217,7 @@ class StudentRepository:
     ) -> StudentProfile:
         from app.models.program_studi import ProgramStudi
         from app.models.credential import RfidCredential, FingerprintCredential
+        from app.models.academic import ClassType as MClassType
 
         if not prodi_id:
             prodi = db.scalar(select(ProgramStudi).where(ProgramStudi.nama == department.strip()))
@@ -200,6 +240,8 @@ class StudentRepository:
             prodi_id=prodi_id,
             nim=nim.strip(),
             angkatan=batch_year,
+            academic_cohort=academic_cohort,
+            class_type=class_type or MClassType.REGULER_PAGI,
             ktm_status=ktm_status,
             phone=phone.strip() if phone else None,
         )
@@ -283,17 +325,36 @@ class StudentRepository:
                 student.ktm_status = KtmStatus.BELUM_MEMILIKI_KTM
 
         if fingerprint_template_id is not None:
+            # Deactivate all active fingerprint credentials for this student on this device
             for fp in student.fingerprint_credentials:
                 if fp.device_id == device_id and fp.is_active:
                     fp.is_active = False
-            fp = FingerprintCredential(
-                student_id=student.id,
-                device_id=device_id,
-                template_slot=fingerprint_template_id,
-                finger_label="Telunjuk Kanan",
-                is_active=True,
+
+            # Flush deactivation before INSERT to avoid UniqueConstraint violation
+            # (uq_device_template_slot) when the same slot is being reassigned
+            db.flush()
+
+            # Check if an entry with this exact (device_id, template_slot) already exists
+            # for THIS student — if so, just reactivate it instead of inserting a new one
+            existing_slot = next(
+                (
+                    fp for fp in student.fingerprint_credentials
+                    if fp.device_id == device_id and fp.template_slot == fingerprint_template_id
+                ),
+                None,
             )
-            db.add(fp)
+            if existing_slot:
+                existing_slot.is_active = True
+            else:
+                db.add(
+                    FingerprintCredential(
+                        student_id=student.id,
+                        device_id=device_id,
+                        template_slot=fingerprint_template_id,
+                        finger_label="Telunjuk Kanan",
+                        is_active=True,
+                    )
+                )
 
         db.commit()
         db.expire(student)
@@ -301,16 +362,51 @@ class StudentRepository:
         return student
 
     @staticmethod
-    def list(db: Session, skip: int = 0, limit: int = 100) -> List[StudentProfile]:
-        return list(
-            db.scalars(
-                select(StudentProfile)
-                .options(joinedload(StudentProfile.user))
-                .order_by(StudentProfile.nim)
-                .offset(skip)
-                .limit(limit)
-            ).unique().all()
+    def list(
+        db: Session,
+        skip: int = 0,
+        limit: int = 100,
+        cohort: Optional[int] = None,
+        class_type: Optional[Any] = None,
+    ) -> List[StudentProfile]:
+        stmt = (
+            select(StudentProfile)
+            .options(joinedload(StudentProfile.user))
+            .order_by(StudentProfile.nim)
         )
+        if cohort is not None:
+            stmt = stmt.where(StudentProfile.academic_cohort == cohort)
+        if class_type is not None:
+            stmt = stmt.where(StudentProfile.class_type == class_type)
+        return list(
+            db.scalars(stmt.offset(skip).limit(limit)).unique().all()
+        )
+
+    @staticmethod
+    def update_profile(
+        db: Session,
+        student_id: int,
+        *,
+        academic_cohort: Optional[int] = None,
+        class_type: Optional[Any] = None,
+        phone: Optional[str] = None,
+        batch_year: Optional[int] = None,
+    ) -> Optional[StudentProfile]:
+        student = db.get(StudentProfile, student_id)
+        if not student:
+            return None
+        if academic_cohort is not None:
+            student.academic_cohort = academic_cohort
+        if class_type is not None:
+            student.class_type = class_type
+        if phone is not None:
+            student.phone = phone.strip() if phone else None
+        if batch_year is not None:
+            student.angkatan = batch_year
+        db.commit()
+        db.refresh(student)
+        return student
+
 
 
 class LecturerRepository:

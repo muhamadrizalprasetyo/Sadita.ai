@@ -87,6 +87,7 @@ class LMSService:
         description: Optional[str] = None,
         max_score: float = 100.0,
         allow_late: bool = True,
+        is_published: bool = True,
     ) -> Assignment:
         course_class = AcademicRepository.get_class_by_id(db, class_id)
         if not course_class:
@@ -112,6 +113,7 @@ class LMSService:
             description=description,
             max_score=max_score,
             allow_late=allow_late,
+            is_published=is_published,
         )
         logger.info("Assignment created: id=%d class_id=%d title='%s'", assignment.id, class_id, title)
         return assignment

@@ -67,7 +67,7 @@ export default function AdminDashboardPage() {
   if (loading) return <LoadingSpinner text="Memuat data operasional kampus..." />;
 
   return (
-    <div style={{ display: "grid", gap: "2rem" }}>
+    <div style={{ display: "grid", gap: "24px" }}>
       {/* Header */}
       <div className="page-header">
         <div>
@@ -87,14 +87,14 @@ export default function AdminDashboardPage() {
       </div>
 
       {error && (
-        <div style={{ padding: "1rem", borderRadius: "var(--radius-lg)", background: "var(--error-bg)", border: "1px solid var(--error-border)", color: "var(--error)" }}>
+        <div style={{ padding: "12px 16px", borderRadius: "var(--radius-search)", background: "var(--error-bg)", border: "1px solid var(--error-border)", color: "var(--error)", fontSize: "13px" }}>
           {error}
         </div>
       )}
 
       {/* Metrics Stat Grid */}
       {stats && (
-        <div className="stat-grid">
+        <div className="stats">
           <StatCard
             label="Total Mahasiswa"
             value={stats.total_students}
@@ -155,18 +155,18 @@ export default function AdminDashboardPage() {
       )}
 
       {/* Realtime Overview Section */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(22rem, 1fr))", gap: "1.5rem" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "20px" }}>
         {/* Classes Table */}
         <div className="card">
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.25rem" }}>
-            <h2 style={{ fontSize: "1.1rem", fontWeight: 700 }}>Kelas Perkuliahan Aktif</h2>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
+            <h2 style={{ fontSize: "16px", fontWeight: 600, color: "var(--text)" }}>Kelas Perkuliahan Aktif</h2>
             <Link href="/admin/akademik" className="btn btn-outline btn-sm">
               Semua Kelas <ArrowRight size={14} />
             </Link>
           </div>
 
           {classes.length === 0 ? (
-            <p style={{ color: "var(--text-muted)", fontSize: "0.875rem" }}>Belum ada kelas terdaftar.</p>
+            <p style={{ color: "var(--muted)", fontSize: "13px" }}>Belum ada kelas terdaftar.</p>
           ) : (
             <div className="table-container">
               <table className="data-table">
@@ -183,7 +183,7 @@ export default function AdminDashboardPage() {
                     <tr key={c.id}>
                       <td style={{ fontWeight: 600 }}>{c.name}</td>
                       <td>{c.course?.name || "Mata Kuliah"}</td>
-                      <td style={{ fontSize: "0.8rem", color: "var(--text-secondary)" }}>
+                      <td style={{ fontSize: "12px", color: "var(--muted)" }}>
                         Hari ke-{c.day_of_week} ({c.start_time} - {c.end_time})
                       </td>
                       <td>
@@ -200,7 +200,7 @@ export default function AdminDashboardPage() {
         {/* Hardware Monitoring Card */}
         <div className="card">
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.25rem" }}>
-            <h2 style={{ fontSize: "1.1rem", fontWeight: 700 }}>Status Perangkat Presensi IoT</h2>
+            <h2 style={{ fontSize: "16px", fontWeight: 600, color: "var(--text)" }}>Status Perangkat Presensi IoT</h2>
             <Link href="/admin/perangkat" className="btn btn-outline btn-sm">
               Detail <ArrowRight size={14} />
             </Link>
@@ -211,18 +211,18 @@ export default function AdminDashboardPage() {
               <div
                 key={d.id}
                 style={{
-                  padding: "0.85rem 1rem",
-                  borderRadius: "var(--radius-lg)",
-                  background: "rgba(255, 255, 255, 0.03)",
-                  border: "1px solid var(--border-subtle)",
+                  padding: "12px 14px",
+                  borderRadius: "var(--radius-search)",
+                  background: "var(--bg)",
+                  border: "1px solid var(--line)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "space-between",
                 }}
               >
                 <div>
-                  <p style={{ fontWeight: 600, fontSize: "0.9rem" }}>{d.nama}</p>
-                  <p style={{ fontSize: "0.75rem", color: "var(--text-muted)", marginTop: "0.15rem" }}>
+                  <p style={{ fontWeight: 600, fontSize: "13px", color: "var(--text)" }}>{d.nama}</p>
+                  <p style={{ fontSize: "11.5px", color: "var(--muted)", marginTop: "2px" }}>
                     ID: {d.device_id} • IP: {d.ip_address || "192.168.1.x"}
                   </p>
                 </div>
@@ -233,9 +233,9 @@ export default function AdminDashboardPage() {
             ))}
           </div>
 
-          <div style={{ marginTop: "1.5rem", padding: "1rem", borderRadius: "var(--radius-md)", background: "rgba(56, 189, 248, 0.05)", border: "1px solid rgba(56, 189, 248, 0.15)", display: "flex", alignItems: "center", gap: "0.75rem" }}>
-            <ShieldCheck size={20} color="var(--primary-light)" />
-            <p style={{ fontSize: "0.8rem", color: "var(--text-secondary)" }}>
+          <div style={{ marginTop: "16px", padding: "12px 14px", borderRadius: "var(--radius-search)", background: "rgba(18, 183, 106, 0.06)", border: "1px solid rgba(18, 183, 106, 0.2)", display: "flex", alignItems: "center", gap: "10px" }}>
+            <ShieldCheck size={18} color="var(--green)" />
+            <p style={{ fontSize: "12px", color: "var(--muted)" }}>
               Broker MQTT terhubung pada port 1883. Heartbeat perangkat otomatis disinkronkan ke database.
             </p>
           </div>

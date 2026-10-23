@@ -300,11 +300,11 @@ export default function MahasiswaKuisPage() {
                         padding: "1rem 1.25rem",
                         borderRadius: "var(--radius-md)",
                         border: isSelected
-                          ? "2px solid var(--primary-light)"
-                          : "1px solid var(--border-subtle)",
+                          ? "2px solid var(--green)"
+                          : "1px solid var(--line)",
                         background: isSelected
-                          ? "rgba(56, 189, 248, 0.08)"
-                          : "rgba(255, 255, 255, 0.02)",
+                          ? "rgba(18, 183, 106, 0.08)"
+                          : "var(--bg)",
                         cursor: "pointer",
                         display: "flex",
                         alignItems: "center",
@@ -317,8 +317,8 @@ export default function MahasiswaKuisPage() {
                           width: "2rem",
                           height: "2rem",
                           borderRadius: "50%",
-                          background: isSelected ? "var(--primary)" : "rgba(255, 255, 255, 0.06)",
-                          color: isSelected ? "#fff" : "var(--text-secondary)",
+                          background: isSelected ? "var(--green)" : "#e9ebef",
+                          color: isSelected ? "#fff" : "var(--muted)",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",

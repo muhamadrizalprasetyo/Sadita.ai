@@ -17,6 +17,8 @@ from app.models.academic import (
     Course,
     CourseClass,
 )
+from app.models.lecturer import LecturerProfile
+from app.models.student import StudentProfile
 
 
 class AcademicRepository:
@@ -146,7 +148,7 @@ class AcademicRepository:
             .options(
                 joinedload(CourseClass.course),
                 joinedload(CourseClass.term),
-                joinedload(CourseClass.lecturer),
+                joinedload(CourseClass.lecturer).joinedload(LecturerProfile.user),
                 joinedload(CourseClass.room),
             )
             .where(CourseClass.id == class_id)
@@ -163,7 +165,7 @@ class AcademicRepository:
             .options(
                 joinedload(CourseClass.course),
                 joinedload(CourseClass.term),
-                joinedload(CourseClass.lecturer),
+                joinedload(CourseClass.lecturer).joinedload(LecturerProfile.user),
                 joinedload(CourseClass.room),
             )
             .order_by(CourseClass.id)
@@ -173,6 +175,31 @@ class AcademicRepository:
         if lecturer_id:
             stmt = stmt.where(CourseClass.lecturer_id == lecturer_id)
         return list(db.scalars(stmt).unique().all())
+
+    @staticmethod
+    def update_class(
+        db: Session,
+        class_id: int,
+        **kwargs,
+    ) -> Optional[CourseClass]:
+        course_class = db.get(CourseClass, class_id)
+        if not course_class:
+            return None
+        for key, val in kwargs.items():
+            if val is not None:
+                if key == "name":
+                    setattr(course_class, "kode_kelas", val)
+                elif key == "day_of_week":
+                    setattr(course_class, "hari", val)
+                elif key == "start_time":
+                    setattr(course_class, "jam_mulai", val)
+                elif key == "end_time":
+                    setattr(course_class, "jam_selesai", val)
+                elif hasattr(course_class, key):
+                    setattr(course_class, key, val)
+        db.commit()
+        db.refresh(course_class)
+        return AcademicRepository.get_class_by_id(db, class_id)
 
     # --- Enrollments ---
     @staticmethod
@@ -213,7 +240,9 @@ class AcademicRepository:
         return list(
             db.scalars(
                 select(ClassEnrollment)
-                .options(joinedload(ClassEnrollment.student))
+                .options(
+                    joinedload(ClassEnrollment.student).joinedload(StudentProfile.user)
+                )
                 .where(ClassEnrollment.class_id == class_id)
             ).unique().all()
         )

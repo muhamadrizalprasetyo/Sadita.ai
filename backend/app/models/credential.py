@@ -16,7 +16,7 @@ import enum
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Optional
 
-from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, DateTime, Enum, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.session import Base
@@ -76,6 +76,9 @@ class FingerprintCredential(Base):
     (misal: telunjuk kiri dan kanan), masing-masing satu entri.
     """
     __tablename__ = "fingerprint_credentials"
+    __table_args__ = (
+        UniqueConstraint("device_id", "template_slot", name="uq_device_template_slot"),
+    )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     student_id: Mapped[int] = mapped_column(
