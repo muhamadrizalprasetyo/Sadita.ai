@@ -173,3 +173,26 @@ git push -u origin <tipe>/<nama-branch>
 Banyak developer atau AI bingung ketika sudah push tetapi profilnya belum muncul di daftar **"Contributors"** di sidebar kanan repositori GitHub:
 1. **Aturan Default Branch GitHub**: GitHub **HANYA** menghitung dan menampilkan kontributor jika commit tersebut telah **di-merge ke branch utama (`main`)**. Selama commit masih berada di branch terpisah (misal `feat/*` atau `docs/*`), commit tersebut belum dihitung ke dalam widget *Contributors*.
 2. **Kesesuaian Email Git**: Pastikan email pada konfigurasi git lokal (`git config user.email`) sudah **terdaftar dan terverifikasi** di akun GitHub pengembang pada menu **Settings → Emails**. Jika email tidak cocok, GitHub tidak dapat menautkan profil akun ke commit tersebut meskipun branch sudah di-merge ke `main`.
+
+---
+
+## 6. Standar Antarmuka Admin & Resolusi Masalah UI/UX (Admin Dashboard Fix)
+
+### 6.1 Sensitivitas Huruf Berkas Aset pada Linux (Linux Case-Sensitivity)
+- **Gejala Bug:** Logo SADITA rusak (*broken image icon*) pada browser Linux karena berkas fisik tersimpan sebagai `public/logo.PNG` (huruf kapital) sementara kode memanggil `/logo.png`.
+- **Solusi Standar:** Seluruh aset di `frontend/public/` wajib berformat huruf kecil (*kebab-case* / *lowercase*). Telah dibuat salinan `frontend/public/logo.png` serta pembungkus tautan dengan fallback graceful `onError` pada komponen `RoleShell`.
+
+### 6.2 Eliminasi Desain AI-Slop Menjadi Tata Letak Eksekutif
+- **Masalah Sebelumnya:** 8 kartu gradien warna-warni neon jenuh yang mengesankan dashboard demo mainan / template AI generik.
+- **Standar Baru SADITA:** 
+  1. **4 Kartu KPI Eksekutif Utama:** Total Mahasiswa (zamrud), Dosen Pengampu (safir), Kelas Perkuliahan (indigo), dan Mata Kuliah (slate) dengan latar belakang putih elegan, tipografi tegas, dan ikon beraksen halus (*subtle tinted icons*).
+  2. **4 Indikator Operasional Ringkas:** Sesi Presensi Aktif (LIVE badge), Perangkat Offline (peringatan perangkat), Persetujuan Pending (pengajuan KRS/pengganti), dan Presensi Hari Ini (tap RFID & bio).
+
+### 6.3 Standardisasi Tabel Kelas Perkuliahan Terjadwal
+- **Pemformatan Hari & Waktu:** Angka `day_of_week` (1-7) diterjemahkan otomatis ke nama hari Bahasa Indonesia (`Senin` s.d. `Minggu`) dan format jam 24 jam dengan zona waktu WIB (`08:00 - 10:30 WIB`).
+- **Parsing Rombel Bersih:** Nama kelas dari seeder yang berformat `TEKFO. 1 - Matematika 1` dipisahkan secara cerdas menjadi chip kode rombel `TEKFO. 1` dan sub-label mode kuliah `reguler pagi`, sementara nama mata kuliah dan ruangan (`R. FB303`) diletakkan pada kolom mata kuliah agar tidak terjadi pemotongan teks (*line wrapping*) yang canggung.
+
+### 6.4 Tata Letak Layar Penuh (*Full-Viewport App Shell*)
+- `.app-shell` menggunakan lebar 100% dengan `grid-template-columns: 260px 1fr`, tanpa padding luar `24px` yang sebelumnya menyebabkan tampilan terpotong saat scroll (*clipping / nested double scrollbar*).
+- Avatar dan metadata admin pada sidebar diperlebar dan diatur agar tidak terpotong canggung (`text-overflow: ellipsis; max-width: 150px`).
+

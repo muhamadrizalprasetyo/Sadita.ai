@@ -3,19 +3,19 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
-import { 
-  LayoutDashboard, 
-  BookOpen, 
-  Calendar, 
-  Users, 
-  GraduationCap, 
-  Clock, 
-  FileText, 
-  CheckSquare, 
-  Radio, 
-  Award, 
-  HelpCircle, 
-  LogOut, 
+import {
+  LayoutDashboard,
+  BookOpen,
+  Calendar,
+  Users,
+  GraduationCap,
+  Clock,
+  FileText,
+  CheckSquare,
+  Radio,
+  Award,
+  HelpCircle,
+  LogOut,
   Building2,
   Sparkles,
   Search,
@@ -137,7 +137,16 @@ export function RoleShell({ role, children }: { role: Role; children: ReactNode 
       <aside className="sidebar">
         {/* Brand */}
         <div className="sidebar-brand">
-          <img src="/logo.png" alt="SADITA.ai" className="brand-logo" />
+          <Link href={homeFor(role)} style={{ display: "inline-block" }}>
+            <img
+              src="/logo.png"
+              alt="SADITA.ai"
+              className="brand-logo"
+              onError={(e) => {
+                e.currentTarget.style.display = "none";
+              }}
+            />
+          </Link>
           <div className="brand-badge">Sistem Akademik Terintegrasi</div>
         </div>
 

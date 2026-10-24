@@ -17,6 +17,13 @@ if ! pg_isready -q; then
     echo "1812005" | sudo -S systemctl start postgresql
 fi
 
+# Bersihkan port 8000 dan 3000 jika ada proses instance sebelumnya
+if command -v fuser &> /dev/null; then
+    fuser -k 8000/tcp 2>/dev/null || true
+    fuser -k 3000/tcp 2>/dev/null || true
+    sleep 1
+fi
+
 # Jalankan backend di background
 echo "Memulai Backend FastAPI pada port 8000..."
 cd "$ROOT_DIR/backend"
