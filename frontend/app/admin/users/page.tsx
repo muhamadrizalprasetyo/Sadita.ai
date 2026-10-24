@@ -1,14 +1,14 @@
 "use client";
 
 import { useEffect, useState, useMemo, useCallback } from "react";
-import { Plus, Edit2, Trash2 } from "lucide-react";
+import { Plus } from "lucide-react";
 import { userApi, type UserItem } from "@/lib/api";
 import {
   Modal,
-  StatusBadge,
   DataTable,
   type ColumnDef,
-  TableToolbar,
+  FilamentBoolean,
+  FilamentAction,
 } from "@/components/ui";
 
 export default function UserManagementPage() {
@@ -16,8 +16,13 @@ export default function UserManagementPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("ALL");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [perPage, setPerPage] = useState(10);
+  const [selectedKeys, setSelectedKeys] = useState<(string | number)[]>([]);
+  const [sortKey, setSortKey] = useState<string>("full_name");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
-  // Create modal
+  // Create modal state
   const [createOpen, setCreateOpen] = useState(false);
   const [creating, setCreating] = useState(false);
   const [createForm, setCreateForm] = useState({
@@ -34,7 +39,7 @@ export default function UserManagementPage() {
     class_type: "REGULER_PAGI" as "REGULER_PAGI" | "REGULER_MALAM" | "REGULER_SHIFT",
   });
 
-  // Edit modal
+  // Edit modal state
   const [editTarget, setEditTarget] = useState<UserItem | null>(null);
   const [updating, setUpdating] = useState(false);
   const [editForm, setEditForm] = useState({
@@ -45,11 +50,11 @@ export default function UserManagementPage() {
     password: "",
   });
 
-  const loadUsers = async () => {
+  const loadUsers = useCallback(async () => {
     const res = await userApi.list({ limit: 200 });
     if (res.data) setUsers(res.data);
     setLoading(false);
-  };
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -64,17 +69,60 @@ export default function UserManagementPage() {
   }, []);
 
   const filteredUsers = useMemo(() => {
-    return users.filter((u) => {
+    let result = users.filter((u) => {
       const matchRole = roleFilter === "ALL" || u.role === roleFilter;
-      const q = search.toLowerCase();
+      const q = search.trim().toLowerCase();
       const matchQuery =
+        !q ||
         u.full_name.toLowerCase().includes(q) ||
         u.email.toLowerCase().includes(q) ||
         (u.student_profile?.nim && u.student_profile.nim.toLowerCase().includes(q)) ||
         (u.lecturer_profile?.nidn && u.lecturer_profile.nidn.toLowerCase().includes(q));
       return matchRole && matchQuery;
     });
-  }, [users, roleFilter, search]);
+
+    if (sortKey) {
+      result = [...result].sort((a, b) => {
+        let valA = "";
+        let valB = "";
+        if (sortKey === "full_name") {
+          valA = a.full_name.toLowerCase();
+          valB = b.full_name.toLowerCase();
+        } else if (sortKey === "parent") {
+          valA = (a.student_profile?.department || a.lecturer_profile?.department || "UNIPI").toLowerCase();
+          valB = (b.student_profile?.department || b.lecturer_profile?.department || "UNIPI").toLowerCase();
+        } else if (sortKey === "role") {
+          valA = a.role;
+          valB = b.role;
+        } else if (sortKey === "is_active") {
+          valA = a.is_active ? "1" : "0";
+          valB = b.is_active ? "1" : "0";
+        }
+
+        if (valA < valB) return sortDirection === "asc" ? -1 : 1;
+        if (valA > valB) return sortDirection === "asc" ? 1 : -1;
+        return 0;
+      });
+    }
+
+    return result;
+  }, [users, roleFilter, search, sortKey, sortDirection]);
+
+  const totalPages = Math.ceil(filteredUsers.length / perPage) || 1;
+
+  const paginatedUsers = useMemo(() => {
+    const start = (currentPage - 1) * perPage;
+    return filteredUsers.slice(start, start + perPage);
+  }, [filteredUsers, currentPage, perPage]);
+
+  const handleSort = (key: string) => {
+    if (sortKey === key) {
+      setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortDirection("asc");
+    }
+  };
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -161,90 +209,89 @@ export default function UserManagementPage() {
     }
   };
 
-  const handleDelete = useCallback(async (u: UserItem) => {
-    if (!confirm(`Hapus pengguna ${u.full_name} (${u.email})? Tindakan ini tidak dapat dibatalkan.`)) return;
-    const res = await userApi.delete(u.id);
-    if (!res.error) {
-      await loadUsers();
-    } else {
-      alert(res.error || "Gagal menghapus user");
-    }
-  }, []);
+  const handleDelete = useCallback(
+    async (u: UserItem) => {
+      if (!confirm(`Hapus pengguna ${u.full_name} (${u.email})? Tindakan ini tidak dapat dibatalkan.`)) return;
+      const res = await userApi.delete(u.id);
+      if (!res.error) {
+        await loadUsers();
+      } else {
+        alert(res.error || "Gagal menghapus user");
+      }
+    },
+    [loadUsers]
+  );
 
-  // Reusable Column Definitions for Users DataTable
+  // Filament v3 Column Definitions matching user screenshot
   const userColumns = useMemo<ColumnDef<UserItem>[]>(
     () => [
       {
         key: "full_name",
-        header: "Nama Lengkap",
-        render: (u) => <span style={{ fontWeight: 600 }}>{u.full_name}</span>,
+        header: "Name",
+        sortable: true,
+        render: (u) => (
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <span style={{ fontWeight: 600, color: "#111827", fontSize: "12.5px" }}>{u.full_name}</span>
+            <span style={{ fontSize: "11px", color: "#6b7280" }}>{u.email}</span>
+          </div>
+        ),
       },
       {
-        key: "email",
-        header: "Email Akun",
-        render: (u) => <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.85rem" }}>{u.email}</span>,
+        key: "parent",
+        header: "Parent",
+        sortable: true,
+        render: (u) => {
+          const dept = u.student_profile?.department || u.lecturer_profile?.department;
+          const idStr = u.student_profile?.nim
+            ? `NIM: ${u.student_profile.nim}`
+            : u.lecturer_profile?.nidn
+              ? `NIDN: ${u.lecturer_profile.nidn}`
+              : u.role === "ADMIN"
+                ? "Administrator SADITA"
+                : "";
+          return (
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              <span style={{ color: "#374151", fontSize: "12.5px" }}>{dept || "Universitas Insan Pembangunan"}</span>
+              {idStr && <span style={{ fontSize: "11px", color: "#9ca3af", fontFamily: "var(--font-mono)" }}>{idStr}</span>}
+            </div>
+          );
+        },
       },
       {
         key: "role",
-        header: "Peran (Role)",
+        header: "Role",
+        sortable: true,
         render: (u) => (
           <span
             className={`badge ${u.role === "ADMIN"
-              ? "badge-error"
-              : u.role === "DOSEN"
-                ? "badge-success"
-                : "badge-info"
+                ? "badge-error"
+                : u.role === "DOSEN"
+                  ? "badge-success"
+                  : "badge-info"
               }`}
+            style={{ fontSize: "11px", padding: "2px 8px", fontWeight: 600 }}
           >
             {u.role}
           </span>
         ),
       },
       {
-        key: "identifier",
-        header: "NIM / NIDN",
-        render: (u) => (
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.85rem" }}>
-            {u.lecturer_profile?.nidn
-              ? `NIDN: ${u.lecturer_profile.nidn}`
-              : u.student_profile?.nim
-                ? `NPM: ${u.student_profile.nim}`
-                : "—"}
-          </span>
-        ),
-      },
-      {
-        key: "status",
-        header: "Status",
-        render: (u) =>
-          u.is_active ? (
-            <StatusBadge status="success" label="Aktif" />
-          ) : (
-            <StatusBadge status="error" label="Nonaktif" />
-          ),
+        key: "is_active",
+        header: "Visibility",
+        align: "center",
+        sortable: true,
+        render: (u) => <FilamentBoolean value={u.is_active} />,
       },
       {
         key: "actions",
-        header: "Aksi",
-        align: "center",
+        header: "",
+        align: "right",
+        sortable: false,
         render: (u) => (
-          <div style={{ display: "flex", gap: "0.5rem", justifyContent: "center" }}>
-            <button
-              type="button"
-              className="btn btn-outline btn-sm"
-              onClick={() => openEdit(u)}
-              title="Edit Pengguna"
-            >
-              <Edit2 size={14} /> Edit
-            </button>
-            <button
-              type="button"
-              className="btn btn-danger btn-sm"
-              onClick={() => handleDelete(u)}
-              title="Hapus Pengguna"
-            >
-              <Trash2 size={14} />
-            </button>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: "12px", justifyContent: "flex-end" }}>
+            <FilamentAction type="show" label="Show" onClick={() => openEdit(u)} />
+            <FilamentAction type="edit" label="Edit" onClick={() => openEdit(u)} />
+            <FilamentAction type="delete" label="" onClick={() => handleDelete(u)} />
           </div>
         ),
       },
@@ -253,49 +300,87 @@ export default function UserManagementPage() {
   );
 
   return (
-    <div>
-      <div className="page-header">
+    <div style={{ display: "grid", gap: "12px" }}>
+      {/* Top Page Header */}
+      <div className="page-header" style={{ marginBottom: 0 }}>
         <div>
           <h1 className="page-title">Manajemen Pengguna</h1>
           <p className="page-subtitle">
-            Kelola akun Admin, Dosen Pengampu, dan Mahasiswa sistem SADITA
+            Kelola akun Administrator, Dosen Pengampu, dan Mahasiswa sistem SADITA
           </p>
         </div>
         <button className="btn btn-primary" onClick={() => setCreateOpen(true)}>
-          <Plus size={16} /> Tambah Pengguna Baru
+          <Plus size={15} /> Tambah Pengguna Baru
         </button>
       </div>
 
-      {/* Reusable TableToolbar */}
-      <TableToolbar
-        searchQuery={search}
-        onSearchChange={setSearch}
-        searchPlaceholder="Cari nama, email, NIM, atau NIDN…"
-        filterTabs={{
-          activeKey: roleFilter,
-          onChange: setRoleFilter,
-          options: [
-            { key: "ALL", label: "Semua Peran" },
-            { key: "ADMIN", label: "Admin" },
-            { key: "DOSEN", label: "Dosen" },
-            { key: "MAHASISWA", label: "Mahasiswa" },
-          ],
-        }}
-        style={{
-          background: "var(--card)",
-          border: "1px solid var(--line)",
-          borderRadius: "8px",
-          padding: "0.55rem 0.75rem",
-        }}
-      />
-
-      {/* Reusable DataTable */}
+      {/* Filament v3 DataTable */}
       <DataTable<UserItem>
         columns={userColumns}
-        data={filteredUsers}
+        data={paginatedUsers}
         loading={loading}
-        loadingText="Memuat daftar pengguna…"
+        loadingText="Memuat data pengguna…"
         emptyMessage="Tidak ada pengguna yang cocok dengan kriteria pencarian."
+        selectable
+        selectedKeys={selectedKeys}
+        onSelectionChange={setSelectedKeys}
+        sortKey={sortKey}
+        sortDirection={sortDirection}
+        onSort={handleSort}
+        searchable
+        searchQuery={search}
+        onSearchChange={(q) => {
+          setSearch(q);
+          setCurrentPage(1);
+        }}
+        searchPlaceholder="Search"
+        showColumnToggle
+        toolbarActions={
+          <div style={{ display: "flex", gap: "4px", flexWrap: "wrap" }}>
+            {[
+              { key: "ALL", label: "Semua" },
+              { key: "ADMIN", label: "Admin" },
+              { key: "DOSEN", label: "Dosen" },
+              { key: "MAHASISWA", label: "Mahasiswa" },
+            ].map((tab) => {
+              const active = roleFilter === tab.key;
+              return (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => {
+                    setRoleFilter(tab.key);
+                    setCurrentPage(1);
+                  }}
+                  style={{
+                    padding: "4px 10px",
+                    borderRadius: "6px",
+                    fontSize: "11.5px",
+                    fontWeight: active ? 600 : 500,
+                    border: "none",
+                    cursor: "pointer",
+                    background: active ? "#eff6ff" : "transparent",
+                    color: active ? "#2563eb" : "#64748b",
+                    transition: "all 0.15s ease",
+                  }}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
+        }
+        pagination={{
+          currentPage,
+          totalPages,
+          perPage,
+          totalRecords: filteredUsers.length,
+          onPageChange: setCurrentPage,
+          onPerPageChange: (pp) => {
+            setPerPage(pp);
+            setCurrentPage(1);
+          },
+        }}
       />
 
       {/* Create Modal */}

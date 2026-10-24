@@ -298,7 +298,39 @@ Sesuai prinsip DRY (*Don't Repeat Yourself*) dan efisiensi kode frontend di selu
 4. **Pusat Ekspor Terpadu (`frontend/components/ui/index.tsx`):**
    - Seluruh halaman dan modul dashboard dapat mengimpor komponen UI hanya dari satu titik:
      ```tsx
-     import { DataTable, SectionCard, TableToolbar, StatCard, StatusBadge, Modal, LoadingSpinner } from "@/components/ui";
+     import {
+       DataTable,
+       SectionCard,
+       TableToolbar,
+       StatCard,
+       StatusBadge,
+       Modal,
+       LoadingSpinner,
+       FilamentBoolean,
+       FilamentAction,
+     } from "@/components/ui";
      ```
+
+### 6.11 Standar Desain Tabel Laravel Filament v3 (Enterprise Resource Table)
+Untuk menjamin konsistensi pengalaman pengguna (UX) bagi developer dan admin sistem, antarmuka tabel SADITA diadopsi dari standar Laravel Filament v3:
+1. **Container & Elevasi Card:**
+   - Card putih (`#ffffff`), border 1px solid abu-abu muda (`#e5e7eb`), radius sudut seragam `rounded-lg` (8px), dan bayangan mikro tipis.
+2. **Topbar Terpadu (Search & Column Actions):**
+   - Kotak pencarian (*Search*) di pojok kanan dengan ikon loop (`Search`), sudut membulat, dan efek focus ring halus.
+   - Tombol toggle kolom (*Column Visibility*) dengan ikon `Columns3` untuk kustomisasi tampilan kolom dinamis.
+   - Slot aksi bilah alat kiri (`toolbarActions`) untuk tombol filter peran, status, atau tombol ekspor data.
+3. **Penyortiran & Seleksi Baris (Sorting & Multi-Select Checkboxes):**
+   - Checkbox header untuk memilih semua data (*Select All*) dan checkbox baris interaktif dengan aksen biru Filament (`#2563eb`).
+   - Indikator panah sorting (`ChevronDown`) halus di samping label header kolom yang dapat diurutkan (*sortable*).
+4. **Indikator Status Boolean Filament (`FilamentBoolean`):**
+   - Ikon lingkaran centang hijau (`CheckCircle2` / `#16a34a`) untuk status aktif/visibel.
+   - Ikon lingkaran silang merah (`XCircle` / `#ef4444`) untuk status nonaktif/tersembunyi.
+5. **Aksi Baris Inline (`FilamentAction`):**
+   - Tombol aksi tautan inline bergaya teks dengan ikon: `Show` (abu-abu), `Edit` (biru pensil), dan `Delete` (merah tempat sampah).
+6. **Footer Paginasi Tersegmentasi Filament:**
+   - Sisi kiri: Informasi jumlah hasil (*"Showing 1 to 10 of 42 results"*).
+   - Sisi tengah: Pemilih batas per halaman (*"Per page [ 10 ˅ ]"*).
+   - Sisi kanan: Kontainer paginasi nomor tersegmentasi (*`[ 1 ] [ 2 ] [ 3 ] [ ... ] [ 5 ] [ > ]`*) dengan penanda halaman aktif berwarna biru Filament (`#eff6ff` & `#2563eb`).
+
 
 
