@@ -108,7 +108,7 @@
 }
 
 html {
-  font-size: 13px;
+  font-size: 14.5px;
 }
 
 body {
@@ -118,8 +118,8 @@ body {
   min-height: 100vh;
   margin: 0;
   padding: 0;
-  font-size: 12.5px;
-  line-height: 1.45;
+  font-size: 13px;
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -149,7 +149,7 @@ a {
    ========================================================================== */
 .app-shell {
   display: grid;
-  grid-template-columns: 215px 1fr;
+  grid-template-columns: 228px 1fr;
   background: #f8fafc;
   min-height: 100vh;
   width: 100%;
@@ -183,7 +183,7 @@ a {
 }
 
 .brand-logo {
-  width: 118px;
+  width: 126px;
   max-width: 100%;
   height: auto;
   object-fit: contain;
@@ -202,7 +202,7 @@ a {
 }
 
 .brand-badge {
-  font-size: 8.5px;
+  font-size: 9px;
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -214,7 +214,7 @@ a {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 8px;
+  padding: 7px 9px;
   margin-bottom: 4px;
   background: #f1f5f9;
   border: 1px solid #e2e8f0;
@@ -222,15 +222,15 @@ a {
 }
 
 .user-avatar {
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   background: #0f172a;
   color: #ffffff;
   display: grid;
   place-items: center;
   font-weight: 600;
-  font-size: 11px;
+  font-size: 11.5px;
   flex: none;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
@@ -241,7 +241,7 @@ a {
 }
 
 .user-name {
-  font-size: 11.5px;
+  font-size: 12px;
   font-weight: 600;
   color: #0f172a;
   white-space: nowrap;
@@ -251,7 +251,7 @@ a {
 }
 
 .user-role-badge {
-  font-size: 9.5px;
+  font-size: 10px;
   font-weight: 600;
   color: #059669;
   letter-spacing: 0.03em;
@@ -279,9 +279,9 @@ a {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 8px;
+  padding: 7px 9px;
   color: #475569;
-  font-size: 11.5px;
+  font-size: 12.5px;
   font-weight: 500;
   position: relative;
   border-radius: 6px;
@@ -312,8 +312,8 @@ a {
 }
 
 .nav-link svg {
-  width: 15px;
-  height: 15px;
+  width: 16px;
+  height: 16px;
   flex: none;
 }
 
@@ -328,13 +328,13 @@ a {
 
 .sidebar-footer .nav-link {
   color: #5b6170;
-  font-size: 11px;
-  padding: 6px 8px;
+  font-size: 12px;
+  padding: 7px 9px;
 }
 
 /* ---------- Main Content ---------- */
 .content-area {
-  padding: 12px 18px 24px;
+  padding: 14px 20px 28px;
   min-width: 0;
   overflow-x: hidden;
 }
@@ -345,16 +345,16 @@ a {
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   background: var(--card);
   border: 1px solid var(--line);
   border-radius: 8px;
-  padding: 6px 14px;
+  padding: 7px 15px;
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
 }
 
 .topbar-greeting {
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 600;
   flex: 1;
   display: flex;
@@ -425,8 +425,8 @@ a {
   background: #f8fafc;
   border: 1px solid var(--line);
   border-radius: 6px;
-  padding: 4px 10px;
-  width: 230px;
+  padding: 5px 11px;
+  width: 240px;
   box-shadow: none;
 }
 
@@ -441,7 +441,7 @@ a {
   border: none;
   outline: none;
   background: none;
-  font-size: 11.5px;
+  font-size: 12px;
   width: 100%;
   color: var(--text);
 }
@@ -451,15 +451,15 @@ a {
 }
 
 .topbar-avatar {
-  width: 26px;
-  height: 26px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   background: linear-gradient(135deg, #1B2D4F, #3A5A8C);
   color: #fff;
   display: grid;
   place-items: center;
   font-weight: 600;
-  font-size: 10.5px;
+  font-size: 11px;
   flex: none;
 }
 
@@ -467,7 +467,7 @@ a {
    Page Headers
    ========================================================================== */
 .page-header {
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -476,14 +476,14 @@ a {
 }
 
 .page-title {
-  font-size: 15.5px;
+  font-size: 17px;
   font-weight: 700;
   color: #1e293b;
 }
 
 .page-subtitle {
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
   margin-top: 2px;
 }
 
@@ -493,19 +493,19 @@ a {
 .stats {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
+  gap: 9px;
   margin-bottom: 0;
 }
 
 .stat {
   border-radius: 8px;
-  padding: 8px 10px 7px;
+  padding: 10px 12px 8px;
   color: #fff;
   position: relative;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: 72px;
+  min-height: 80px;
   transition: transform .15s ease, box-shadow .15s ease;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
@@ -532,30 +532,30 @@ a {
 }
 
 .stat-label {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 500;
   opacity: .92;
 }
 
 .stat-number {
-  font-size: 18px;
+  font-size: 22px;
   font-weight: 700;
   line-height: 1.1;
-  margin-top: 1px;
+  margin-top: 2px;
 }
 
 .stat-foot {
   border-top: 1px solid rgba(255, 255, 255, .25);
   padding-top: 4px;
   margin-top: 4px;
-  font-size: 10px;
+  font-size: 10.5px;
   display: flex;
   justify-content: flex-end;
 }
 
 .stat-foot svg {
-  width: 13px;
-  height: 13px;
+  width: 14px;
+  height: 14px;
 }
 
 .stat-foot .row {
@@ -622,7 +622,7 @@ a {
 .card {
   background: var(--card);
   border-radius: 8px;
-  padding: 12px 14px;
+  padding: 13px 15px;
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
   border: 1px solid var(--line);
   min-width: 0;
@@ -636,13 +636,13 @@ a {
 }
 
 .card-head h3 {
-  font-size: 12.5px;
+  font-size: 13.5px;
   font-weight: 600;
   color: var(--text);
 }
 
 .card-head h3.lg {
-  font-size: 14.5px;
+  font-size: 15.5px;
   color: #3a3f4d;
   font-weight: 600;
 }
@@ -650,8 +650,8 @@ a {
 .grid2 {
   display: grid;
   grid-template-columns: 1.25fr 1fr;
-  gap: 10px;
-  margin-bottom: 10px;
+  gap: 12px;
+  margin-bottom: 12px;
 }
 
 .grid2:last-child {
@@ -666,8 +666,8 @@ a {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 5px 11px;
-  font-size: 11.5px;
+  padding: 6px 13px;
+  font-size: 12px;
   font-weight: 600;
   border-radius: 6px;
   transition: all .15s ease;
@@ -746,8 +746,8 @@ a {
 
 .data-table th {
   background: #fafbfc;
-  padding: 6px 10px;
-  font-size: 9.5px;
+  padding: 7px 11px;
+  font-size: 10.5px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -756,9 +756,9 @@ a {
 }
 
 .data-table td {
-  padding: 6.5px 10px;
+  padding: 7.5px 11px;
   border-bottom: 1px solid var(--line);
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text);
 }
 

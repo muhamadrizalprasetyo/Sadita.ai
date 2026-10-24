@@ -191,8 +191,8 @@ export default function UserManagementPage() {
           padding: "0.55rem 0.75rem",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", flex: 1, minWidth: "12rem" }}>
-          <Search size={14} style={{ color: "var(--text-secondary)" }} />
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flex: 1, minWidth: "14rem" }}>
+          <Search size={16} style={{ color: "var(--text-secondary)" }} />
           <input
             type="text"
             className="form-input"
@@ -201,8 +201,8 @@ export default function UserManagementPage() {
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <div style={{ display: "flex", gap: "0.4rem", alignItems: "center" }}>
-          <span style={{ fontSize: "0.78rem", fontWeight: 600 }}>Filter Peran:</span>
+        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+          <span style={{ fontSize: "0.85rem", fontWeight: 600 }}>Filter Peran:</span>
           {["ALL", "ADMIN", "DOSEN", "MAHASISWA"].map((r) => (
             <button
               key={r}

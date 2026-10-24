@@ -56,20 +56,20 @@ export default function AdminAkademikIndex() {
         </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(15rem, 1fr))", gap: "0.75rem" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(16rem, 1fr))", gap: "0.85rem" }}>
         {sections.map(s => {
           const Icon = s.icon;
           return (
-            <Link key={s.href} href={s.href} className="card" style={{ display: "flex", flexDirection: "column", gap: "0.6rem", padding: "10px 12px", transition: "transform 0.15s ease, border-color 0.15s ease" }}>
+            <Link key={s.href} href={s.href} className="card" style={{ display: "flex", flexDirection: "column", gap: "0.65rem", padding: "12px 14px", transition: "transform 0.15s ease, border-color 0.15s ease" }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <div style={{ width: "2.2rem", height: "2.2rem", borderRadius: "6px", background: s.color, color: s.textColor, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <Icon size={16} />
+                <div style={{ width: "2.4rem", height: "2.4rem", borderRadius: "8px", background: s.color, color: s.textColor, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <Icon size={18} />
                 </div>
-                <ArrowRight size={14} color="var(--text-muted)" />
+                <ArrowRight size={15} color="var(--text-muted)" />
               </div>
               <div>
-                <h3 style={{ fontSize: "0.92rem", fontWeight: 700, color: "var(--text-primary)" }}>{s.title}</h3>
-                <p style={{ fontSize: "0.76rem", color: "var(--text-secondary)", marginTop: "0.15rem" }}>{s.desc}</p>
+                <h3 style={{ fontSize: "0.96rem", fontWeight: 700, color: "var(--text-primary)" }}>{s.title}</h3>
+                <p style={{ fontSize: "0.82rem", color: "var(--text-secondary)", marginTop: "0.2rem" }}>{s.desc}</p>
               </div>
             </Link>
           );

@@ -202,28 +202,29 @@ Banyak developer atau AI bingung ketika sudah push tetapi profilnya belum muncul
 - **Larangan Pemanggilan `setState` Sinkron di `useEffect`:** Inisialisasi awal `loading` diatur langsung pada nilai `true` (`useState(true)`). Pemanggilan `setLoading(true)` dilarang diletakkan secara sinkron di dalam badan `useEffect` untuk mencegah *cascading renders*.
 - Pembersihan menyeluruh seluruh import tak terpakai (`Sparkles`, `Radio`, `Activity`).
 
-### 6.6 Standar Skala Desktop Kompak Berdensitas Tinggi (*Compact Desktop Scaling*)
-Sesuai arahan optimasi antarmuka desktop agar tidak kebesaran (*bulky*) dan proporsional untuk operasional kampus:
+### 6.6 Standar Skala Desktop Proporsional & Nyaman (*Calibrated Desktop Scaling*)
+Sesuai arahan kalibrasi antarmuka desktop agar tidak kebesaran (*bulky*) dan tidak kekecilan (*too tiny*), tercapai standar emas enterprise yang nyaman dibaca pada layar laptop/desktop:
 1. **Root Font Scaling Global:**
-   - `html { font-size: 13px; }` dan `body { font-size: 12.5px; line-height: 1.45; }`. Seluruh turunan REM dan EM otomatis terskala proporsional, rapi, dan tajam.
-2. **Sidebar Kompak (215px):**
-   - Lebar sidebar diciutkan dari 260px ke **215px**.
-   - Logo SADITA berukuran lebar 118px.
-   - Profil pengguna: avatar 28px, nama 11.5px, badge peran 9.5px.
-   - Menu navigasi: padding `6px 8px`, ukuran font `11.5px`, ikon 15px.
-3. **Topbar Ramping:**
-   - Tinggi dan padding dirampingkan ke `padding: 6px 14px`.
-   - Input pencarian berlebar `230px`, font `11.5px`, padding `4px 10px`.
-   - Avatar profil 26px.
+   - `html { font-size: 14.5px; }` dan `body { font-size: 13px; line-height: 1.5; }`. Seluruh turunan REM dan EM otomatis terskala proporsional, nyaman dibaca, dan tajam.
+2. **Sidebar Proporsional (228px):**
+   - Lebar sidebar diatur ke **228px**.
+   - Logo SADITA berukuran lebar 126px.
+   - Profil pengguna (di footer): avatar 30px, nama 12px, badge peran 10px.
+   - Menu navigasi: padding `7px 9px`, ukuran font `12.5px`, ikon 16px, dengan `gap: 6px`.
+3. **Topbar Seimbang:**
+   - Tinggi dan padding dirampingkan ke `padding: 7px 15px`.
+   - Input pencarian berlebar `240px`, font `12px`, padding `5px 11px`.
+   - Avatar profil 28px, greeting 13px.
 4. **Data Table Operasional Berdensitas Tinggi:**
-   - Padding sel tabel th `6px 10px` (font `9.5px`), td `6.5px 10px` (font `11px`).
-   - Badge status: padding `2px 6px`, font `9.5px`.
-   - Tombol aksi tabel: padding `3px 8px`, font `10.5px`.
-   - Mampu menampilkan 20-30 baris data sekaligus pada satu layar laptop/desktop tanpa scroll berlebihan.
-5. **Halaman Administrasi Kompak:**
-   - **Manajemen Pengguna:** Toolbar pencarian & filter padat (`padding: 0.55rem 0.75rem`, `gap: 0.6rem`), tombol filter peran ringkas (`padding: 3px 10px`).
-   - **Master Akademik:** Grid modul ringkas (`gap: 0.75rem`, kartu berpadding `10px 12px`, ikon `16px`).
-   - **Monitoring Presensi & Materi LMS:** Toolbar pemilihan kelas perkuliahan padat (`padding: 0.55rem 0.75rem`, dropdown `max-width: 18rem`), badge status dan tombol aksi berukuran pas dan elegan.
+   - Padding sel tabel th `7px 11px` (font `10.5px`), td `7.5px 11px` (font `12px`).
+   - Badge status: padding `3px 8px`, font `10.5px`.
+   - Tombol aksi tabel: padding `3.5px 9px`, font `11px`.
+   - Mampu menampilkan 20-30 baris data sekaligus pada satu layar laptop/desktop tanpa membebani mata.
+5. **Kartu Statistik & Modul Akademik:**
+   - **8 Stat Cards:** Angka metrik berukuran `22px` (tegas dan jelas), label `11px`, subtext `10.5px`, padding `10px 12px 8px`, min-height `80px`.
+   - **Manajemen Pengguna:** Toolbar pencarian & filter padat (`padding: 0.55rem 0.75rem`, `gap: 0.5rem`), tombol filter peran ringkas (`padding: 3px 10px`).
+   - **Master Akademik:** Grid modul ringkas (`gap: 0.85rem`, kartu berpadding `12px 14px`, ikon `18px`, judul `0.96rem`).
+   - **Monitoring Presensi & Materi LMS:** Toolbar pemilihan kelas perkuliahan padat (`padding: 0.65rem 0.85rem`, dropdown `max-width: 20rem`), badge status dan tombol aksi berukuran pas dan elegan.
 
 ### 6.7 Rekonfigurasi Sidebar Footer & Pembersihan Linting Menyeluruh
 1. **Pemindahan Kartu Profil ke Footer Sidebar:**

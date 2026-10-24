@@ -1263,11 +1263,11 @@ export function AttendancePage() {
         subtitle="Riwayat pertemuan perkuliahan dan status pembukaan sesi tap RFID"
       />
 
-      <div className="card" style={{ marginBottom: "0.75rem", padding: "0.55rem 0.75rem", display: "flex", alignItems: "center", gap: "0.6rem" }}>
-        <label style={{ fontSize: "0.78rem", fontWeight: 600 }}>Pilih Kelas Perkuliahan:</label>
+      <div className="card" style={{ marginBottom: "0.85rem", padding: "0.65rem 0.85rem", display: "flex", alignItems: "center", gap: "0.75rem" }}>
+        <label style={{ fontSize: "0.85rem", fontWeight: 600 }}>Pilih Kelas Perkuliahan:</label>
         <select
           className="form-select"
-          style={{ maxWidth: "18rem" }}
+          style={{ maxWidth: "20rem" }}
           value={selected ?? ""}
           onChange={e => setSelected(Number(e.target.value))}
         >
@@ -1394,11 +1394,11 @@ export function LmsPage({ assignment = false }: { assignment?: boolean }) {
         subtitle={assignment ? "Tugas terstruktur kelas, pengumpulan berkas PDF, dan batas waktu" : "Dokumen modul, slide PPT perkuliahan, dan link pembelajaran"}
       />
 
-      <div className="card" style={{ marginBottom: "0.75rem", padding: "0.55rem 0.75rem", display: "flex", alignItems: "center", gap: "0.6rem" }}>
-        <label style={{ fontSize: "0.78rem", fontWeight: 600 }}>Pilih Kelas Perkuliahan:</label>
+      <div className="card" style={{ marginBottom: "0.85rem", padding: "0.65rem 0.85rem", display: "flex", alignItems: "center", gap: "0.75rem" }}>
+        <label style={{ fontSize: "0.85rem", fontWeight: 600 }}>Pilih Kelas Perkuliahan:</label>
         <select
           className="form-select"
-          style={{ maxWidth: "18rem" }}
+          style={{ maxWidth: "20rem" }}
           value={selected ?? ""}
           onChange={e => setSelected(Number(e.target.value))}
         >

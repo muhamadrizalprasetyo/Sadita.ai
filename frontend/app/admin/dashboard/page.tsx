@@ -187,18 +187,18 @@ export default function AdminDashboardPage() {
       <div style={{ display: "grid", gridTemplateColumns: "1.35fr 1fr", gap: "10px", alignItems: "start" }}>
 
         {/* Classes Table */}
-        <div className="card" style={{ padding: "12px 14px" }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
-            <h2 style={{ fontSize: "13px", fontWeight: 600, color: "var(--text)", margin: 0 }}>
+        <div className="card" style={{ padding: "14px 16px" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "10px" }}>
+            <h2 style={{ fontSize: "14px", fontWeight: 600, color: "var(--text)", margin: 0 }}>
               Kelas Perkuliahan Aktif
             </h2>
             <Link
               href="/admin/akademik"
               className="btn btn-outline btn-sm"
-              style={{ padding: "2px 7px", fontSize: "10.5px" }}
+              style={{ padding: "3px 9px", fontSize: "11.5px" }}
             >
               <span>Semua Kelas</span>
-              <ArrowRight size={12} />
+              <ArrowRight size={13} />
             </Link>
           </div>
 
@@ -229,18 +229,18 @@ export default function AdminDashboardPage() {
                           </span>
                         </td>
                         <td>
-                          <div style={{ fontWeight: 600, fontSize: "11.5px", color: "var(--text)" }}>
+                          <div style={{ fontWeight: 600, fontSize: "12.5px", color: "var(--text)" }}>
                             {c.course?.name || "Mata Kuliah"}
                           </div>
                           {c.course?.code && (
-                            <div style={{ fontSize: "10px", color: "var(--muted)", marginTop: "1px" }}>
+                            <div style={{ fontSize: "11px", color: "var(--muted)", marginTop: "1px" }}>
                               Kode: {c.course.code}
                             </div>
                           )}
                         </td>
-                        <td style={{ fontSize: "11px", color: "var(--text)" }}>
+                        <td style={{ fontSize: "12px", color: "var(--text)" }}>
                           <div style={{ fontWeight: 500, color: "#1e293b" }}>{dayName}</div>
-                          <div style={{ fontSize: "10px", color: "var(--muted)" }}>
+                          <div style={{ fontSize: "11px", color: "var(--muted)" }}>
                             {formatTime(c.start_time)} - {formatTime(c.end_time)} WIB
                           </div>
                         </td>
@@ -259,18 +259,18 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Hardware Monitoring Card */}
-        <div className="card" style={{ padding: "12px 14px" }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
-            <h2 style={{ fontSize: "13px", fontWeight: 600, color: "var(--text)", margin: 0 }}>
+        <div className="card" style={{ padding: "14px 16px" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "10px" }}>
+            <h2 style={{ fontSize: "14px", fontWeight: 600, color: "var(--text)", margin: 0 }}>
               Status Perangkat Presensi IoT
             </h2>
             <Link
               href="/admin/perangkat"
               className="btn btn-outline btn-sm"
-              style={{ padding: "2px 7px", fontSize: "10.5px" }}
+              style={{ padding: "3px 9px", fontSize: "11.5px" }}
             >
               <span>Detail</span>
-              <ArrowRight size={12} />
+              <ArrowRight size={13} />
             </Link>
           </div>
 
@@ -295,10 +295,10 @@ export default function AdminDashboardPage() {
                   }}
                 >
                   <div style={{ minWidth: 0 }}>
-                    <p style={{ fontWeight: 600, fontSize: "11.5px", color: "var(--text)", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    <p style={{ fontWeight: 600, fontSize: "12.5px", color: "var(--text)", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       {d.nama}
                     </p>
-                    <p style={{ fontSize: "10px", color: "var(--muted)", margin: "1px 0 0" }}>
+                    <p style={{ fontSize: "11px", color: "var(--muted)", margin: "1px 0 0" }}>
                       ID: <span style={{ fontFamily: "var(--font-mono)" }}>{d.device_id}</span> • IP: {d.ip_address || "192.168.1.150"}
                     </p>
                   </div>
@@ -320,8 +320,8 @@ export default function AdminDashboardPage() {
             alignItems: "flex-start",
             gap: "7px"
           }}>
-            <ShieldCheck size={14} color="var(--green)" style={{ flexShrink: 0, marginTop: "1px" }} />
-            <p style={{ fontSize: "10.5px", color: "var(--muted)", margin: 0, lineHeight: 1.4 }}>
+            <ShieldCheck size={15} color="var(--green)" style={{ flexShrink: 0, marginTop: "1px" }} />
+            <p style={{ fontSize: "11.5px", color: "var(--muted)", margin: 0, lineHeight: 1.45 }}>
               Broker MQTT terhubung pada port 1883. Heartbeat perangkat disinkronkan ke database.
             </p>
           </div>
