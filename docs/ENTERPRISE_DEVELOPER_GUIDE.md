@@ -173,3 +173,56 @@ git push -u origin <tipe>/<nama-branch>
 Banyak developer atau AI bingung ketika sudah push tetapi profilnya belum muncul di daftar **"Contributors"** di sidebar kanan repositori GitHub:
 1. **Aturan Default Branch GitHub**: GitHub **HANYA** menghitung dan menampilkan kontributor jika commit tersebut telah **di-merge ke branch utama (`main`)**. Selama commit masih berada di branch terpisah (misal `feat/*` atau `docs/*`), commit tersebut belum dihitung ke dalam widget *Contributors*.
 2. **Kesesuaian Email Git**: Pastikan email pada konfigurasi git lokal (`git config user.email`) sudah **terdaftar dan terverifikasi** di akun GitHub pengembang pada menu **Settings → Emails**. Jika email tidak cocok, GitHub tidak dapat menautkan profil akun ke commit tersebut meskipun branch sudah di-merge ke `main`.
+
+---
+
+## 6. Standar Antarmuka Admin & Resolusi Masalah UI/UX (Admin Dashboard Resolution)
+
+### 6.1 Sensitivitas Huruf Berkas Aset pada Linux & Optimasi Next.js Image
+- **Gejala Bug:** Logo SADITA rusak (*broken image icon*) pada browser Linux karena berkas fisik tersimpan sebagai `public/logo.PNG` (huruf kapital) sementara kode memanggil `/logo.png`. Selain itu, penggunaan tag mentah `<img>` memicu peringatan LCP dan bandwidth pada Next.js.
+- **Solusi Standar:** Seluruh aset di `frontend/public/` wajib berformat huruf kecil (*kebab-case* / *lowercase*). Telah dibuat `frontend/public/logo.png` dan digantikan menggunakan komponen resmi `<Image priority width={155} height={40} />` dari `next/image` di `RoleShell`.
+
+### 6.2 Konsistensi Rounded-LG & Spasi Komponen Rapat Kompak (Tight & Compact Spacing)
+- **Standar Sudut Rounded-LG:** Seluruh kartu (`.card`, `.stat`), wadah tabel (`.table-container`), bilah atas (`.topbar`), dan tombol aksi konsisten menggunakan standar `border-radius: var(--radius-card)` yaitu **8px - 12px** (`rounded-lg`).
+- **Spasi Komponen Rapat & Berdensitas Tinggi:** Jarak antar komponen dibuat padat dan proporsional untuk memaksimalkan *high data density* enterprise:
+  - Grid metrik (`.stats`): `gap: 8px`, tinggi kartu ramping (`min-height: 72px`), padding `8px 10px 7px`, angka `18px`, label `10px`.
+  - Grid konten utama: `gap: 10px` antara tabel perkuliahan dan status IoT.
+  - Padding area kerja (`.content-area`): `12px 18px 24px`.
+- **Struktur 8 Stat Card Terintegrasi:** Mempertahankan 8 kartu metrik utama (Total Mahasiswa, Dosen Pengampu, Kelas Perkuliahan, Mata Kuliah, Sesi Presensi Aktif, Perangkat Offline, Pending Approval, Presensi Hari Ini) dengan perataan tipografi tajam, batas kontras halus, dan penempatan ikon yang presisi.
+
+### 6.3 Standardisasi Tabel Kelas Perkuliahan Terjadwal
+- **Pemformatan Hari & Waktu:** Angka `day_of_week` (1-7) diterjemahkan otomatis ke nama hari Bahasa Indonesia (`Senin` s.d. `Minggu`) dan format jam 24 jam dengan zona waktu WIB (`08:00 - 10:30 WIB`).
+- **Parsing Rombel Bersih Tanpa Terpotong:** Nama kelas dari seeder dipisahkan secara cerdas menjadi chip kode rombel `TI-2024-Pagi-A`, `TEKFO. 1`, `TEKFO. 2`, dll., sehingga mengeliminasi terlipatnya teks nama mata kuliah menjadi 4 baris sempit.
+
+### 6.4 Tata Letak Layar Penuh (*Full-Viewport App Shell*)
+- `.app-shell` menggunakan lebar 100% dengan `grid-template-columns: 215px 1fr`, tanpa padding luar `24px` yang sebelumnya menyebabkan tampilan terpotong saat scroll (*clipping / nested double scrollbar*).
+- Avatar dan metadata admin pada sidebar diperlebar dan diatur agar tidak terpotong canggung (`text-overflow: ellipsis; max-width: 140px`).
+
+### 6.5 Resolusi Linting React 19 & Next.js 16 (Cascading Renders Fix)
+- **Larangan Pemanggilan `setState` Sinkron di `useEffect`:** Inisialisasi awal `loading` diatur langsung pada nilai `true` (`useState(true)`). Pemanggilan `setLoading(true)` dilarang diletakkan secara sinkron di dalam badan `useEffect` untuk mencegah *cascading renders*.
+- Pembersihan menyeluruh seluruh import tak terpakai (`Sparkles`, `Radio`, `Activity`).
+
+### 6.6 Standar Skala Desktop Kompak Berdensitas Tinggi (*Compact Desktop Scaling*)
+Sesuai arahan optimasi antarmuka desktop agar tidak kebesaran (*bulky*) dan proporsional untuk operasional kampus:
+1. **Root Font Scaling Global:**
+   - `html { font-size: 13px; }` dan `body { font-size: 12.5px; line-height: 1.45; }`. Seluruh turunan REM dan EM otomatis terskala proporsional, rapi, dan tajam.
+2. **Sidebar Kompak (215px):**
+   - Lebar sidebar diciutkan dari 260px ke **215px**.
+   - Logo SADITA berukuran lebar 118px.
+   - Profil pengguna: avatar 28px, nama 11.5px, badge peran 9.5px.
+   - Menu navigasi: padding `6px 8px`, ukuran font `11.5px`, ikon 15px.
+3. **Topbar Ramping:**
+   - Tinggi dan padding dirampingkan ke `padding: 6px 14px`.
+   - Input pencarian berlebar `230px`, font `11.5px`, padding `4px 10px`.
+   - Avatar profil 26px.
+4. **Data Table Operasional Berdensitas Tinggi:**
+   - Padding sel tabel th `6px 10px` (font `9.5px`), td `6.5px 10px` (font `11px`).
+   - Badge status: padding `2px 6px`, font `9.5px`.
+   - Tombol aksi tabel: padding `3px 8px`, font `10.5px`.
+   - Mampu menampilkan 20-30 baris data sekaligus pada satu layar laptop/desktop tanpa scroll berlebihan.
+5. **Halaman Administrasi Kompak:**
+   - **Manajemen Pengguna:** Toolbar pencarian & filter padat (`padding: 0.55rem 0.75rem`, `gap: 0.6rem`), tombol filter peran ringkas (`padding: 3px 10px`).
+   - **Master Akademik:** Grid modul ringkas (`gap: 0.75rem`, kartu berpadding `10px 12px`, ikon `16px`).
+   - **Monitoring Presensi & Materi LMS:** Toolbar pemilihan kelas perkuliahan padat (`padding: 0.55rem 0.75rem`, dropdown `max-width: 18rem`), badge status dan tombol aksi berukuran pas dan elegan.
+
+

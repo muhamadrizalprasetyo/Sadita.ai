@@ -1,23 +1,23 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
-import { 
-  LayoutDashboard, 
-  BookOpen, 
-  Calendar, 
-  Users, 
-  GraduationCap, 
-  Clock, 
-  FileText, 
-  CheckSquare, 
-  Radio, 
-  Award, 
-  HelpCircle, 
-  LogOut, 
+import {
+  LayoutDashboard,
+  BookOpen,
+  Calendar,
+  Users,
+  GraduationCap,
+  Clock,
+  FileText,
+  CheckSquare,
+  Radio,
+  Award,
+  HelpCircle,
+  LogOut,
   Building2,
-  Sparkles,
   Search,
   Settings,
   type LucideIcon
@@ -137,7 +137,17 @@ export function RoleShell({ role, children }: { role: Role; children: ReactNode 
       <aside className="sidebar">
         {/* Brand */}
         <div className="sidebar-brand">
-          <img src="/logo.png" alt="SADITA.ai" className="brand-logo" />
+          <Link href={homeFor(role)} style={{ display: "inline-block" }}>
+            <Image
+              src="/logo.png"
+              alt="SADITA.ai"
+              width={155}
+              height={40}
+              priority
+              className="brand-logo"
+              style={{ width: "155px", height: "auto" }}
+            />
+          </Link>
           <div className="brand-badge">Sistem Akademik Terintegrasi</div>
         </div>
 

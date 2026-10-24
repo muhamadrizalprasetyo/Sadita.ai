@@ -12,26 +12,26 @@ interface StatCardProps {
 }
 
 const colorMap: Record<string, { grad: string }> = {
-  green:  { grad: "var(--grad-green)" },
-  blue:   { grad: "var(--grad-blue)" },
+  green: { grad: "var(--grad-green)" },
+  blue: { grad: "var(--grad-blue)" },
   purple: { grad: "var(--grad-purple)" },
   orange: { grad: "var(--grad-orange)" },
-  red:    { grad: "linear-gradient(135deg, #e53e3e, #fc8181)" },
+  red: { grad: "linear-gradient(135deg, #e53e3e, #fc8181)" },
   indigo: { grad: "linear-gradient(135deg, #4338ca, #818cf8)" },
   yellow: { grad: "linear-gradient(135deg, #d97706, #fbbf24)" },
 };
 
 export function StatCard({ label, value, icon: Icon, color = "blue", subtext }: StatCardProps) {
-  const { grad } = colorMap[color];
+  const { grad } = colorMap[color] || { grad: "var(--grad-blue)" };
   return (
     <div className={`stat`} style={{ background: grad }}>
       <div>
         <div className="stat-label">{label}</div>
         <div className="stat-number">{value}</div>
-        {subtext && <div style={{ fontSize: "11px", opacity: 0.85, marginTop: "2px" }}>{subtext}</div>}
+        {subtext && <div style={{ fontSize: "9.5px", opacity: 0.85, marginTop: "1px" }}>{subtext}</div>}
       </div>
       <div className="stat-foot">
-        <Icon size={20} style={{ opacity: 0.85 }} />
+        <Icon size={14} style={{ opacity: 0.85 }} />
       </div>
     </div>
   );

@@ -1,33 +1,40 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { 
-  Users, 
-  BookOpen, 
-  Calendar, 
-  Monitor, 
-  ClipboardList, 
-  CheckCircle, 
-  Clock, 
+import Link from "next/link";
+import {
+  Users,
+  BookOpen,
+  Calendar,
+  Monitor,
+  ClipboardList,
+  CheckCircle,
   ArrowRight,
   ShieldCheck,
   RefreshCw,
-  Plus
+  Plus,
 } from "lucide-react";
 import { academicApi, AdminDashboard, CourseClass, SaditaDevice, deviceApi } from "@/lib/api";
-import { StatCard, LoadingSpinner, EmptyState } from "@/components/ui";
-import Link from "next/link";
+import { LoadingSpinner, StatCard } from "@/components/ui";
+
+const INDONESIAN_DAYS = ["", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"];
+
+function formatTime(t?: string | null): string {
+  if (!t) return "--:--";
+  return t.length >= 5 ? t.slice(0, 5) : t;
+}
 
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState<AdminDashboard | null>(null);
   const [classes, setClasses] = useState<CourseClass[]>([]);
   const [devices, setDevices] = useState<SaditaDevice[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const loadData = () => {
-    setLoading(true);
-    void Promise.all([
+  const loadData = useCallback((isManual = false) => {
+    if (isManual) setRefreshing(true);
+    Promise.all([
       academicApi.getDashboard(),
       academicApi.getClasses(),
       deviceApi.list(),
@@ -36,65 +43,87 @@ export default function AdminDashboardPage() {
         if (statsRes.data) setStats(statsRes.data);
         if (classesRes.data) setClasses(classesRes.data);
         if (devicesRes.data) setDevices(devicesRes.data);
+        setError(null);
       })
       .catch(() => {
-        setError("Gagal memuat data dashboard operasional.");
+        setError("Gagal memuat data dashboard operasional. Pastikan backend terhubung.");
       })
       .finally(() => {
         setLoading(false);
-      });
-  };
-
-  useEffect(() => {
-    void Promise.all([
-      academicApi.getDashboard(),
-      academicApi.getClasses(),
-      deviceApi.list(),
-    ])
-      .then(([statsRes, classesRes, devicesRes]) => {
-        if (statsRes.data) setStats(statsRes.data);
-        if (classesRes.data) setClasses(classesRes.data);
-        if (devicesRes.data) setDevices(devicesRes.data);
-      })
-      .catch(() => {
-        setError("Gagal memuat data dashboard operasional.");
-      })
-      .finally(() => {
-        setLoading(false);
+        setRefreshing(false);
       });
   }, []);
 
-  if (loading) return <LoadingSpinner text="Memuat data operasional kampus..." />;
+  useEffect(() => {
+    let isMounted = true;
+    Promise.all([
+      academicApi.getDashboard(),
+      academicApi.getClasses(),
+      deviceApi.list(),
+    ])
+      .then(([statsRes, classesRes, devicesRes]) => {
+        if (!isMounted) return;
+        if (statsRes.data) setStats(statsRes.data);
+        if (classesRes.data) setClasses(classesRes.data);
+        if (devicesRes.data) setDevices(devicesRes.data);
+        setError(null);
+      })
+      .catch(() => {
+        if (isMounted) setError("Gagal memuat data dashboard operasional. Pastikan backend terhubung.");
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  if (loading) {
+    return <LoadingSpinner text="Memuat data operasional kampus..." />;
+  }
 
   return (
-    <div style={{ display: "grid", gap: "24px" }}>
-      {/* Header */}
-      <div className="page-header">
+    <div style={{ display: "grid", gap: "10px" }}>
+      {/* 1. Header */}
+      <div className="page-header" style={{ marginBottom: 0, padding: 0 }}>
         <div>
-          <h1 className="page-title">Dashboard Administrator</h1>
-          <p className="page-subtitle">Sistem Akademik Terintegrasi & Monitoring Presensi IoT</p>
+          <h1 className="page-title" style={{ margin: 0 }}>
+            Dashboard Administrator
+          </h1>
+          <p className="page-subtitle" style={{ margin: "1px 0 0" }}>
+            Sistem Akademik Terintegrasi & Monitoring Presensi IoT
+          </p>
         </div>
-        <div style={{ display: "flex", gap: "0.75rem" }}>
-          <button onClick={loadData} className="btn btn-secondary">
-            <RefreshCw size={16} />
-            <span>Segarkan</span>
+        <div style={{ display: "flex", gap: "6px" }}>
+          <button
+            onClick={() => loadData(true)}
+            disabled={refreshing}
+            className="btn btn-secondary btn-sm"
+          >
+            <RefreshCw size={13} className={refreshing ? "spin" : ""} />
+            <span>{refreshing ? "Memuat..." : "Segarkan"}</span>
           </button>
-          <Link href="/admin/akademik" className="btn btn-primary">
-            <Plus size={16} />
+          <Link
+            href="/admin/akademik"
+            className="btn btn-primary btn-sm"
+          >
+            <Plus size={13} />
             <span>Kelola Akademik</span>
           </Link>
         </div>
       </div>
 
       {error && (
-        <div style={{ padding: "12px 16px", borderRadius: "var(--radius-search)", background: "var(--error-bg)", border: "1px solid var(--error-border)", color: "var(--error)", fontSize: "13px" }}>
+        <div style={{ padding: "8px 12px", borderRadius: "6px", background: "var(--error-bg)", border: "1px solid var(--error-border)", color: "var(--error)", fontSize: "11px" }}>
           {error}
         </div>
       )}
 
-      {/* Metrics Stat Grid */}
+      {/* 2. Metrics Stat Grid (8 Cards, tightly spaced) */}
       {stats && (
-        <div className="stats">
+        <div className="stats" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "8px", marginBottom: 0 }}>
           <StatCard
             label="Total Mahasiswa"
             value={stats.total_students}
@@ -154,43 +183,75 @@ export default function AdminDashboardPage() {
         </div>
       )}
 
-      {/* Realtime Overview Section */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "20px" }}>
+      {/* 3. Realtime Overview Section (Classes Table & IoT Devices) */}
+      <div style={{ display: "grid", gridTemplateColumns: "1.35fr 1fr", gap: "10px", alignItems: "start" }}>
+
         {/* Classes Table */}
-        <div className="card">
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
-            <h2 style={{ fontSize: "16px", fontWeight: 600, color: "var(--text)" }}>Kelas Perkuliahan Aktif</h2>
-            <Link href="/admin/akademik" className="btn btn-outline btn-sm">
-              Semua Kelas <ArrowRight size={14} />
+        <div className="card" style={{ padding: "12px 14px" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
+            <h2 style={{ fontSize: "13px", fontWeight: 600, color: "var(--text)", margin: 0 }}>
+              Kelas Perkuliahan Aktif
+            </h2>
+            <Link
+              href="/admin/akademik"
+              className="btn btn-outline btn-sm"
+              style={{ padding: "2px 7px", fontSize: "10.5px" }}
+            >
+              <span>Semua Kelas</span>
+              <ArrowRight size={12} />
             </Link>
           </div>
 
           {classes.length === 0 ? (
-            <p style={{ color: "var(--muted)", fontSize: "13px" }}>Belum ada kelas terdaftar.</p>
+            <p style={{ color: "var(--muted)", fontSize: "11px", padding: "12px 0", textAlign: "center" }}>
+              Belum ada kelas terdaftar.
+            </p>
           ) : (
-            <div className="table-container">
+            <div className="table-container" style={{ border: "1px solid var(--line)", boxShadow: "none" }}>
               <table className="data-table">
                 <thead>
                   <tr>
-                    <th>Kode / Kelas</th>
+                    <th style={{ width: "120px" }}>Kode / Kelas</th>
                     <th>Mata Kuliah</th>
-                    <th>Jadwal</th>
-                    <th>Status</th>
+                    <th style={{ width: "150px" }}>Jadwal</th>
+                    <th style={{ width: "70px", textAlign: "center" }}>Status</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {classes.slice(0, 5).map((c) => (
-                    <tr key={c.id}>
-                      <td style={{ fontWeight: 600 }}>{c.name}</td>
-                      <td>{c.course?.name || "Mata Kuliah"}</td>
-                      <td style={{ fontSize: "12px", color: "var(--muted)" }}>
-                        Hari ke-{c.day_of_week} ({c.start_time} - {c.end_time})
-                      </td>
-                      <td>
-                        <span className="badge badge-success">Aktif</span>
-                      </td>
-                    </tr>
-                  ))}
+                  {classes.slice(0, 5).map((c) => {
+                    const dayName = INDONESIAN_DAYS[c.day_of_week] || `Hari ke-${c.day_of_week}`;
+                    const rombelCode = c.name.includes(" - ") ? c.name.split(" - ")[0].trim() : c.name;
+                    return (
+                      <tr key={c.id}>
+                        <td>
+                          <span className="badge-class-code">
+                            {rombelCode}
+                          </span>
+                        </td>
+                        <td>
+                          <div style={{ fontWeight: 600, fontSize: "11.5px", color: "var(--text)" }}>
+                            {c.course?.name || "Mata Kuliah"}
+                          </div>
+                          {c.course?.code && (
+                            <div style={{ fontSize: "10px", color: "var(--muted)", marginTop: "1px" }}>
+                              Kode: {c.course.code}
+                            </div>
+                          )}
+                        </td>
+                        <td style={{ fontSize: "11px", color: "var(--text)" }}>
+                          <div style={{ fontWeight: 500, color: "#1e293b" }}>{dayName}</div>
+                          <div style={{ fontSize: "10px", color: "var(--muted)" }}>
+                            {formatTime(c.start_time)} - {formatTime(c.end_time)} WIB
+                          </div>
+                        </td>
+                        <td style={{ textAlign: "center" }}>
+                          <span className="badge badge-success">
+                            Aktif
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -198,48 +259,74 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Hardware Monitoring Card */}
-        <div className="card">
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.25rem" }}>
-            <h2 style={{ fontSize: "16px", fontWeight: 600, color: "var(--text)" }}>Status Perangkat Presensi IoT</h2>
-            <Link href="/admin/perangkat" className="btn btn-outline btn-sm">
-              Detail <ArrowRight size={14} />
+        <div className="card" style={{ padding: "12px 14px" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
+            <h2 style={{ fontSize: "13px", fontWeight: 600, color: "var(--text)", margin: 0 }}>
+              Status Perangkat Presensi IoT
+            </h2>
+            <Link
+              href="/admin/perangkat"
+              className="btn btn-outline btn-sm"
+              style={{ padding: "2px 7px", fontSize: "10.5px" }}
+            >
+              <span>Detail</span>
+              <ArrowRight size={12} />
             </Link>
           </div>
 
-          <div style={{ display: "grid", gap: "0.75rem" }}>
-            {devices.map((d) => (
-              <div
-                key={d.id}
-                style={{
-                  padding: "12px 14px",
-                  borderRadius: "var(--radius-search)",
-                  background: "var(--bg)",
-                  border: "1px solid var(--line)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                }}
-              >
-                <div>
-                  <p style={{ fontWeight: 600, fontSize: "13px", color: "var(--text)" }}>{d.nama}</p>
-                  <p style={{ fontSize: "11.5px", color: "var(--muted)", marginTop: "2px" }}>
-                    ID: {d.device_id} • IP: {d.ip_address || "192.168.1.x"}
-                  </p>
+          <div style={{ display: "grid", gap: "6px" }}>
+            {devices.length === 0 ? (
+              <p style={{ fontSize: "11px", color: "var(--muted)", textAlign: "center", padding: "10px 0" }}>
+                Belum ada perangkat terdaftar.
+              </p>
+            ) : (
+              devices.map((d) => (
+                <div
+                  key={d.id}
+                  style={{
+                    padding: "8px 10px",
+                    borderRadius: "6px",
+                    background: "#f8fafc",
+                    border: "1px solid var(--line)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: "8px"
+                  }}
+                >
+                  <div style={{ minWidth: 0 }}>
+                    <p style={{ fontWeight: 600, fontSize: "11.5px", color: "var(--text)", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {d.nama}
+                    </p>
+                    <p style={{ fontSize: "10px", color: "var(--muted)", margin: "1px 0 0" }}>
+                      ID: <span style={{ fontFamily: "var(--font-mono)" }}>{d.device_id}</span> • IP: {d.ip_address || "192.168.1.150"}
+                    </p>
+                  </div>
+                  <span className={`badge ${d.status === "ACTIVE" ? "badge-success" : "badge-error"}`} style={{ flexShrink: 0 }}>
+                    {d.status}
+                  </span>
                 </div>
-                <span className={`badge ${d.status === "ACTIVE" ? "badge-success" : "badge-error"}`}>
-                  {d.status}
-                </span>
-              </div>
-            ))}
+              ))
+            )}
           </div>
 
-          <div style={{ marginTop: "16px", padding: "12px 14px", borderRadius: "var(--radius-search)", background: "rgba(18, 183, 106, 0.06)", border: "1px solid rgba(18, 183, 106, 0.2)", display: "flex", alignItems: "center", gap: "10px" }}>
-            <ShieldCheck size={18} color="var(--green)" />
-            <p style={{ fontSize: "12px", color: "var(--muted)" }}>
-              Broker MQTT terhubung pada port 1883. Heartbeat perangkat otomatis disinkronkan ke database.
+          <div style={{
+            marginTop: "10px",
+            padding: "8px 10px",
+            borderRadius: "6px",
+            background: "rgba(18, 183, 106, 0.06)",
+            border: "1px solid rgba(18, 183, 106, 0.2)",
+            display: "flex",
+            alignItems: "flex-start",
+            gap: "7px"
+          }}>
+            <ShieldCheck size={14} color="var(--green)" style={{ flexShrink: 0, marginTop: "1px" }} />
+            <p style={{ fontSize: "10.5px", color: "var(--muted)", margin: 0, lineHeight: 1.4 }}>
+              Broker MQTT terhubung pada port 1883. Heartbeat perangkat disinkronkan ke database.
             </p>
           </div>
         </div>
+
       </div>
     </div>
   );

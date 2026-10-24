@@ -269,7 +269,7 @@ export const authApi = {
 export const studentApi = {
   list: (paramsOrSkip?: number | { skip?: number; limit?: number; cohort?: number; class_type?: string; class_id?: number }, limit = 100) => {
     let s = 0;
-    let l = limit;
+    const l = limit;
     let qs = "";
     if (typeof paramsOrSkip === "object" && paramsOrSkip !== null) {
       const q = new URLSearchParams();
