@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import {
@@ -17,7 +18,6 @@ import {
   HelpCircle,
   LogOut,
   Building2,
-  Sparkles,
   Search,
   Settings,
   type LucideIcon
@@ -138,13 +138,14 @@ export function RoleShell({ role, children }: { role: Role; children: ReactNode 
         {/* Brand */}
         <div className="sidebar-brand">
           <Link href={homeFor(role)} style={{ display: "inline-block" }}>
-            <img
+            <Image
               src="/logo.png"
               alt="SADITA.ai"
+              width={155}
+              height={40}
+              priority
               className="brand-logo"
-              onError={(e) => {
-                e.currentTarget.style.display = "none";
-              }}
+              style={{ width: "155px", height: "auto" }}
             />
           </Link>
           <div className="brand-badge">Sistem Akademik Terintegrasi</div>

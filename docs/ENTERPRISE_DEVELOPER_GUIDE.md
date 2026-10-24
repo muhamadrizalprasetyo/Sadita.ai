@@ -176,23 +176,30 @@ Banyak developer atau AI bingung ketika sudah push tetapi profilnya belum muncul
 
 ---
 
-## 6. Standar Antarmuka Admin & Resolusi Masalah UI/UX (Admin Dashboard Fix)
+## 6. Standar Antarmuka Admin & Resolusi Masalah UI/UX (Admin Dashboard Resolution)
 
-### 6.1 Sensitivitas Huruf Berkas Aset pada Linux (Linux Case-Sensitivity)
-- **Gejala Bug:** Logo SADITA rusak (*broken image icon*) pada browser Linux karena berkas fisik tersimpan sebagai `public/logo.PNG` (huruf kapital) sementara kode memanggil `/logo.png`.
-- **Solusi Standar:** Seluruh aset di `frontend/public/` wajib berformat huruf kecil (*kebab-case* / *lowercase*). Telah dibuat salinan `frontend/public/logo.png` serta pembungkus tautan dengan fallback graceful `onError` pada komponen `RoleShell`.
+### 6.1 Sensitivitas Huruf Berkas Aset pada Linux & Optimasi Next.js Image
+- **Gejala Bug:** Logo SADITA rusak (*broken image icon*) pada browser Linux karena berkas fisik tersimpan sebagai `public/logo.PNG` (huruf kapital) sementara kode memanggil `/logo.png`. Selain itu, penggunaan tag mentah `<img>` memicu peringatan LCP dan bandwidth pada Next.js.
+- **Solusi Standar:** Seluruh aset di `frontend/public/` wajib berformat huruf kecil (*kebab-case* / *lowercase*). Telah dibuat `frontend/public/logo.png` dan digantikan menggunakan komponen resmi `<Image priority width={155} height={40} />` dari `next/image` di `RoleShell`.
 
-### 6.2 Eliminasi Desain AI-Slop Menjadi Tata Letak Eksekutif
-- **Masalah Sebelumnya:** 8 kartu gradien warna-warni neon jenuh yang mengesankan dashboard demo mainan / template AI generik.
-- **Standar Baru SADITA:** 
-  1. **4 Kartu KPI Eksekutif Utama:** Total Mahasiswa (zamrud), Dosen Pengampu (safir), Kelas Perkuliahan (indigo), dan Mata Kuliah (slate) dengan latar belakang putih elegan, tipografi tegas, dan ikon beraksen halus (*subtle tinted icons*).
-  2. **4 Indikator Operasional Ringkas:** Sesi Presensi Aktif (LIVE badge), Perangkat Offline (peringatan perangkat), Persetujuan Pending (pengajuan KRS/pengganti), dan Presensi Hari Ini (tap RFID & bio).
+### 6.2 Konsistensi Rounded-LG & Spasi Komponen Rapat (Tight Spacing)
+- **Standar Sudut Rounded-LG:** Seluruh kartu (`.card`, `.stat`), wadah tabel (`.table-container`), bilah atas (`.topbar`), dan tombol aksi wajib menggunakan standar `border-radius: var(--radius-card)` yaitu **12px** (`0.75rem` / `rounded-lg`).
+- **Spasi Komponen Rapat & Konsisten:** Jarak antar komponen dibuat padat dan proporsional untuk memaksimalkan *high data density* enterprise:
+  - Grid metrik (`.stats`): `gap: 12px`, tinggi kartu ramping (`min-height: 114px`), padding `14px 16px 12px`.
+  - Grid konten utama: `gap: 14px` antara tabel perkuliahan dan status IoT.
+  - Padding area kerja (`.content-area`): `18px 24px 32px`.
+- **Struktur 8 Stat Card Terintegrasi:** Mempertahankan 8 kartu metrik utama (Total Mahasiswa, Dosen Pengampu, Kelas Perkuliahan, Mata Kuliah, Sesi Presensi Aktif, Perangkat Offline, Pending Approval, Presensi Hari Ini) dengan perataan tipografi tajam, batas kontras halus, dan penempatan ikon yang presisi.
 
 ### 6.3 Standardisasi Tabel Kelas Perkuliahan Terjadwal
 - **Pemformatan Hari & Waktu:** Angka `day_of_week` (1-7) diterjemahkan otomatis ke nama hari Bahasa Indonesia (`Senin` s.d. `Minggu`) dan format jam 24 jam dengan zona waktu WIB (`08:00 - 10:30 WIB`).
-- **Parsing Rombel Bersih:** Nama kelas dari seeder yang berformat `TEKFO. 1 - Matematika 1` dipisahkan secara cerdas menjadi chip kode rombel `TEKFO. 1` dan sub-label mode kuliah `reguler pagi`, sementara nama mata kuliah dan ruangan (`R. FB303`) diletakkan pada kolom mata kuliah agar tidak terjadi pemotongan teks (*line wrapping*) yang canggung.
+- **Parsing Rombel Bersih Tanpa Terpotong:** Nama kelas dari seeder dipisahkan secara cerdas menjadi chip kode rombel `TI-2024-Pagi-A`, `TEKFO. 1`, `TEKFO. 2`, dll., sehingga mengeliminasi terlipatnya teks nama mata kuliah menjadi 4 baris sempit.
 
 ### 6.4 Tata Letak Layar Penuh (*Full-Viewport App Shell*)
 - `.app-shell` menggunakan lebar 100% dengan `grid-template-columns: 260px 1fr`, tanpa padding luar `24px` yang sebelumnya menyebabkan tampilan terpotong saat scroll (*clipping / nested double scrollbar*).
 - Avatar dan metadata admin pada sidebar diperlebar dan diatur agar tidak terpotong canggung (`text-overflow: ellipsis; max-width: 150px`).
+
+### 6.5 Resolusi Linting React 19 & Next.js 16 (Cascading Renders Fix)
+- **Larangan Pemanggilan `setState` Sinkron di `useEffect`:** Inisialisasi awal `loading` diatur langsung pada nilai `true` (`useState(true)`). Pemanggilan `setLoading(true)` dilarang diletakkan secara sinkron di dalam badan `useEffect` untuk mencegah *cascading renders*.
+- Pembersihan menyeluruh seluruh import tak terpakai (`Sparkles`, `Radio`, `Activity`).
+
 
