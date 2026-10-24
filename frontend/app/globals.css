@@ -173,8 +173,9 @@ a {
 }
 
 .sidebar-brand {
-  margin-bottom: 14px;
-  padding: 0 4px;
+  margin-bottom: 12px;
+  padding: 0 4px 10px 4px;
+  border-bottom: 1px solid var(--line);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -214,7 +215,7 @@ a {
   align-items: center;
   gap: 8px;
   padding: 6px 8px;
-  margin-bottom: 12px;
+  margin-bottom: 4px;
   background: #f1f5f9;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
@@ -261,7 +262,7 @@ a {
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 6px;
   flex: 1;
 }
 
@@ -317,9 +318,9 @@ a {
 }
 
 .sidebar-footer {
-  padding-top: 8px;
+  padding-top: 10px;
   border-top: 1px solid var(--line);
-  margin-right: 0;
+  margin-top: auto;
   display: flex;
   flex-direction: column;
   gap: 4px;

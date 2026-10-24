@@ -225,4 +225,16 @@ Sesuai arahan optimasi antarmuka desktop agar tidak kebesaran (*bulky*) dan prop
    - **Master Akademik:** Grid modul ringkas (`gap: 0.75rem`, kartu berpadding `10px 12px`, ikon `16px`).
    - **Monitoring Presensi & Materi LMS:** Toolbar pemilihan kelas perkuliahan padat (`padding: 0.55rem 0.75rem`, dropdown `max-width: 18rem`), badge status dan tombol aksi berukuran pas dan elegan.
 
+### 6.7 Rekonfigurasi Sidebar Footer & Pembersihan Linting Menyeluruh
+1. **Pemindahan Kartu Profil ke Footer Sidebar:**
+   - Komponen `.sidebar-user` (avatar, nama user, role badge) dipindahkan dari atas menu ke area bawah (`.sidebar-footer`), tepat di atas tombol "Keluar Sistem".
+   - Header logo (`.sidebar-brand`) ditambahkan garis pembatas bawah (`border-bottom: 1px solid var(--line)`).
+   - Jarak antar item tab navigasi (`.sidebar-nav`) diperlebar proporsional menjadi `gap: 6px` agar tidak terlalu rapat/cramped.
+   - Penonaktifan dev overlay `devIndicators: false` pada `next.config.ts` guna mengeliminasi logo bundar `N` (Next.js Dev Indicator) yang menghalangi tombol keluar sistem.
+2. **Resolusi 100% Linter & Bebas Cascading Renders (`@[current_problems]`):**
+   - Mengeliminasi seluruh import ikon tidak terpakai (`UserCheck`, `UserX`, `Shield`, `GraduationCap`, `BookOpen`, `Key`, `Calendar`, `Clock`, `FileText`, `CheckSquare`, `Activity`, `Filter`, `AlertCircle`, `EmptyState`).
+   - Menerapkan pola `isMounted` Promise pada `app/admin/users/page.tsx` untuk mencegah `react-hooks/set-state-in-effect`.
+   - Mengintegrasikan variabel `error` pada `CoursesPage` dan `DevicesPage`, serta menyambungkan fungsi `loadData` sebagai aksi tombol penyegaran manual (*refresh*) pada halaman monitoring IoT.
+
+
 

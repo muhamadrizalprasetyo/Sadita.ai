@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { Plus, Search, Edit2, Trash2, UserCheck, UserX, Shield, GraduationCap, BookOpen, Key } from "lucide-react";
+import { Plus, Search, Edit2, Trash2 } from "lucide-react";
 import { userApi, type UserItem } from "@/lib/api";
 import { LoadingSpinner, Modal, StatusBadge } from "@/components/ui";
 
@@ -40,14 +40,21 @@ export default function UserManagementPage() {
   });
 
   const loadUsers = async () => {
-    setLoading(true);
     const res = await userApi.list({ limit: 200 });
     if (res.data) setUsers(res.data);
     setLoading(false);
   };
 
   useEffect(() => {
-    void loadUsers();
+    let isMounted = true;
+    userApi.list({ limit: 200 }).then((res) => {
+      if (!isMounted) return;
+      if (res.data) setUsers(res.data);
+      setLoading(false);
+    });
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const filteredUsers = useMemo(() => {
@@ -239,10 +246,10 @@ export default function UserManagementPage() {
                     <td>
                       <span
                         className={`badge ${u.role === "ADMIN"
-                            ? "badge-error"
-                            : u.role === "DOSEN"
-                              ? "badge-success"
-                              : "badge-info"
+                          ? "badge-error"
+                          : u.role === "DOSEN"
+                            ? "badge-success"
+                            : "badge-info"
                           }`}
                       >
                         {u.role}

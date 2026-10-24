@@ -71,8 +71,8 @@ export async function apiFetch<T>(
     const rawMessage = err instanceof Error ? err.message : "Network error";
     const networkHint =
       rawMessage.includes("Failed to fetch") ||
-      rawMessage.includes("NetworkError") ||
-      rawMessage.includes("fetch")
+        rawMessage.includes("NetworkError") ||
+        rawMessage.includes("fetch")
         ? `Backend SADITA tidak aktif atau tidak dapat dijangkau di ${API_BASE}. Jalankan server FastAPI terlebih dahulu, lalu coba login kembali.`
         : rawMessage;
 

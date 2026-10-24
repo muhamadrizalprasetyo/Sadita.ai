@@ -151,15 +151,6 @@ export function RoleShell({ role, children }: { role: Role; children: ReactNode 
           <div className="brand-badge">Sistem Akademik Terintegrasi</div>
         </div>
 
-        {/* User Card */}
-        <div className="sidebar-user">
-          <div className="user-avatar">{initials}</div>
-          <div className="user-meta">
-            <div className="user-name" title={user.full_name}>{user.full_name}</div>
-            <span className="user-role-badge">{user.role}</span>
-          </div>
-        </div>
-
         {/* Navigation */}
         <ul className="sidebar-nav">
           {items.map((item) => {
@@ -171,7 +162,7 @@ export function RoleShell({ role, children }: { role: Role; children: ReactNode 
                   href={item.href}
                   className={`nav-link ${isActive ? "active" : ""}`}
                 >
-                  <Icon size={20} />
+                  <Icon size={16} />
                   <span>{item.label}</span>
                 </Link>
               </li>
@@ -181,6 +172,15 @@ export function RoleShell({ role, children }: { role: Role; children: ReactNode 
 
         {/* Footer */}
         <div className="sidebar-footer">
+          {/* User Card */}
+          <div className="sidebar-user">
+            <div className="user-avatar">{initials}</div>
+            <div className="user-meta">
+              <div className="user-name" title={user.full_name}>{user.full_name}</div>
+              <span className="user-role-badge">{user.role}</span>
+            </div>
+          </div>
+
           <button
             className="nav-link"
             style={{ width: "100%", background: "none", border: "none", textAlign: "left", cursor: "pointer" }}
@@ -189,7 +189,7 @@ export function RoleShell({ role, children }: { role: Role; children: ReactNode 
               router.replace("/login");
             }}
           >
-            <LogOut size={20} />
+            <LogOut size={16} />
             <span>Keluar Sistem</span>
           </button>
         </div>
