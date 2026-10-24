@@ -3,6 +3,10 @@
 import React, { ReactNode } from "react";
 import { LucideIcon } from "lucide-react";
 
+export { DataTable, type ColumnDef, type DataTableProps } from "./data-table";
+export { SectionCard, type SectionCardProps } from "./section-card";
+export { TableToolbar, type TableToolbarProps, type FilterTabOption } from "./table-toolbar";
+
 interface StatCardProps {
   label: string;
   value: string | number;

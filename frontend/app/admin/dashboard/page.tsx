@@ -15,13 +15,19 @@ import {
   ShieldCheck,
   RefreshCw,
   Plus,
-  Search,
   AlertTriangle,
   Activity,
   Zap,
 } from "lucide-react";
 import { academicApi, AdminDashboard, CourseClass, SaditaDevice, deviceApi } from "@/lib/api";
-import { LoadingSpinner, StatCard } from "@/components/ui";
+import {
+  LoadingSpinner,
+  StatCard,
+  DataTable,
+  type ColumnDef,
+  SectionCard,
+  TableToolbar,
+} from "@/components/ui";
 
 const INDONESIAN_DAYS = ["", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"];
 
@@ -132,6 +138,80 @@ export default function AdminDashboardPage() {
       return matchesSearch && matchesType;
     });
   }, [classes, searchQuery, classTypeFilter]);
+
+  // Reusable Column Definitions for Classes DataTable
+  const classColumns = useMemo<ColumnDef<CourseClass>[]>(
+    () => [
+      {
+        key: "rombel",
+        header: "Kode / Rombel",
+        width: "115px",
+        render: (c) => {
+          const rombelCode = c.name.includes(" - ") ? c.name.split(" - ")[0].trim() : c.name;
+          return (
+            <div style={{ display: "flex", flexDirection: "column", gap: "2px", alignItems: "flex-start" }}>
+              <span className="badge-class-code">{rombelCode}</span>
+              <span style={{ fontSize: "9.5px", color: "var(--muted)", fontWeight: 500 }}>
+                {c.class_type ? c.class_type.replace("_", " ") : "REGULER"}
+              </span>
+            </div>
+          );
+        },
+      },
+      {
+        key: "course",
+        header: "Mata Kuliah & Dosen",
+        render: (c) => (
+          <div>
+            <div style={{ fontWeight: 600, fontSize: "12px", color: "var(--text)" }}>
+              {c.course?.name || "Mata Kuliah"}
+            </div>
+            <div style={{ fontSize: "10.5px", color: "#64748b", marginTop: "1px" }}>
+              {c.course?.code ? `${c.course.code} • ` : ""}
+              {c.course?.credits ? `${c.course.credits} SKS • ` : ""}
+              {c.lecturer?.full_name || "Dosen Pengampu"}
+            </div>
+          </div>
+        ),
+      },
+      {
+        key: "schedule",
+        header: "Jadwal & Ruang",
+        width: "160px",
+        render: (c) => {
+          const dayName = INDONESIAN_DAYS[c.day_of_week] || `Hari ke-${c.day_of_week}`;
+          return (
+            <div style={{ fontSize: "11.5px", color: "var(--text)" }}>
+              <div style={{ fontWeight: 600, color: "#1e293b" }}>{dayName}</div>
+              <div style={{ fontSize: "10.5px", color: "var(--muted)" }}>
+                {formatTime(c.start_time)} - {formatTime(c.end_time)} WIB
+              </div>
+              <div style={{ fontSize: "10px", color: "#475569", fontWeight: 500 }}>
+                {c.room?.name || "Lab Terjadwal"}
+              </div>
+            </div>
+          );
+        },
+      },
+      {
+        key: "action",
+        header: "Aksi",
+        width: "85px",
+        align: "center",
+        render: () => (
+          <Link
+            href="/admin/presensi"
+            className="btn btn-secondary btn-sm"
+            style={{ padding: "3px 8px", fontSize: "10.5px" }}
+            title="Buka sesi presensi kelas ini"
+          >
+            <span>Presensi</span>
+          </Link>
+        ),
+      },
+    ],
+    []
+  );
 
   if (loading) {
     return <LoadingSpinner text="Memuat data operasional kampus..." />;
@@ -364,20 +444,14 @@ export default function AdminDashboardPage() {
         </div>
       )}
 
-      {/* 5. Realtime Overview Section (Classes Table & IoT Devices) */}
+      {/* 5. Realtime Overview Section (Classes Table & IoT Devices) using Reusable Components */}
       <div style={{ display: "grid", gridTemplateColumns: "1.45fr 1fr", gap: "10px", alignItems: "start" }}>
 
-        {/* Classes Table with Search & Filter */}
-        <div className="card" style={{ padding: "13px 15px" }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "10px" }}>
-            <div>
-              <h2 style={{ fontSize: "13.5px", fontWeight: 700, color: "var(--text)", margin: 0 }}>
-                Kelas Perkuliahan Aktif
-              </h2>
-              <p style={{ fontSize: "11px", color: "var(--muted)", margin: "1px 0 0" }}>
-                Jadwal & rombel semester berjalan ({filteredClasses.length} dari {classes.length} kelas)
-              </p>
-            </div>
+        {/* Classes Reusable SectionCard + TableToolbar + DataTable */}
+        <SectionCard
+          title="Kelas Perkuliahan Aktif"
+          subtitle={`Jadwal & rombel semester berjalan (${filteredClasses.length} dari ${classes.length} kelas)`}
+          action={
             <Link
               href="/admin/akademik"
               className="btn btn-outline btn-sm"
@@ -387,138 +461,40 @@ export default function AdminDashboardPage() {
               <span>Kelola Semua Kelas</span>
               <ArrowRight size={13} />
             </Link>
-          </div>
+          }
+        >
+          {/* Reusable TableToolbar */}
+          <TableToolbar
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            searchPlaceholder="Cari kelas, mata kuliah, dosen..."
+            filterTabs={{
+              activeKey: classTypeFilter,
+              onChange: setClassTypeFilter,
+              options: [
+                { key: "ALL", label: "Semua" },
+                { key: "PAGI", label: "Pagi" },
+                { key: "MALAM", label: "Malam" },
+              ],
+            }}
+          />
 
-          {/* Quick Search & Filter Controls */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px", marginBottom: "10px" }}>
-            <div style={{ position: "relative", flex: 1, maxWidth: "260px" }}>
-              <Search size={13} style={{ position: "absolute", left: "9px", top: "50%", transform: "translateY(-50%)", color: "#94a3b8" }} />
-              <input
-                type="text"
-                placeholder="Cari kelas, mata kuliah, dosen..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                style={{
-                  width: "100%",
-                  padding: "4px 8px 4px 28px",
-                  fontSize: "11.5px",
-                  borderRadius: "6px",
-                  border: "1px solid var(--line)",
-                  background: "#f8fafc",
-                  color: "var(--text)",
-                  outline: "none",
-                }}
-              />
-            </div>
-            <div style={{ display: "flex", gap: "4px" }}>
-              <button
-                type="button"
-                className={`filter-tab-btn ${classTypeFilter === "ALL" ? "active" : ""}`}
-                onClick={() => setClassTypeFilter("ALL")}
-              >
-                Semua
-              </button>
-              <button
-                type="button"
-                className={`filter-tab-btn ${classTypeFilter === "PAGI" ? "active" : ""}`}
-                onClick={() => setClassTypeFilter("PAGI")}
-              >
-                Pagi
-              </button>
-              <button
-                type="button"
-                className={`filter-tab-btn ${classTypeFilter === "MALAM" ? "active" : ""}`}
-                onClick={() => setClassTypeFilter("MALAM")}
-              >
-                Malam
-              </button>
-            </div>
-          </div>
-
-          {filteredClasses.length === 0 ? (
-            <p style={{ color: "var(--muted)", fontSize: "11px", padding: "14px 0", textAlign: "center" }}>
-              Tidak ada kelas perkuliahan yang sesuai filter pencarian.
-            </p>
-          ) : (
-            <div className="table-container" style={{ border: "1px solid var(--line)", boxShadow: "none" }}>
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th style={{ width: "115px" }}>Kode / Rombel</th>
-                    <th>Mata Kuliah & Dosen</th>
-                    <th style={{ width: "160px" }}>Jadwal & Ruang</th>
-                    <th style={{ width: "85px", textAlign: "center" }}>Aksi</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredClasses.slice(0, 5).map((c) => {
-                    const dayName = INDONESIAN_DAYS[c.day_of_week] || `Hari ke-${c.day_of_week}`;
-                    const rombelCode = c.name.includes(" - ") ? c.name.split(" - ")[0].trim() : c.name;
-                    const lecturerName = c.lecturer?.full_name || "Dosen Pengampu";
-                    const roomName = c.room?.name || "Lab Terjadwal";
-
-                    return (
-                      <tr key={c.id}>
-                        <td>
-                          <div style={{ display: "flex", flexDirection: "column", gap: "2px", alignItems: "flex-start" }}>
-                            <span className="badge-class-code">
-                              {rombelCode}
-                            </span>
-                            <span style={{ fontSize: "9.5px", color: "var(--muted)", fontWeight: 500 }}>
-                              {c.class_type ? c.class_type.replace("_", " ") : "REGULER"}
-                            </span>
-                          </div>
-                        </td>
-                        <td>
-                          <div style={{ fontWeight: 600, fontSize: "12px", color: "var(--text)" }}>
-                            {c.course?.name || "Mata Kuliah"}
-                          </div>
-                          <div style={{ fontSize: "10.5px", color: "#64748b", marginTop: "1px" }}>
-                            {c.course?.code ? `${c.course.code} • ` : ""}{c.course?.credits ? `${c.course.credits} SKS • ` : ""}{lecturerName}
-                          </div>
-                        </td>
-                        <td style={{ fontSize: "11.5px", color: "var(--text)" }}>
-                          <div style={{ fontWeight: 600, color: "#1e293b" }}>{dayName}</div>
-                          <div style={{ fontSize: "10.5px", color: "var(--muted)" }}>
-                            {formatTime(c.start_time)} - {formatTime(c.end_time)} WIB
-                          </div>
-                          <div style={{ fontSize: "10px", color: "#475569", fontWeight: 500 }}>
-                            {roomName}
-                          </div>
-                        </td>
-                        <td style={{ textAlign: "center" }}>
-                          <Link
-                            href="/admin/presensi"
-                            className="btn btn-secondary btn-sm"
-                            style={{ padding: "3px 8px", fontSize: "10.5px" }}
-                            title="Buka sesi presensi kelas ini"
-                          >
-                            <span>Presensi</span>
-                          </Link>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
+          {/* Reusable DataTable */}
+          <DataTable<CourseClass>
+            columns={classColumns}
+            data={filteredClasses.slice(0, 5)}
+            emptyMessage="Tidak ada kelas perkuliahan yang sesuai filter pencarian."
+          />
+        </SectionCard>
 
         {/* Right Column: Hardware Monitoring Card & Recent Activities */}
         <div style={{ display: "grid", gap: "10px" }}>
 
-          {/* Hardware Monitoring Card */}
-          <div className="card" style={{ padding: "13px 15px" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "10px" }}>
-              <div>
-                <h2 style={{ fontSize: "13.5px", fontWeight: 700, color: "var(--text)", margin: 0 }}>
-                  Status Perangkat Presensi IoT
-                </h2>
-                <p style={{ fontSize: "11px", color: "var(--muted)", margin: "1px 0 0" }}>
-                  ESP32-S3 Biometrik & RFID Reader
-                </p>
-              </div>
+          {/* Reusable SectionCard for IoT Hardware */}
+          <SectionCard
+            title="Status Perangkat Presensi IoT"
+            subtitle="ESP32-S3 Biometrik & RFID Reader"
+            action={
               <Link
                 href="/admin/perangkat"
                 className="btn btn-outline btn-sm"
@@ -528,8 +504,8 @@ export default function AdminDashboardPage() {
                 <span>Konfigurasi</span>
                 <ArrowRight size={13} />
               </Link>
-            </div>
-
+            }
+          >
             <div style={{ display: "grid", gap: "6px" }}>
               {devices.length === 0 ? (
                 <p style={{ fontSize: "11px", color: "var(--muted)", textAlign: "center", padding: "10px 0" }}>
@@ -601,20 +577,20 @@ export default function AdminDashboardPage() {
                 Broker MQTT terhubung pada port 1883. Heartbeat perangkat otomatis disinkronkan.
               </p>
             </div>
-          </div>
+          </SectionCard>
 
-          {/* Recent Operational Activities (Aktivitas Terbaru as per AGENTS.md) */}
-          <div className="card" style={{ padding: "13px 15px" }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
+          {/* Reusable SectionCard for Recent Activities */}
+          <SectionCard
+            title={
               <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
                 <Activity size={14} style={{ color: "var(--navy-accent)" }} />
                 <h3 style={{ fontSize: "13px", fontWeight: 700, color: "var(--text)", margin: 0 }}>
                   Aktivitas Presensi Terbaru
                 </h3>
               </div>
-              <span style={{ fontSize: "10.5px", color: "var(--muted)" }}>Live Stream</span>
-            </div>
-
+            }
+            action={<span style={{ fontSize: "10.5px", color: "var(--muted)" }}>Live Stream</span>}
+          >
             <div style={{ display: "grid", gap: "6px" }}>
               {stats?.recent_activities && stats.recent_activities.length > 0 ? (
                 stats.recent_activities.map((act) => (
@@ -648,7 +624,7 @@ export default function AdminDashboardPage() {
                 </p>
               )}
             </div>
-          </div>
+          </SectionCard>
 
         </div>
 

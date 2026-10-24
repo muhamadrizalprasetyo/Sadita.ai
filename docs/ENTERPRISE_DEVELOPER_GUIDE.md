@@ -280,3 +280,25 @@ Sesuai arahan kalibrasi antarmuka desktop agar tidak kebesaran (*bulky*) dan tid
    - Tombol diagnostik cepat `Ping` pada kartu perangkat ESP32-S3 dengan umpan balik status latensi (*Aktif 12ms*).
    - Feed linimasa aktivitas presensi terkini (*Recent Activities*) yang menampilkan stream rekaman tap RFID dan biometrik mahasiswa secara realtime.
 
+### 6.10 Arsitektur Komponen Reusable UI Enterprise (DataTable, SectionCard, & TableToolbar)
+Sesuai prinsip DRY (*Don't Repeat Yourself*) dan efisiensi kode frontend di seluruh dashboard peran (Admin, Dosen, Mahasiswa, Kaprodi):
+
+1. **Komponen Tabel Universal (`DataTable<T>`):**
+   - Berkas: `frontend/components/ui/data-table.tsx`
+   - Mendukung tipe generik `T extends { id?: string | number }` dengan definisi kolom terstruktur `ColumnDef<T>[]`.
+   - Mengintegrasikan penanganan otomatis *loading skeleton/spinner*, pesan *empty state* yang informatif, baris klik interaktif, dan kontrol paginasi standar.
+   - Mengeliminasi ratusan baris markup `table`, `thead`, `tbody`, `tr`, dan `td` manual yang sebelumnya diduplikasi di setiap halaman.
+2. **Komponen Bilah Alat & Filter (`TableToolbar`):**
+   - Berkas: `frontend/components/ui/table-toolbar.tsx`
+   - Menyediakan antarmuka pencarian cepat (*search box*) dengan ikon responsif.
+   - Menyediakan grup tombol filter (*Filter Chips*) yang seragam (`Semua`, `Pagi`, `Malam`, atau filter peran `Admin`, `Dosen`, `Mahasiswa`) dengan dukungan penghitung item (*count badge*).
+3. **Komponen Kartu Kontainer Bagian (`SectionCard`):**
+   - Berkas: `frontend/components/ui/section-card.tsx`
+   - Membakukan tata letak kartu operasional dengan header judul, subjudul deskriptif, dan area tombol aksi di pojok kanan atas (*header action slot*).
+4. **Pusat Ekspor Terpadu (`frontend/components/ui/index.tsx`):**
+   - Seluruh halaman dan modul dashboard dapat mengimpor komponen UI hanya dari satu titik:
+     ```tsx
+     import { DataTable, SectionCard, TableToolbar, StatCard, StatusBadge, Modal, LoadingSpinner } from "@/components/ui";
+     ```
+
+
