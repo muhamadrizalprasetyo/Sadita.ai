@@ -1,6 +1,6 @@
 "use client";
 
-import React, { ReactNode } from "react";
+import React, { ReactNode, useEffect } from "react";
 import { LucideIcon } from "lucide-react";
 
 export {
@@ -14,6 +14,7 @@ export {
 } from "./data-table";
 export { SectionCard, type SectionCardProps } from "./section-card";
 export { TableToolbar, type TableToolbarProps, type FilterTabOption } from "./table-toolbar";
+export { BackToTop } from "./back-to-top";
 
 interface StatCardProps {
   label: string;
@@ -89,14 +90,82 @@ export function EmptyState({ icon: Icon, title, description, action }: { icon: L
   );
 }
 
-export function Modal({ isOpen, onClose, title, children }: { isOpen: boolean; onClose: () => void; title: string; children: ReactNode }) {
+export function Modal({
+  isOpen,
+  onClose,
+  title,
+  children,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  title: string;
+  children: ReactNode;
+}) {
+  // Lock background scroll on all devices (Desktop cursor & iPhone touch gestures)
+  useEffect(() => {
+    if (!isOpen) return;
+
+    // Prevent background shift when scrollbar hides on desktop
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+    const origBodyOverflow = document.body.style.overflow;
+    const origBodyPaddingRight = document.body.style.paddingRight;
+    const origHtmlOverflow = document.documentElement.style.overflow;
+    const origTouchAction = document.body.style.touchAction;
+
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+    document.body.style.touchAction = "none";
+    if (scrollbarWidth > 0) {
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+    }
+
+    // Prevent touchmove bleed-through on mobile / iOS iPhone Safari
+    const handleTouchMove = (e: TouchEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (!target?.closest(".modal-box")) {
+        if (e.cancelable) e.preventDefault();
+      }
+    };
+
+    // Close on Escape key
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+
+    document.addEventListener("touchmove", handleTouchMove, { passive: false });
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = origBodyOverflow;
+      document.documentElement.style.overflow = origHtmlOverflow;
+      document.body.style.paddingRight = origBodyPaddingRight;
+      document.body.style.touchAction = origTouchAction;
+      document.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
+
   return (
-    <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+    <div
+      className="modal-overlay"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+      onWheel={(e) => {
+        // Prevent mouse wheel from scrolling page behind overlay
+        if (e.target === e.currentTarget) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      }}
+    >
       <div className="modal-box">
         <div className="modal-header">
           <h2 className="modal-title">{title}</h2>
           <button
+            type="button"
             onClick={onClose}
             style={{
               width: "32px",
@@ -111,6 +180,7 @@ export function Modal({ isOpen, onClose, title, children }: { isOpen: boolean; o
               fontSize: "16px",
               cursor: "pointer",
             }}
+            aria-label="Tutup modal"
           >
             ✕
           </button>

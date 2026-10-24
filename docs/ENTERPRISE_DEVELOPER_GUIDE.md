@@ -327,12 +327,21 @@ Untuk menjamin konsistensi pengalaman pengguna (UX) bagi developer dan admin sis
 4. **Indikator Status Boolean Filament (`FilamentBoolean`):**
    - Ikon lingkaran centang hijau (`CheckCircle2` / `#16a34a`) untuk status aktif/visibel.
    - Ikon lingkaran silang merah (`XCircle` / `#ef4444`) untuk status nonaktif/tersembunyi.
-5. **Aksi Baris Inline (`FilamentAction`):**
-   - Tombol aksi tautan inline bergaya teks dengan ikon: `Show` (abu-abu), `Edit` (biru pensil), dan `Delete` (merah tempat sampah).
-6. **Footer Paginasi Tersegmentasi Filament:**
-   - Sisi kiri: Informasi jumlah hasil (*"Showing 1 to 10 of 42 results"*).
-   - Sisi tengah: Pemilih batas per halaman (*"Per page [ 10 ˅ ]"*).
-   - Sisi kanan: Kontainer paginasi nomor tersegmentasi (*`[ 1 ] [ 2 ] [ 3 ] [ ... ] [ 5 ] [ > ]`*) dengan penanda halaman aktif berwarna biru Filament (`#eff6ff` & `#2563eb`).
+### 6.12 Komponen Global BackToTop & Penguncian Scroll Overlay Modal (Cross-Device)
+1. **Komponen Global `BackToTop` (`frontend/components/ui/back-to-top.tsx`):**
+   - Ditanamkan secara otomatis pada shell aplikasi (`role-shell.tsx`) sehingga aktif di seluruh halaman dan peran (*Admin*, *Dosen*, *Mahasiswa*, *Kaprodi*, *Ketua Kelas*).
+   - Memantau posisi gulir halaman (`scrollY > 80px`).
+   - Berada di posisi melayang kanan bawah (`bottom: 5.6rem; right: 2.3rem`), bertumpuk secara ergonomis di atas FAB asisten AI SI KOBAR.
+   - Mematuhi standar Apple Human Interface Guidelines dengan target sentuh minimum 44 × 44 pixel dan dukungan `env(safe-area-inset-bottom)` di Apple iPhone Safari.
+   - Menghasilkan animasi *smooth scrolling* saat diklik untuk kembali ke bagian atas dokumen.
+
+2. **Penguncian Scroll Latar Belakang Modal / Popup (`Modal` Component):**
+   - Berkas: `frontend/components/ui/index.tsx` & `frontend/app/globals.css`.
+   - Mengunci `document.body.style.overflow = "hidden"` dan `document.documentElement.style.overflow = "hidden"` saat modal (*Detail / View*, *Edit*, *Tambah*) aktif.
+   - **Kompensasi Desktop Scrollbar Shift:** Menghitung lebar scrollbar desktop (`window.innerWidth - clientWidth`) dan menambahkan `paddingRight` pada body secara otomatis agar konten di belakang modal tidak bergeser (*layout shift*).
+   - **Pencegahan Gestur Sentuh iPhone & Kursor Roda Desktop:** Menambahkan `touch-action: none;` dan event listener non-passive `touchmove` pada backdrop overlay, serta `onWheel` containment, sehingga kursor mouse maupun usapan jari pengguna di layar sentuh Apple iPhone di luar kotak modal tidak dapat menggulir halaman tabel/dashboard di belakangnya.
+   - Mengintegrasikan penutupan modal instan melalui tombol keyboard `Escape`.
+
 
 
 
