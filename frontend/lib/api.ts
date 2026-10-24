@@ -71,8 +71,8 @@ export async function apiFetch<T>(
     const rawMessage = err instanceof Error ? err.message : "Network error";
     const networkHint =
       rawMessage.includes("Failed to fetch") ||
-      rawMessage.includes("NetworkError") ||
-      rawMessage.includes("fetch")
+        rawMessage.includes("NetworkError") ||
+        rawMessage.includes("fetch")
         ? `Backend SADITA tidak aktif atau tidak dapat dijangkau di ${API_BASE}. Jalankan server FastAPI terlebih dahulu, lalu coba login kembali.`
         : rawMessage;
 
@@ -182,6 +182,26 @@ export interface CourseClass {
   room?: ClassRoom;
 }
 
+export interface ActiveSessionInfo {
+  id: number;
+  class_id: number;
+  class_name: string;
+  course_name: string;
+  lecturer_name: string;
+  room_name?: string;
+  session_number: number;
+  topic?: string;
+  opened_at?: string;
+  present_count: number;
+}
+
+export interface RecentActivityItem {
+  id: number;
+  action: string;
+  description: string;
+  created_at: string;
+}
+
 export interface AdminDashboard {
   total_students: number;
   total_lecturers: number;
@@ -192,6 +212,8 @@ export interface AdminDashboard {
   pending_approvals: number;
   today_attendance: number;
   generated_at: string;
+  active_session?: ActiveSessionInfo;
+  recent_activities?: RecentActivityItem[];
 }
 
 export interface SaditaDevice {

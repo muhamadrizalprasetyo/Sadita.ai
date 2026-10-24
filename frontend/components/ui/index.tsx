@@ -3,6 +3,10 @@
 import React, { ReactNode } from "react";
 import { LucideIcon } from "lucide-react";
 
+export { DataTable, type ColumnDef, type DataTableProps } from "./data-table";
+export { SectionCard, type SectionCardProps } from "./section-card";
+export { TableToolbar, type TableToolbarProps, type FilterTabOption } from "./table-toolbar";
+
 interface StatCardProps {
   label: string;
   value: string | number;
@@ -28,10 +32,10 @@ export function StatCard({ label, value, icon: Icon, color = "blue", subtext }: 
       <div>
         <div className="stat-label">{label}</div>
         <div className="stat-number">{value}</div>
-        {subtext && <div style={{ fontSize: "9.5px", opacity: 0.85, marginTop: "1px" }}>{subtext}</div>}
+        {subtext && <div style={{ fontSize: "10.5px", opacity: 0.88, marginTop: "2px" }}>{subtext}</div>}
       </div>
       <div className="stat-foot">
-        <Icon size={14} style={{ opacity: 0.85 }} />
+        <Icon size={15} style={{ opacity: 0.88 }} />
       </div>
     </div>
   );

@@ -1,9 +1,15 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
-import { Plus, Search, Edit2, Trash2, UserCheck, UserX, Shield, GraduationCap, BookOpen, Key } from "lucide-react";
+import { useEffect, useState, useMemo, useCallback } from "react";
+import { Plus, Edit2, Trash2 } from "lucide-react";
 import { userApi, type UserItem } from "@/lib/api";
-import { LoadingSpinner, Modal, StatusBadge } from "@/components/ui";
+import {
+  Modal,
+  StatusBadge,
+  DataTable,
+  type ColumnDef,
+  TableToolbar,
+} from "@/components/ui";
 
 export default function UserManagementPage() {
   const [users, setUsers] = useState<UserItem[]>([]);
@@ -40,14 +46,21 @@ export default function UserManagementPage() {
   });
 
   const loadUsers = async () => {
-    setLoading(true);
     const res = await userApi.list({ limit: 200 });
     if (res.data) setUsers(res.data);
     setLoading(false);
   };
 
   useEffect(() => {
-    void loadUsers();
+    let isMounted = true;
+    userApi.list({ limit: 200 }).then((res) => {
+      if (!isMounted) return;
+      if (res.data) setUsers(res.data);
+      setLoading(false);
+    });
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const filteredUsers = useMemo(() => {
@@ -114,7 +127,7 @@ export default function UserManagementPage() {
     }
   };
 
-  const openEdit = (u: UserItem) => {
+  const openEdit = useCallback((u: UserItem) => {
     setEditTarget(u);
     setEditForm({
       full_name: u.full_name,
@@ -123,7 +136,7 @@ export default function UserManagementPage() {
       is_active: u.is_active,
       password: "",
     });
-  };
+  }, []);
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -148,7 +161,7 @@ export default function UserManagementPage() {
     }
   };
 
-  const handleDelete = async (u: UserItem) => {
+  const handleDelete = useCallback(async (u: UserItem) => {
     if (!confirm(`Hapus pengguna ${u.full_name} (${u.email})? Tindakan ini tidak dapat dibatalkan.`)) return;
     const res = await userApi.delete(u.id);
     if (!res.error) {
@@ -156,7 +169,88 @@ export default function UserManagementPage() {
     } else {
       alert(res.error || "Gagal menghapus user");
     }
-  };
+  }, []);
+
+  // Reusable Column Definitions for Users DataTable
+  const userColumns = useMemo<ColumnDef<UserItem>[]>(
+    () => [
+      {
+        key: "full_name",
+        header: "Nama Lengkap",
+        render: (u) => <span style={{ fontWeight: 600 }}>{u.full_name}</span>,
+      },
+      {
+        key: "email",
+        header: "Email Akun",
+        render: (u) => <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.85rem" }}>{u.email}</span>,
+      },
+      {
+        key: "role",
+        header: "Peran (Role)",
+        render: (u) => (
+          <span
+            className={`badge ${u.role === "ADMIN"
+              ? "badge-error"
+              : u.role === "DOSEN"
+                ? "badge-success"
+                : "badge-info"
+              }`}
+          >
+            {u.role}
+          </span>
+        ),
+      },
+      {
+        key: "identifier",
+        header: "NIM / NIDN",
+        render: (u) => (
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.85rem" }}>
+            {u.lecturer_profile?.nidn
+              ? `NIDN: ${u.lecturer_profile.nidn}`
+              : u.student_profile?.nim
+                ? `NPM: ${u.student_profile.nim}`
+                : "—"}
+          </span>
+        ),
+      },
+      {
+        key: "status",
+        header: "Status",
+        render: (u) =>
+          u.is_active ? (
+            <StatusBadge status="success" label="Aktif" />
+          ) : (
+            <StatusBadge status="error" label="Nonaktif" />
+          ),
+      },
+      {
+        key: "actions",
+        header: "Aksi",
+        align: "center",
+        render: (u) => (
+          <div style={{ display: "flex", gap: "0.5rem", justifyContent: "center" }}>
+            <button
+              type="button"
+              className="btn btn-outline btn-sm"
+              onClick={() => openEdit(u)}
+              title="Edit Pengguna"
+            >
+              <Edit2 size={14} /> Edit
+            </button>
+            <button
+              type="button"
+              className="btn btn-danger btn-sm"
+              onClick={() => handleDelete(u)}
+              title="Hapus Pengguna"
+            >
+              <Trash2 size={14} />
+            </button>
+          </div>
+        ),
+      },
+    ],
+    [openEdit, handleDelete]
+  );
 
   return (
     <div>
@@ -172,123 +266,37 @@ export default function UserManagementPage() {
         </button>
       </div>
 
-      {/* Toolbar Search & Filter */}
-      <div
-        className="card"
+      {/* Reusable TableToolbar */}
+      <TableToolbar
+        searchQuery={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="Cari nama, email, NIM, atau NIDN…"
+        filterTabs={{
+          activeKey: roleFilter,
+          onChange: setRoleFilter,
+          options: [
+            { key: "ALL", label: "Semua Peran" },
+            { key: "ADMIN", label: "Admin" },
+            { key: "DOSEN", label: "Dosen" },
+            { key: "MAHASISWA", label: "Mahasiswa" },
+          ],
+        }}
         style={{
-          display: "flex",
-          gap: "0.6rem",
-          alignItems: "center",
-          flexWrap: "wrap",
-          marginBottom: "0.75rem",
+          background: "var(--card)",
+          border: "1px solid var(--line)",
+          borderRadius: "8px",
           padding: "0.55rem 0.75rem",
         }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", flex: 1, minWidth: "12rem" }}>
-          <Search size={14} style={{ color: "var(--text-secondary)" }} />
-          <input
-            type="text"
-            className="form-input"
-            placeholder="Cari nama, email, NIM, atau NIDN…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
-        <div style={{ display: "flex", gap: "0.4rem", alignItems: "center" }}>
-          <span style={{ fontSize: "0.78rem", fontWeight: 600 }}>Filter Peran:</span>
-          {["ALL", "ADMIN", "DOSEN", "MAHASISWA"].map((r) => (
-            <button
-              key={r}
-              className={`btn btn-sm ${roleFilter === r ? "btn-primary" : "btn-outline"}`}
-              onClick={() => setRoleFilter(r)}
-            >
-              {r === "ALL" ? "Semua Peran" : r}
-            </button>
-          ))}
-        </div>
-      </div>
+      />
 
-      {/* Table */}
-      {loading ? (
-        <LoadingSpinner text="Memuat daftar pengguna…" />
-      ) : (
-        <div className="table-container">
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Nama Lengkap</th>
-                <th>Email Akun</th>
-                <th>Peran (Role)</th>
-                <th>NIM / NIDN</th>
-                <th>Status</th>
-                <th>Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredUsers.length === 0 ? (
-                <tr>
-                  <td colSpan={6} style={{ textAlign: "center", padding: "2rem", color: "var(--text-secondary)" }}>
-                    Tidak ada pengguna yang cocok dengan kriteria pencarian.
-                  </td>
-                </tr>
-              ) : (
-                filteredUsers.map((u) => (
-                  <tr key={u.id}>
-                    <td style={{ fontWeight: 600 }}>{u.full_name}</td>
-                    <td style={{ fontFamily: "var(--font-mono)", fontSize: "0.85rem" }}>{u.email}</td>
-                    <td>
-                      <span
-                        className={`badge ${u.role === "ADMIN"
-                            ? "badge-error"
-                            : u.role === "DOSEN"
-                              ? "badge-success"
-                              : "badge-info"
-                          }`}
-                      >
-                        {u.role}
-                      </span>
-                    </td>
-                    <td style={{ fontFamily: "var(--font-mono)", fontSize: "0.85rem" }}>
-                      {u.lecturer_profile?.nidn
-                        ? `NIDN: ${u.lecturer_profile.nidn}`
-                        : u.student_profile?.nim
-                          ? `NPM: ${u.student_profile.nim}`
-                          : "—"}
-                    </td>
-                    <td>
-                      {u.is_active ? (
-                        <StatusBadge status="success" label="Aktif" />
-                      ) : (
-                        <StatusBadge status="error" label="Nonaktif" />
-                      )}
-                    </td>
-                    <td>
-                      <div style={{ display: "flex", gap: "0.5rem" }}>
-                        <button
-                          type="button"
-                          className="btn btn-outline btn-sm"
-                          onClick={() => openEdit(u)}
-                          title="Edit Pengguna"
-                        >
-                          <Edit2 size={14} /> Edit
-                        </button>
-                        <button
-                          type="button"
-                          className="btn btn-danger btn-sm"
-                          onClick={() => handleDelete(u)}
-                          title="Hapus Pengguna"
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      )}
+      {/* Reusable DataTable */}
+      <DataTable<UserItem>
+        columns={userColumns}
+        data={filteredUsers}
+        loading={loading}
+        loadingText="Memuat daftar pengguna…"
+        emptyMessage="Tidak ada pengguna yang cocok dengan kriteria pencarian."
+      />
 
       {/* Create Modal */}
       {createOpen && (

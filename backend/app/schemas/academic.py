@@ -171,6 +171,28 @@ class KrsRequestResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class ActiveSessionInfo(BaseModel):
+    id: int
+    class_id: int
+    class_name: str
+    course_name: str
+    lecturer_name: str
+    room_name: Optional[str] = None
+    session_number: int
+    topic: Optional[str] = None
+    opened_at: Optional[datetime] = None
+    present_count: int = 0
+    model_config = ConfigDict(from_attributes=True)
+
+
+class RecentActivityItem(BaseModel):
+    id: int
+    action: str
+    description: str
+    created_at: datetime
+    model_config = ConfigDict(from_attributes=True)
+
+
 class AdminDashboardResponse(BaseModel):
     total_students: int = 0
     total_lecturers: int = 0
@@ -181,5 +203,8 @@ class AdminDashboardResponse(BaseModel):
     pending_approvals: int = 0
     today_attendance: int = 0
     generated_at: datetime
+    active_session: Optional[ActiveSessionInfo] = None
+    recent_activities: List[RecentActivityItem] = []
 
     model_config = ConfigDict(from_attributes=True)
+

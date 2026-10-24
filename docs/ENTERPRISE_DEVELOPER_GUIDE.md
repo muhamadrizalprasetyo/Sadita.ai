@@ -202,27 +202,103 @@ Banyak developer atau AI bingung ketika sudah push tetapi profilnya belum muncul
 - **Larangan Pemanggilan `setState` Sinkron di `useEffect`:** Inisialisasi awal `loading` diatur langsung pada nilai `true` (`useState(true)`). Pemanggilan `setLoading(true)` dilarang diletakkan secara sinkron di dalam badan `useEffect` untuk mencegah *cascading renders*.
 - Pembersihan menyeluruh seluruh import tak terpakai (`Sparkles`, `Radio`, `Activity`).
 
-### 6.6 Standar Skala Desktop Kompak Berdensitas Tinggi (*Compact Desktop Scaling*)
-Sesuai arahan optimasi antarmuka desktop agar tidak kebesaran (*bulky*) dan proporsional untuk operasional kampus:
+### 6.6 Standar Skala Desktop Proporsional & Nyaman (*Calibrated Desktop Scaling*)
+Sesuai arahan kalibrasi antarmuka desktop agar tidak kebesaran (*bulky*) dan tidak kekecilan (*too tiny*), tercapai standar emas enterprise yang nyaman dibaca pada layar laptop/desktop:
 1. **Root Font Scaling Global:**
-   - `html { font-size: 13px; }` dan `body { font-size: 12.5px; line-height: 1.45; }`. Seluruh turunan REM dan EM otomatis terskala proporsional, rapi, dan tajam.
-2. **Sidebar Kompak (215px):**
-   - Lebar sidebar diciutkan dari 260px ke **215px**.
-   - Logo SADITA berukuran lebar 118px.
-   - Profil pengguna: avatar 28px, nama 11.5px, badge peran 9.5px.
-   - Menu navigasi: padding `6px 8px`, ukuran font `11.5px`, ikon 15px.
-3. **Topbar Ramping:**
-   - Tinggi dan padding dirampingkan ke `padding: 6px 14px`.
-   - Input pencarian berlebar `230px`, font `11.5px`, padding `4px 10px`.
-   - Avatar profil 26px.
+   - `html { font-size: 14.5px; }` dan `body { font-size: 13px; line-height: 1.5; }`. Seluruh turunan REM dan EM otomatis terskala proporsional, nyaman dibaca, dan tajam.
+2. **Sidebar Proporsional (228px):**
+   - Lebar sidebar diatur ke **228px**.
+   - Logo SADITA berukuran lebar 126px.
+   - Profil pengguna (di footer): avatar 30px, nama 12px, badge peran 10px.
+   - Menu navigasi: padding `7px 9px`, ukuran font `12.5px`, ikon 16px, dengan `gap: 6px`.
+3. **Topbar Seimbang:**
+   - Tinggi dan padding dirampingkan ke `padding: 7px 15px`.
+   - Input pencarian berlebar `240px`, font `12px`, padding `5px 11px`.
+   - Avatar profil 28px, greeting 13px.
 4. **Data Table Operasional Berdensitas Tinggi:**
-   - Padding sel tabel th `6px 10px` (font `9.5px`), td `6.5px 10px` (font `11px`).
-   - Badge status: padding `2px 6px`, font `9.5px`.
-   - Tombol aksi tabel: padding `3px 8px`, font `10.5px`.
-   - Mampu menampilkan 20-30 baris data sekaligus pada satu layar laptop/desktop tanpa scroll berlebihan.
-5. **Halaman Administrasi Kompak:**
-   - **Manajemen Pengguna:** Toolbar pencarian & filter padat (`padding: 0.55rem 0.75rem`, `gap: 0.6rem`), tombol filter peran ringkas (`padding: 3px 10px`).
-   - **Master Akademik:** Grid modul ringkas (`gap: 0.75rem`, kartu berpadding `10px 12px`, ikon `16px`).
-   - **Monitoring Presensi & Materi LMS:** Toolbar pemilihan kelas perkuliahan padat (`padding: 0.55rem 0.75rem`, dropdown `max-width: 18rem`), badge status dan tombol aksi berukuran pas dan elegan.
+   - Padding sel tabel th `7px 11px` (font `10.5px`), td `7.5px 11px` (font `12px`).
+   - Badge status: padding `3px 8px`, font `10.5px`.
+   - Tombol aksi tabel: padding `3.5px 9px`, font `11px`.
+   - Mampu menampilkan 20-30 baris data sekaligus pada satu layar laptop/desktop tanpa membebani mata.
+5. **Kartu Statistik & Modul Akademik:**
+   - **8 Stat Cards:** Angka metrik berukuran `22px` (tegas dan jelas), label `11px`, subtext `10.5px`, padding `10px 12px 8px`, min-height `80px`.
+   - **Manajemen Pengguna:** Toolbar pencarian & filter padat (`padding: 0.55rem 0.75rem`, `gap: 0.5rem`), tombol filter peran ringkas (`padding: 3px 10px`).
+   - **Master Akademik:** Grid modul ringkas (`gap: 0.85rem`, kartu berpadding `12px 14px`, ikon `18px`, judul `0.96rem`).
+   - **Monitoring Presensi & Materi LMS:** Toolbar pemilihan kelas perkuliahan padat (`padding: 0.65rem 0.85rem`, dropdown `max-width: 20rem`), badge status dan tombol aksi berukuran pas dan elegan.
+
+### 6.7 Rekonfigurasi Sidebar Footer Interaktif & Pembersihan Linting Menyeluruh
+1. **Modern User Trigger & Popover Menu (Desain Foto 1 & 2):**
+   - Menggantikan kartu statis dan tombol logout mentah dengan menu footer interaktif berstandar enterprise:
+     - **Item Notifikasi:** Menu `Notifications` dengan ikon lonceng dan badge pill counter `6` bertema biru lembut (`.sidebar-badge-pill`).
+     - **User Trigger:** Tombol pemicu profil (`.sidebar-user-trigger`) berisi avatar inisial bulat (`AS`), nama pengguna (`Administrator SADITA`), dan ikon chevron `^` yang berotasi otomatis saat menu dibuka/tutup.
+     - **Floating Popover Menu:** Menu mengambang di atas trigger (`.sidebar-user-popover`) dengan bayangan halus (*box-shadow*), menampilkan:
+       1. Info Pengguna: Ikon User dan nama lengkap.
+       2. Pengalih Tema (*Theme Switcher*): 3 tombol ikon (Terang/Sun, Gelap/Moon, Sistem/Monitor) yang fungsional mengubah mode tampilan.
+       3. Tombol Keluar (*Sign out*): Tombol sign out dengan ikon `LogOut` yang membersihkan token dan mengarahkan ke halaman login.
+     - **Deteksi Klik Luar (*Click-Outside Detection*):** Popover otomatis menutup saat pengguna mengeklik area luar layar.
+2. **Resolusi 100% Linter & Bebas Cascading Renders (`@[current_problems]`):**
+   - Mengeliminasi seluruh import ikon tidak terpakai (`UserCheck`, `UserX`, `Shield`, `GraduationCap`, `BookOpen`, `Key`, `Calendar`, `Clock`, `FileText`, `CheckSquare`, `Activity`, `Filter`, `AlertCircle`, `EmptyState`).
+   - Menerapkan pola `isMounted` Promise pada `app/admin/users/page.tsx` untuk mencegah `react-hooks/set-state-in-effect`.
+   - Mengintegrasikan variabel `error` pada `CoursesPage` dan `DevicesPage`, serta menyambungkan fungsi `loadData` sebagai aksi tombol penyegaran manual (*refresh*) pada halaman monitoring IoT.
+
+### 6.8 Isolasi Scroll Navigasi Sidebar, Slim Scrollbar 4px & Pencegahan Scroll Bleed
+1. **Navigasi Mandiri & Terisolasi (`.sidebar-nav`):**
+   - Area header identitas (*brand*) `.sidebar-brand` disematkan permanen di atas (`flex-shrink: 0`).
+   - Area footer profil & notifikasi `.sidebar-footer` disematkan permanen di bawah (`flex-shrink: 0; margin-top: auto`).
+   - Menu daftar tab `.sidebar-nav` memiliki sifat fleksibel (`flex: 1; min-height: 0; overflow-y: auto`) sehingga hanya daftar menu yang bergeser ketika layar monitor diperkecil atau daftar tab bertambah panjang.
+2. **Pencegahan Scroll Bleed / Background Chaining:**
+   - Diterapkan `overscroll-behavior: contain` pada `.sidebar` dan `.sidebar-nav`.
+   - Saat kursor mouse berada di dalam area sidebar dan di-scroll hingga batas atas/bawah, pergerakan mouse **TIDAK AKAN** merembes atau menggeser konten halaman utama di belakangnya (*zero scroll chaining*).
+3. **Scrollbar Ramping 4px Lintas Browser (*Cross-Browser Slim Scrollbar*):**
+   - **Modern Standard (Firefox, dsb):** `scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent;`.
+   - **WebKit (Chrome, Safari, Edge, Opera):**
+     - Lebar batang `::-webkit-scrollbar`: `4px`.
+     - Track transparan: `background: transparent`.
+     - Thumb: `background: #cbd5e1; border-radius: 4px;` dengan hover halus `#94a3b8`.
+
+### 6.9 Revamp Fungsional Dashboard Administrator, Eliminasi Redundansi & Monitoring Presensi Real-Time
+1. **Eliminasi Fitur Ganda / Redundan (*Zero Duplicate Elements*):**
+   - **Avatar Topbar Dihapus:** Menghilangkan avatar inisial bulat statis yang tidak fungsional pada sisi kanan topbar (`.topbar-avatar`), menggantikannya dengan badge sistem terverifikasi `SADITA Enterprise Live` yang elegan. Profil pengguna tetap terpusat pada *interactive user popover* di footer sidebar.
+   - **Tombol Aksi Unik:** Mengganti tombol ganda "Kelola Akademik" pada header dashboard dengan tombol operasional utama **"Buka Sesi Presensi"** (`/admin/presensi`), membedakannya dari tombol "Kelola Semua Kelas" (`/admin/akademik`) pada tabel perkuliahan.
+   - **Diferensiasi Ikon Stat Card:** Mengeliminasi duplikasi ikon lucide (`Users` ganda dan `BookOpen` ganda). Dosen Pengampu kini menggunakan `UserCheck`, dan Kelas Perkuliahan menggunakan `Layers`.
+2. **Navigasi Interaktif Kartu KPI (*Actionable Stat Cards*):**
+   - Seluruh 8 StatCard dibungkus dengan tautan semantik (`.stat-card-link`) dengan efek hover *micro-lift* (`translateY(-2px)`) yang langsung mengarahkan administrator ke modul terkait:
+     - Mahasiswa & Dosen: `/admin/users`
+     - Kelas & Mata Kuliah: `/admin/akademik`
+     - Sesi Aktif, Approval, & Presensi Hari Ini: `/admin/presensi`
+     - Perangkat Offline: `/admin/perangkat`
+3. **Widget Sesi Perkuliahan Berlangsung (*Real-Time Live Attendance Widget*):**
+   - Integrasi otomatis saat terdapat sesi perkuliahan aktif (`SessionStatus.OPEN`), menampilkan:
+     - Indikator live berdenyut (*pulsing emerald dot*).
+     - Rombel kelas, mata kuliah, topik pertemuan, nama dosen pengampu, dan ruang lab IoT.
+     - Penghitung live mahasiswa hadir (*present count*) dan tombol pintas `Pantau Presensi ->`.
+4. **Pencarian & Filter Kelas Cepat (*Client-Side Search & Chips*):**
+   - Kotak pencarian responsif untuk mencari kelas, mata kuliah, atau dosen secara instan.
+   - Tombol filter cepat (*Filter Chips*): `Semua`, `Pagi`, `Malam`.
+   - Kolom data tabel kaya: Rombel + Mode Kuliah, Mata Kuliah + SKS + Dosen, Jadwal + Ruangan, dan tombol aksi langsung `Presensi`.
+5. **Diagnostik Perangkat IoT & Aliran Aktivitas Terkini (*IoT Ping & Live Activity Stream*):**
+   - Tombol diagnostik cepat `Ping` pada kartu perangkat ESP32-S3 dengan umpan balik status latensi (*Aktif 12ms*).
+   - Feed linimasa aktivitas presensi terkini (*Recent Activities*) yang menampilkan stream rekaman tap RFID dan biometrik mahasiswa secara realtime.
+
+### 6.10 Arsitektur Komponen Reusable UI Enterprise (DataTable, SectionCard, & TableToolbar)
+Sesuai prinsip DRY (*Don't Repeat Yourself*) dan efisiensi kode frontend di seluruh dashboard peran (Admin, Dosen, Mahasiswa, Kaprodi):
+
+1. **Komponen Tabel Universal (`DataTable<T>`):**
+   - Berkas: `frontend/components/ui/data-table.tsx`
+   - Mendukung tipe generik `T extends { id?: string | number }` dengan definisi kolom terstruktur `ColumnDef<T>[]`.
+   - Mengintegrasikan penanganan otomatis *loading skeleton/spinner*, pesan *empty state* yang informatif, baris klik interaktif, dan kontrol paginasi standar.
+   - Mengeliminasi ratusan baris markup `table`, `thead`, `tbody`, `tr`, dan `td` manual yang sebelumnya diduplikasi di setiap halaman.
+2. **Komponen Bilah Alat & Filter (`TableToolbar`):**
+   - Berkas: `frontend/components/ui/table-toolbar.tsx`
+   - Menyediakan antarmuka pencarian cepat (*search box*) dengan ikon responsif.
+   - Menyediakan grup tombol filter (*Filter Chips*) yang seragam (`Semua`, `Pagi`, `Malam`, atau filter peran `Admin`, `Dosen`, `Mahasiswa`) dengan dukungan penghitung item (*count badge*).
+3. **Komponen Kartu Kontainer Bagian (`SectionCard`):**
+   - Berkas: `frontend/components/ui/section-card.tsx`
+   - Membakukan tata letak kartu operasional dengan header judul, subjudul deskriptif, dan area tombol aksi di pojok kanan atas (*header action slot*).
+4. **Pusat Ekspor Terpadu (`frontend/components/ui/index.tsx`):**
+   - Seluruh halaman dan modul dashboard dapat mengimpor komponen UI hanya dari satu titik:
+     ```tsx
+     import { DataTable, SectionCard, TableToolbar, StatCard, StatusBadge, Modal, LoadingSpinner } from "@/components/ui";
+     ```
 
 

@@ -3,19 +3,10 @@
 import { useEffect, useState, type ReactNode } from "react";
 import {
   Plus,
-  BookOpen,
-  Calendar,
   Users,
-  GraduationCap,
   Radio,
-  Clock,
-  FileText,
-  CheckSquare,
-  Activity,
   Search,
-  Filter,
   CheckCircle,
-  AlertCircle,
   Edit3,
   Upload
 } from "lucide-react";
@@ -42,7 +33,7 @@ import {
   type LecturerProfile,
   type StudentProfile
 } from "@/lib/api";
-import { LoadingSpinner, EmptyState, Modal, StatusBadge } from "@/components/ui";
+import { LoadingSpinner, Modal, StatusBadge } from "@/components/ui";
 
 function PageHeader({ title, subtitle, action }: { title: string; subtitle?: string; action?: ReactNode }) {
   return (
@@ -220,6 +211,8 @@ export function CoursesPage() {
           </button>
         }
       />
+
+      {error && <div style={{ color: "#ef4444", marginBottom: "0.75rem", fontSize: "0.85rem" }}>{error}</div>}
 
       <div style={{ display: "flex", gap: "1rem", marginBottom: "1.25rem" }}>
         <div style={{ position: "relative", flex: 1, maxWidth: "24rem" }}>
@@ -1195,7 +1188,14 @@ export function DevicesPage() {
       <PageHeader
         title="Perangkat Presensi IoT (ESP32-S3)"
         subtitle="Monitoring hardware, sensor RFID RC522, fingerprint AS608, dan broker MQTT"
+        action={
+          <button className="btn btn-secondary" onClick={loadData}>
+            Segarkan
+          </button>
+        }
       />
+
+      {error && <div style={{ color: "#ef4444", marginBottom: "0.75rem", fontSize: "0.85rem" }}>{error}</div>}
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(20rem, 1fr))", gap: "1.25rem" }}>
         {items.map(d => (
@@ -1263,11 +1263,11 @@ export function AttendancePage() {
         subtitle="Riwayat pertemuan perkuliahan dan status pembukaan sesi tap RFID"
       />
 
-      <div className="card" style={{ marginBottom: "0.75rem", padding: "0.55rem 0.75rem", display: "flex", alignItems: "center", gap: "0.6rem" }}>
-        <label style={{ fontSize: "0.78rem", fontWeight: 600 }}>Pilih Kelas Perkuliahan:</label>
+      <div className="card" style={{ marginBottom: "0.85rem", padding: "0.65rem 0.85rem", display: "flex", alignItems: "center", gap: "0.75rem" }}>
+        <label style={{ fontSize: "0.85rem", fontWeight: 600 }}>Pilih Kelas Perkuliahan:</label>
         <select
           className="form-select"
-          style={{ maxWidth: "18rem" }}
+          style={{ maxWidth: "20rem" }}
           value={selected ?? ""}
           onChange={e => setSelected(Number(e.target.value))}
         >
@@ -1394,11 +1394,11 @@ export function LmsPage({ assignment = false }: { assignment?: boolean }) {
         subtitle={assignment ? "Tugas terstruktur kelas, pengumpulan berkas PDF, dan batas waktu" : "Dokumen modul, slide PPT perkuliahan, dan link pembelajaran"}
       />
 
-      <div className="card" style={{ marginBottom: "0.75rem", padding: "0.55rem 0.75rem", display: "flex", alignItems: "center", gap: "0.6rem" }}>
-        <label style={{ fontSize: "0.78rem", fontWeight: 600 }}>Pilih Kelas Perkuliahan:</label>
+      <div className="card" style={{ marginBottom: "0.85rem", padding: "0.65rem 0.85rem", display: "flex", alignItems: "center", gap: "0.75rem" }}>
+        <label style={{ fontSize: "0.85rem", fontWeight: 600 }}>Pilih Kelas Perkuliahan:</label>
         <select
           className="form-select"
-          style={{ maxWidth: "18rem" }}
+          style={{ maxWidth: "20rem" }}
           value={selected ?? ""}
           onChange={e => setSelected(Number(e.target.value))}
         >
