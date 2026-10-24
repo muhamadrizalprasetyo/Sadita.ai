@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import { authApi, clearStoredToken, getStoredToken, type User } from "@/lib/api";
 import { KobarAssistant } from "./kobar-assistant";
+import { BackToTop } from "@/components/ui";
 
 export type Role = "ADMIN" | "KAPRODI" | "DOSEN" | "KETUA_KELAS" | "MAHASISWA";
 
@@ -335,6 +336,9 @@ export function RoleShell({ role, children }: { role: Role; children: ReactNode 
 
       {/* Embedded SI KOBAR AI Assistant */}
       <KobarAssistant user={user} />
+
+      {/* Global Back to Top Button on Every Page */}
+      <BackToTop />
     </div>
   );
 }

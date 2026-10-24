@@ -1,14 +1,14 @@
 "use client";
 
 import { useEffect, useState, useMemo, useCallback } from "react";
-import { Plus, Edit2, Trash2 } from "lucide-react";
+import { Plus, Trash2, Pencil } from "lucide-react";
 import { userApi, type UserItem } from "@/lib/api";
 import {
   Modal,
-  StatusBadge,
   DataTable,
   type ColumnDef,
-  TableToolbar,
+  FilamentBoolean,
+  FilamentAction,
 } from "@/components/ui";
 
 export default function UserManagementPage() {
@@ -16,8 +16,15 @@ export default function UserManagementPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("ALL");
+  const [statusFilter, setStatusFilter] = useState<string>("ALL");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [perPage, setPerPage] = useState(10);
+  const [selectedKeys, setSelectedKeys] = useState<(string | number)[]>([]);
+  const [sortKey, setSortKey] = useState<string>("full_name");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+  const [viewTarget, setViewTarget] = useState<UserItem | null>(null);
 
-  // Create modal
+  // Create modal state
   const [createOpen, setCreateOpen] = useState(false);
   const [creating, setCreating] = useState(false);
   const [createForm, setCreateForm] = useState({
@@ -34,7 +41,7 @@ export default function UserManagementPage() {
     class_type: "REGULER_PAGI" as "REGULER_PAGI" | "REGULER_MALAM" | "REGULER_SHIFT",
   });
 
-  // Edit modal
+  // Edit modal state
   const [editTarget, setEditTarget] = useState<UserItem | null>(null);
   const [updating, setUpdating] = useState(false);
   const [editForm, setEditForm] = useState({
@@ -45,11 +52,11 @@ export default function UserManagementPage() {
     password: "",
   });
 
-  const loadUsers = async () => {
+  const loadUsers = useCallback(async () => {
     const res = await userApi.list({ limit: 200 });
     if (res.data) setUsers(res.data);
     setLoading(false);
-  };
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -64,17 +71,68 @@ export default function UserManagementPage() {
   }, []);
 
   const filteredUsers = useMemo(() => {
-    return users.filter((u) => {
+    let result = users.filter((u) => {
       const matchRole = roleFilter === "ALL" || u.role === roleFilter;
-      const q = search.toLowerCase();
+      const matchStatus =
+        statusFilter === "ALL"
+          ? true
+          : statusFilter === "ACTIVE"
+            ? u.is_active === true
+            : u.is_active === false;
+
+      const q = search.trim().toLowerCase();
       const matchQuery =
+        !q ||
         u.full_name.toLowerCase().includes(q) ||
         u.email.toLowerCase().includes(q) ||
         (u.student_profile?.nim && u.student_profile.nim.toLowerCase().includes(q)) ||
         (u.lecturer_profile?.nidn && u.lecturer_profile.nidn.toLowerCase().includes(q));
-      return matchRole && matchQuery;
+
+      return matchRole && matchStatus && matchQuery;
     });
-  }, [users, roleFilter, search]);
+
+    if (sortKey) {
+      result = [...result].sort((a, b) => {
+        let valA = "";
+        let valB = "";
+        if (sortKey === "full_name") {
+          valA = a.full_name.toLowerCase();
+          valB = b.full_name.toLowerCase();
+        } else if (sortKey === "parent") {
+          valA = (a.student_profile?.department || a.lecturer_profile?.department || "UNIPI").toLowerCase();
+          valB = (b.student_profile?.department || b.lecturer_profile?.department || "UNIPI").toLowerCase();
+        } else if (sortKey === "role") {
+          valA = a.role;
+          valB = b.role;
+        } else if (sortKey === "is_active") {
+          valA = a.is_active ? "1" : "0";
+          valB = b.is_active ? "1" : "0";
+        }
+
+        if (valA < valB) return sortDirection === "asc" ? -1 : 1;
+        if (valA > valB) return sortDirection === "asc" ? 1 : -1;
+        return 0;
+      });
+    }
+
+    return result;
+  }, [users, roleFilter, statusFilter, search, sortKey, sortDirection]);
+
+  const totalPages = Math.ceil(filteredUsers.length / perPage) || 1;
+
+  const paginatedUsers = useMemo(() => {
+    const start = (currentPage - 1) * perPage;
+    return filteredUsers.slice(start, start + perPage);
+  }, [filteredUsers, currentPage, perPage]);
+
+  const handleSort = (key: string) => {
+    if (sortKey === key) {
+      setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortDirection("asc");
+    }
+  };
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -161,32 +219,73 @@ export default function UserManagementPage() {
     }
   };
 
-  const handleDelete = useCallback(async (u: UserItem) => {
-    if (!confirm(`Hapus pengguna ${u.full_name} (${u.email})? Tindakan ini tidak dapat dibatalkan.`)) return;
-    const res = await userApi.delete(u.id);
-    if (!res.error) {
-      await loadUsers();
-    } else {
-      alert(res.error || "Gagal menghapus user");
-    }
-  }, []);
+  const handleDelete = useCallback(
+    async (u: UserItem) => {
+      if (!confirm(`Hapus pengguna ${u.full_name} (${u.email})? Tindakan ini tidak dapat dibatalkan.`)) return;
+      const res = await userApi.delete(u.id);
+      if (!res.error) {
+        await loadUsers();
+      } else {
+        alert(res.error || "Gagal menghapus user");
+      }
+    },
+    [loadUsers]
+  );
 
-  // Reusable Column Definitions for Users DataTable
+  const handleBulkDelete = useCallback(
+    async (keys: (string | number)[]) => {
+      if (!confirm(`Hapus ${keys.length} akun pengguna terpilih? Tindakan ini permanen.`)) return;
+      for (const key of keys) {
+        await userApi.delete(Number(key));
+      }
+      setSelectedKeys([]);
+      await loadUsers();
+    },
+    [loadUsers]
+  );
+
+  // Filament v5 Column Definitions matching user screenshots
   const userColumns = useMemo<ColumnDef<UserItem>[]>(
     () => [
       {
         key: "full_name",
-        header: "Nama Lengkap",
-        render: (u) => <span style={{ fontWeight: 600 }}>{u.full_name}</span>,
+        header: "Name",
+        sortable: true,
+        toggleable: false, // Name is core, cannot be hidden
+        render: (u) => (
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <span style={{ fontWeight: 600, color: "#111827", fontSize: "12.5px" }}>{u.full_name}</span>
+            <span style={{ fontSize: "11px", color: "#6b7280" }}>{u.email}</span>
+          </div>
+        ),
       },
       {
-        key: "email",
-        header: "Email Akun",
-        render: (u) => <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.85rem" }}>{u.email}</span>,
+        key: "parent",
+        header: "Parent",
+        sortable: true,
+        toggleable: true,
+        render: (u) => {
+          const dept = u.student_profile?.department || u.lecturer_profile?.department;
+          const idStr = u.student_profile?.nim
+            ? `NIM: ${u.student_profile.nim}`
+            : u.lecturer_profile?.nidn
+              ? `NIDN: ${u.lecturer_profile.nidn}`
+              : u.role === "ADMIN"
+                ? "Administrator SADITA"
+                : "";
+          return (
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              <span style={{ color: "#374151", fontSize: "12.5px" }}>{dept || "Universitas Insan Pembangunan"}</span>
+              {idStr && <span style={{ fontSize: "11px", color: "#9ca3af", fontFamily: "var(--font-mono)" }}>{idStr}</span>}
+            </div>
+          );
+        },
       },
       {
         key: "role",
-        header: "Peran (Role)",
+        header: "Role",
+        sortable: true,
+        toggleable: true,
         render: (u) => (
           <span
             className={`badge ${u.role === "ADMIN"
@@ -195,56 +294,33 @@ export default function UserManagementPage() {
                 ? "badge-success"
                 : "badge-info"
               }`}
+            style={{ fontSize: "11px", padding: "2px 8px", fontWeight: 600 }}
           >
             {u.role}
           </span>
         ),
       },
       {
-        key: "identifier",
-        header: "NIM / NIDN",
-        render: (u) => (
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: "0.85rem" }}>
-            {u.lecturer_profile?.nidn
-              ? `NIDN: ${u.lecturer_profile.nidn}`
-              : u.student_profile?.nim
-                ? `NPM: ${u.student_profile.nim}`
-                : "—"}
-          </span>
-        ),
-      },
-      {
-        key: "status",
-        header: "Status",
-        render: (u) =>
-          u.is_active ? (
-            <StatusBadge status="success" label="Aktif" />
-          ) : (
-            <StatusBadge status="error" label="Nonaktif" />
-          ),
+        key: "is_active",
+        header: "Visibility",
+        align: "center",
+        sortable: true,
+        toggleable: true,
+        render: (u) => <FilamentBoolean value={u.is_active} />,
       },
       {
         key: "actions",
-        header: "Aksi",
-        align: "center",
+        header: "",
+        align: "right",
+        sortable: false,
+        toggleable: false,
         render: (u) => (
-          <div style={{ display: "flex", gap: "0.5rem", justifyContent: "center" }}>
-            <button
-              type="button"
-              className="btn btn-outline btn-sm"
-              onClick={() => openEdit(u)}
-              title="Edit Pengguna"
-            >
-              <Edit2 size={14} /> Edit
-            </button>
-            <button
-              type="button"
-              className="btn btn-danger btn-sm"
-              onClick={() => handleDelete(u)}
-              title="Hapus Pengguna"
-            >
-              <Trash2 size={14} />
-            </button>
+          <div
+            style={{ display: "inline-flex", alignItems: "center", gap: "10px", justifyContent: "flex-end" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <FilamentAction type="edit" label="Edit" onClick={() => openEdit(u)} />
+            <FilamentAction type="delete" label="" onClick={() => handleDelete(u)} />
           </div>
         ),
       },
@@ -253,49 +329,99 @@ export default function UserManagementPage() {
   );
 
   return (
-    <div>
-      <div className="page-header">
+    <div style={{ display: "grid", gap: "12px" }}>
+      {/* Top Page Header */}
+      <div className="page-header" style={{ marginBottom: 0 }}>
         <div>
           <h1 className="page-title">Manajemen Pengguna</h1>
           <p className="page-subtitle">
-            Kelola akun Admin, Dosen Pengampu, dan Mahasiswa sistem SADITA
+            Kelola akun Administrator, Dosen Pengampu, dan Mahasiswa sistem SADITA
           </p>
         </div>
         <button className="btn btn-primary" onClick={() => setCreateOpen(true)}>
-          <Plus size={16} /> Tambah Pengguna Baru
+          <Plus size={15} /> Tambah Pengguna Baru
         </button>
       </div>
 
-      {/* Reusable TableToolbar */}
-      <TableToolbar
-        searchQuery={search}
-        onSearchChange={setSearch}
-        searchPlaceholder="Cari nama, email, NIM, atau NIDN…"
-        filterTabs={{
-          activeKey: roleFilter,
-          onChange: setRoleFilter,
-          options: [
-            { key: "ALL", label: "Semua Peran" },
-            { key: "ADMIN", label: "Admin" },
-            { key: "DOSEN", label: "Dosen" },
-            { key: "MAHASISWA", label: "Mahasiswa" },
-          ],
-        }}
-        style={{
-          background: "var(--card)",
-          border: "1px solid var(--line)",
-          borderRadius: "8px",
-          padding: "0.55rem 0.75rem",
-        }}
-      />
-
-      {/* Reusable DataTable */}
+      {/* Filament v5 DataTable with Filters Popover, Columns Popover & Bulk Actions */}
       <DataTable<UserItem>
         columns={userColumns}
-        data={filteredUsers}
+        data={paginatedUsers}
         loading={loading}
-        loadingText="Memuat daftar pengguna…"
-        emptyMessage="Tidak ada pengguna yang cocok dengan kriteria pencarian."
+        loadingText="Memuat data pengguna…"
+        emptyMessage="Tidak ada pengguna yang cocok dengan filter atau pencarian."
+        onRowClick={(u) => setViewTarget(u)}
+        selectable
+        selectedKeys={selectedKeys}
+        onSelectionChange={setSelectedKeys}
+        bulkActions={[
+          {
+            key: "delete",
+            label: "Delete selected",
+            icon: <Trash2 size={13} color="#dc2626" />,
+            danger: true,
+            onClick: handleBulkDelete,
+          },
+        ]}
+        sortKey={sortKey}
+        sortDirection={sortDirection}
+        onSort={handleSort}
+        searchable
+        searchQuery={search}
+        onSearchChange={(q) => {
+          setSearch(q);
+          setCurrentPage(1);
+        }}
+        searchPlaceholder="Search"
+        showColumnToggle
+        filters={[
+          {
+            key: "role",
+            label: "Peran Pengguna (Role)",
+            value: roleFilter,
+            onChange: (val) => {
+              setRoleFilter(val);
+              setCurrentPage(1);
+            },
+            options: [
+              { value: "ALL", label: "Semua Peran" },
+              { value: "ADMIN", label: "Administrator" },
+              { value: "DOSEN", label: "Dosen Pengampu" },
+              { value: "MAHASISWA", label: "Mahasiswa" },
+              { value: "KETUA_KELAS", label: "Ketua Kelas" },
+            ],
+          },
+          {
+            key: "status",
+            label: "Status Akun",
+            value: statusFilter,
+            onChange: (val) => {
+              setStatusFilter(val);
+              setCurrentPage(1);
+            },
+            options: [
+              { value: "ALL", label: "Semua Status" },
+              { value: "ACTIVE", label: "Aktif Saja" },
+              { value: "INACTIVE", label: "Nonaktif / Terblokir" },
+            ],
+          },
+        ]}
+        onResetFilters={() => {
+          setRoleFilter("ALL");
+          setStatusFilter("ALL");
+          setCurrentPage(1);
+        }}
+        pagination={{
+          currentPage,
+          totalPages,
+          perPage,
+          totalRecords: filteredUsers.length,
+          onPageChange: setCurrentPage,
+          onPerPageChange: (pp) => {
+            setPerPage(pp);
+            setCurrentPage(1);
+          },
+        }}
       />
 
       {/* Create Modal */}
@@ -489,6 +615,210 @@ export default function UserManagementPage() {
               </button>
             </div>
           </form>
+        </Modal>
+      )}
+
+      {/* Detail / View Modal (Triggered by clicking row background) */}
+      {viewTarget && (
+        <Modal
+          isOpen
+          onClose={() => setViewTarget(null)}
+          title={`Detail Pengguna — ${viewTarget.full_name}`}
+        >
+          <div style={{ display: "grid", gap: "1.25rem" }}>
+            {/* Header Profile Summary */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "1rem",
+                padding: "1rem",
+                background: "#f8fafc",
+                borderRadius: "8px",
+                border: "1px solid #e2e8f0",
+              }}
+            >
+              <div
+                style={{
+                  width: "48px",
+                  height: "48px",
+                  borderRadius: "50%",
+                  background: "#2563eb",
+                  color: "#ffffff",
+                  display: "grid",
+                  placeItems: "center",
+                  fontSize: "1.2rem",
+                  fontWeight: 700,
+                  flexShrink: 0,
+                }}
+              >
+                {viewTarget.full_name.charAt(0).toUpperCase()}
+              </div>
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                  <h3 style={{ margin: 0, fontSize: "1.05rem", fontWeight: 700, color: "#0f172a" }}>
+                    {viewTarget.full_name}
+                  </h3>
+                  <span
+                    className={`badge ${viewTarget.role === "ADMIN"
+                        ? "badge-error"
+                        : viewTarget.role === "DOSEN"
+                          ? "badge-success"
+                          : "badge-info"
+                      }`}
+                    style={{ fontSize: "11px", padding: "2px 8px", fontWeight: 600 }}
+                  >
+                    {viewTarget.role}
+                  </span>
+                  <span
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "4px",
+                      fontSize: "11px",
+                      fontWeight: 600,
+                      color: viewTarget.is_active ? "#16a34a" : "#dc2626",
+                    }}
+                  >
+                    <FilamentBoolean value={viewTarget.is_active} />
+                    <span>{viewTarget.is_active ? "Aktif" : "Nonaktif"}</span>
+                  </span>
+                </div>
+                <p style={{ margin: "3px 0 0", fontSize: "0.85rem", color: "#64748b" }}>
+                  {viewTarget.email}
+                </p>
+              </div>
+            </div>
+
+            {/* Information Grid */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+              <div
+                style={{
+                  padding: "0.85rem 1rem",
+                  borderRadius: "8px",
+                  border: "1px solid #e2e8f0",
+                  background: "#ffffff",
+                }}
+              >
+                <h4
+                  style={{
+                    margin: "0 0 0.6rem",
+                    fontSize: "0.8rem",
+                    textTransform: "uppercase",
+                    color: "#64748b",
+                    letterSpacing: "0.05em",
+                  }}
+                >
+                  Informasi Akademik
+                </h4>
+                <div style={{ display: "grid", gap: "0.5rem", fontSize: "0.85rem" }}>
+                  <div>
+                    <span style={{ color: "#64748b" }}>Departemen / Prodi: </span>
+                    <strong style={{ color: "#1e293b" }}>
+                      {viewTarget.student_profile?.department ||
+                        viewTarget.lecturer_profile?.department ||
+                        (viewTarget.role === "ADMIN" ? "Administrator SADITA" : "Universitas Insan Pembangunan")}
+                    </strong>
+                  </div>
+                  <div>
+                    <span style={{ color: "#64748b" }}>Nomor Induk: </span>
+                    <strong style={{ color: "#1e293b", fontFamily: "var(--font-mono)" }}>
+                      {viewTarget.student_profile?.nim
+                        ? `NIM ${viewTarget.student_profile.nim}`
+                        : viewTarget.lecturer_profile?.nidn
+                          ? `NIDN ${viewTarget.lecturer_profile.nidn}`
+                          : "—"}
+                    </strong>
+                  </div>
+                  {viewTarget.student_profile?.academic_cohort && (
+                    <div>
+                      <span style={{ color: "#64748b" }}>Angkatan: </span>
+                      <strong style={{ color: "#1e293b" }}>
+                        Tahun ke-{viewTarget.student_profile.academic_cohort}
+                      </strong>
+                    </div>
+                  )}
+                  {viewTarget.student_profile?.class_type && (
+                    <div>
+                      <span style={{ color: "#64748b" }}>Tipe Kelas: </span>
+                      <strong style={{ color: "#1e293b" }}>
+                        {viewTarget.student_profile.class_type.replace("_", " ")}
+                      </strong>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div
+                style={{
+                  padding: "0.85rem 1rem",
+                  borderRadius: "8px",
+                  border: "1px solid #e2e8f0",
+                  background: "#ffffff",
+                }}
+              >
+                <h4
+                  style={{
+                    margin: "0 0 0.6rem",
+                    fontSize: "0.8rem",
+                    textTransform: "uppercase",
+                    color: "#64748b",
+                    letterSpacing: "0.05em",
+                  }}
+                >
+                  Akses Perangkat & Keamanan
+                </h4>
+                <div style={{ display: "grid", gap: "0.5rem", fontSize: "0.85rem" }}>
+                  <div>
+                    <span style={{ color: "#64748b" }}>RFID UID Kartu: </span>
+                    <strong style={{ color: "#1e293b", fontFamily: "var(--font-mono)" }}>
+                      {viewTarget.student_profile?.rfid_uid || "Belum Terdaftar"}
+                    </strong>
+                  </div>
+                  <div>
+                    <span style={{ color: "#64748b" }}>ID Sistem: </span>
+                    <span style={{ color: "#64748b", fontFamily: "var(--font-mono)", fontSize: "0.75rem" }}>
+                      {viewTarget.id}
+                    </span>
+                  </div>
+                  <div>
+                    <span style={{ color: "#64748b" }}>Terdaftar Pada: </span>
+                    <span style={{ color: "#1e293b" }}>
+                      {viewTarget.created_at
+                        ? new Date(viewTarget.created_at).toLocaleDateString("id-ID", {
+                          day: "numeric",
+                          month: "long",
+                          year: "numeric",
+                        })
+                        : "—"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Actions */}
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.6rem", marginTop: "0.5rem" }}>
+              <button
+                type="button"
+                className="btn btn-outline"
+                onClick={() => setViewTarget(null)}
+              >
+                Tutup
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => {
+                  const target = viewTarget;
+                  setViewTarget(null);
+                  openEdit(target);
+                }}
+              >
+                <Pencil size={14} /> Edit Data Pengguna
+              </button>
+            </div>
+          </div>
         </Modal>
       )}
     </div>

@@ -298,7 +298,51 @@ Sesuai prinsip DRY (*Don't Repeat Yourself*) dan efisiensi kode frontend di selu
 4. **Pusat Ekspor Terpadu (`frontend/components/ui/index.tsx`):**
    - Seluruh halaman dan modul dashboard dapat mengimpor komponen UI hanya dari satu titik:
      ```tsx
-     import { DataTable, SectionCard, TableToolbar, StatCard, StatusBadge, Modal, LoadingSpinner } from "@/components/ui";
+     import {
+       DataTable,
+       SectionCard,
+       TableToolbar,
+       StatCard,
+       StatusBadge,
+       Modal,
+       LoadingSpinner,
+       FilamentBoolean,
+       FilamentAction,
+     } from "@/components/ui";
      ```
+
+### 6.11 Standar Desain Tabel Laravel Filament v5 (Enterprise Resource Table)
+Untuk menjamin konsistensi pengalaman pengguna (UX) bagi developer dan admin sistem, antarmuka tabel SADITA mengadopsi standar terkini Laravel Filament v5:
+1. **Container & Elevasi Card:**
+   - Card putih (`#ffffff`), border 1px solid abu-abu muda (`#e5e7eb`), radius sudut seragam `rounded-lg` (8px), dan bayangan mikro tipis.
+2. **Topbar Terpadu (Search, Filters, & Columns Visibility):**
+   - Kotak pencarian (*Search*) di pojok kanan dengan ikon loop (`Search`), sudut membulat, dan efek focus ring halus.
+   - **Tombol & Popover Filter Khusus (`ListFilter`):** Filter tidak diletakkan sebagai tab arbitrer di toolbar, melainkan diakses melalui tombol filter terdedikasi di pojok kanan atas. Ketika filter aktif, tombol menampilkan badge jumlah filter aktif dan berlatar biru lembut. Mengklik tombol membuka popover berisikan dropdown filter (`Peran Pengguna`, `Status Akun`), tombol tautan merah `Reset`, dan tombol `Apply filters`.
+   - **Tombol & Popover Kolom (`Columns3`):** Membuka popover interaktif untuk memilih visibilitas kolom (*Name*, *Parent*, *Role*, *Visibility*), tautan merah `Reset` untuk mengembalikan ke setelan default, dan tombol biru `Apply columns`.
+3. **Penyortiran & Seleksi Baris Multi-Select (Bulk Actions & Selection Bar):**
+   - Checkbox header (*Select All*) dan checkbox baris interaktif dengan aksen biru Filament (`#2563eb`).
+   - Indikator strip biru vertikal (`border-left: 3px solid #2563eb`) di sisi paling kiri setiap baris yang terpilih (*selected row*).
+   - **Tombol Aksi Massal (`Bulk actions`):** Otomatis muncul di pojok kiri atas toolbar ketika ada data terpilih, membuka menu dropdown seperti `Delete selected` dengan ikon tempat sampah merah.
+   - **Bilah Pemilihan Data (*Selection Bar*):** Tampil di bawah toolbar ketika baris dipilih, menyajikan info `X records selected`, tautan biru `Select all N`, dan tautan merah `Deselect all`.
+4. **Indikator Status Boolean Filament (`FilamentBoolean`):**
+   - Ikon lingkaran centang hijau (`CheckCircle2` / `#16a34a`) untuk status aktif/visibel.
+   - Ikon lingkaran silang merah (`XCircle` / `#ef4444`) untuk status nonaktif/tersembunyi.
+### 6.12 Komponen Global BackToTop & Penguncian Scroll Overlay Modal (Cross-Device)
+1. **Komponen Global `BackToTop` (`frontend/components/ui/back-to-top.tsx`):**
+   - Ditanamkan secara otomatis pada shell aplikasi (`role-shell.tsx`) sehingga aktif di seluruh halaman dan peran (*Admin*, *Dosen*, *Mahasiswa*, *Kaprodi*, *Ketua Kelas*).
+   - Memantau posisi gulir halaman (`scrollY > 80px`).
+   - Berada di posisi melayang kanan bawah (`bottom: 5.6rem; right: 2.3rem`), bertumpuk secara ergonomis di atas FAB asisten AI SI KOBAR.
+   - Mematuhi standar Apple Human Interface Guidelines dengan target sentuh minimum 44 × 44 pixel dan dukungan `env(safe-area-inset-bottom)` di Apple iPhone Safari.
+   - Menghasilkan animasi *smooth scrolling* saat diklik untuk kembali ke bagian atas dokumen.
+
+2. **Penguncian Scroll Latar Belakang Modal / Popup (`Modal` Component):**
+   - Berkas: `frontend/components/ui/index.tsx` & `frontend/app/globals.css`.
+   - Mengunci `document.body.style.overflow = "hidden"` dan `document.documentElement.style.overflow = "hidden"` saat modal (*Detail / View*, *Edit*, *Tambah*) aktif.
+   - **Kompensasi Desktop Scrollbar Shift:** Menghitung lebar scrollbar desktop (`window.innerWidth - clientWidth`) dan menambahkan `paddingRight` pada body secara otomatis agar konten di belakang modal tidak bergeser (*layout shift*).
+   - **Pencegahan Gestur Sentuh iPhone & Kursor Roda Desktop:** Menambahkan `touch-action: none;` dan event listener non-passive `touchmove` pada backdrop overlay, serta `onWheel` containment, sehingga kursor mouse maupun usapan jari pengguna di layar sentuh Apple iPhone di luar kotak modal tidak dapat menggulir halaman tabel/dashboard di belakangnya.
+   - Mengintegrasikan penutupan modal instan melalui tombol keyboard `Escape`.
+
+
+
 
 
