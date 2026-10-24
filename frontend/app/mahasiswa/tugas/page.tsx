@@ -3,14 +3,12 @@
 import { useEffect, useState } from "react";
 import {
   academicApi,
-  authApi,
   lmsApi,
   uploadApi,
   getFileUrl,
   type Assignment,
   type AssignmentSubmission,
   type CourseClass,
-  type User,
 } from "@/lib/api";
 import { LoadingSpinner } from "@/components/ui";
 import { Upload, CheckCircle, Clock, AlertCircle, FileText } from "lucide-react";
@@ -39,7 +37,6 @@ function SubmissionBadge({ sub }: { sub: AssignmentSubmission | null | undefined
 }
 
 export default function MahasiswaTugasPage() {
-  const [user, setUser] = useState<User | null>(null);
   const [classes, setClasses] = useState<CourseClass[]>([]);
   const [selectedClass, setSelectedClass] = useState<number>();
   const [assignments, setAssignments] = useState<Assignment[]>([]);
@@ -57,11 +54,13 @@ export default function MahasiswaTugasPage() {
 
   useEffect(() => {
     async function init() {
-      const [meRes, classRes] = await Promise.all([authApi.getMe(), academicApi.getClasses()]);
-      if (meRes.data) setUser(meRes.data);
+      const classRes = await academicApi.getClasses();
       const classList = classRes.data ?? [];
       setClasses(classList);
-      if (classList.length > 0) setSelectedClass(classList[0].id);
+      if (classList.length > 0) {
+        setSelectedClass(classList[0].id);
+        setAssLoading(true);
+      }
       setLoading(false);
     }
     void init();
@@ -69,22 +68,38 @@ export default function MahasiswaTugasPage() {
 
   useEffect(() => {
     if (!selectedClass) return;
-    setAssLoading(true);
-    void lmsApi.getAssignments(selectedClass).then(async (r) => {
-      const list = r.data ?? [];
-      setAssignments(list);
+    let isCancelled = false;
 
-      // Fetch submission status for each assignment
-      const subMap: Record<number, AssignmentSubmission | null> = {};
-      await Promise.all(
-        list.map(async (a) => {
-          const res = await lmsApi.getMySubmission(a.id);
-          subMap[a.id] = res.data ?? null;
-        })
-      );
-      setSubmissions(subMap);
-      setAssLoading(false);
-    });
+    async function loadAssignments(classId: number) {
+      try {
+        const r = await lmsApi.getAssignments(classId);
+        if (isCancelled) return;
+        const list = r.data ?? [];
+        setAssignments(list);
+
+        // Fetch submission status for each assignment
+        const subMap: Record<number, AssignmentSubmission | null> = {};
+        await Promise.all(
+          list.map(async (a) => {
+            const res = await lmsApi.getMySubmission(a.id);
+            subMap[a.id] = res.data ?? null;
+          })
+        );
+        if (!isCancelled) {
+          setSubmissions(subMap);
+        }
+      } finally {
+        if (!isCancelled) {
+          setAssLoading(false);
+        }
+      }
+    }
+
+    void loadAssignments(selectedClass);
+
+    return () => {
+      isCancelled = true;
+    };
   }, [selectedClass]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -167,7 +182,10 @@ export default function MahasiswaTugasPage() {
           className="form-select"
           style={{ maxWidth: "24rem", flex: 1 }}
           value={selectedClass ?? ""}
-          onChange={(e) => setSelectedClass(Number(e.target.value))}
+          onChange={(e) => {
+            setSelectedClass(Number(e.target.value));
+            setAssLoading(true);
+          }}
         >
           {classes.map((c) => (
             <option key={c.id} value={c.id}>

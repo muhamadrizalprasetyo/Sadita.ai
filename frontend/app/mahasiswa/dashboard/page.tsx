@@ -8,10 +8,8 @@ import {
   Clock,
   CheckSquare,
   HelpCircle,
-  Award,
   ArrowRight,
   Radio,
-  FileText,
   CreditCard,
   RefreshCw,
   CheckCircle,
@@ -144,8 +142,9 @@ export default function MahasiswaDashboardPage() {
           setKtmSuccessMsg(null);
         }, 1500);
       }
-    } catch (e: any) {
-      setKtmErrorMsg(e?.message || "Gagal mendaftarkan kartu KTM");
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Gagal mendaftarkan kartu KTM";
+      setKtmErrorMsg(msg);
     } finally {
       setIsSavingKtm(false);
     }
