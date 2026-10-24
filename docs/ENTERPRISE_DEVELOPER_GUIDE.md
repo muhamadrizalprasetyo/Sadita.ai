@@ -241,6 +241,17 @@ Sesuai arahan kalibrasi antarmuka desktop agar tidak kebesaran (*bulky*) dan tid
    - Menerapkan pola `isMounted` Promise pada `app/admin/users/page.tsx` untuk mencegah `react-hooks/set-state-in-effect`.
    - Mengintegrasikan variabel `error` pada `CoursesPage` dan `DevicesPage`, serta menyambungkan fungsi `loadData` sebagai aksi tombol penyegaran manual (*refresh*) pada halaman monitoring IoT.
 
-
-
-
+### 6.8 Isolasi Scroll Navigasi Sidebar, Slim Scrollbar 4px & Pencegahan Scroll Bleed
+1. **Navigasi Mandiri & Terisolasi (`.sidebar-nav`):**
+   - Area header identitas (*brand*) `.sidebar-brand` disematkan permanen di atas (`flex-shrink: 0`).
+   - Area footer profil & notifikasi `.sidebar-footer` disematkan permanen di bawah (`flex-shrink: 0; margin-top: auto`).
+   - Menu daftar tab `.sidebar-nav` memiliki sifat fleksibel (`flex: 1; min-height: 0; overflow-y: auto`) sehingga hanya daftar menu yang bergeser ketika layar monitor diperkecil atau daftar tab bertambah panjang.
+2. **Pencegahan Scroll Bleed / Background Chaining:**
+   - Diterapkan `overscroll-behavior: contain` pada `.sidebar` dan `.sidebar-nav`.
+   - Saat kursor mouse berada di dalam area sidebar dan di-scroll hingga batas atas/bawah, pergerakan mouse **TIDAK AKAN** merembes atau menggeser konten halaman utama di belakangnya (*zero scroll chaining*).
+3. **Scrollbar Ramping 4px Lintas Browser (*Cross-Browser Slim Scrollbar*):**
+   - **Modern Standard (Firefox, dsb):** `scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent;`.
+   - **WebKit (Chrome, Safari, Edge, Opera):**
+     - Lebar batang `::-webkit-scrollbar`: `4px`.
+     - Track transparan: `background: transparent`.
+     - Thumb: `background: #cbd5e1; border-radius: 4px;` dengan hover halus `#94a3b8`.

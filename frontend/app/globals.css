@@ -162,17 +162,20 @@ a {
 .sidebar {
   background: #ffffff;
   border-right: 1px solid var(--line);
-  padding: 14px 10px;
+  padding: 14px 10px 10px 10px;
   display: flex;
   flex-direction: column;
   position: sticky;
   top: 0;
   height: 100vh;
-  overflow-y: auto;
+  max-height: 100vh;
+  overflow: hidden;
+  overscroll-behavior: contain;
   z-index: 20;
 }
 
 .sidebar-brand {
+  flex-shrink: 0;
   margin-bottom: 12px;
   padding: 0 4px 10px 4px;
   border-bottom: 1px solid var(--line);
@@ -264,6 +267,31 @@ a {
   flex-direction: column;
   gap: 6px;
   flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  padding: 2px 2px 8px 0;
+  margin: 0;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.sidebar-nav::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar-nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
 .sidebar-section-title {
@@ -318,6 +346,7 @@ a {
 }
 
 .sidebar-footer {
+  flex-shrink: 0;
   padding-top: 10px;
   border-top: 1px solid var(--line);
   margin-top: auto;
@@ -325,6 +354,7 @@ a {
   flex-direction: column;
   gap: 4px;
   position: relative;
+  background: #ffffff;
 }
 
 .sidebar-footer .nav-link {
@@ -1278,8 +1308,13 @@ a {
 }
 
 /* ==========================================================================
-   Scrollbar
+   Cross-browser Slim Scrollbar
    ========================================================================== */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
 ::-webkit-scrollbar {
   width: 4px;
   height: 4px;
@@ -1290,8 +1325,12 @@ a {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--navy-accent);
+  background: #cbd5e1;
   border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
 /* ==========================================================================
