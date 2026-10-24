@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { 
-  BookOpen, 
-  Calendar, 
-  Clock, 
-  CheckSquare, 
-  HelpCircle, 
-  Award, 
+import {
+  BookOpen,
+  Calendar,
+  Clock,
+  CheckSquare,
+  HelpCircle,
+  Award,
   ArrowRight,
   Radio,
   FileText,
@@ -46,7 +46,7 @@ export default function MahasiswaDashboardPage() {
           academicApi.getClasses(),
           authApi.getMe(),
         ]);
-        
+
         const classList = cRes.data ?? [];
         setClasses(classList);
         if (uRes.data) setUser(uRes.data);
@@ -74,7 +74,7 @@ export default function MahasiswaDashboardPage() {
             Promise.all(assignmentPromises),
             Promise.all(quizPromises),
           ]);
-          
+
           const totalA = assignResults.reduce((acc: number, curr: { data?: Assignment[] }) => acc + (curr.data?.length ?? 0), 0);
           const totalQ = quizResults.reduce((acc: number, curr: { data?: Quiz[] }) => acc + (curr.data?.length ?? 0), 0);
           setTotalAssignments(totalA);
@@ -250,8 +250,8 @@ export default function MahasiswaDashboardPage() {
         <div className="card" style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <h2 style={{ fontSize: "14px", fontWeight: 600, color: "var(--text)" }}>Identitas Presensi IoT Kampus</h2>
-            <button 
-              type="button" 
+            <button
+              type="button"
               onClick={handleOpenKtmModal}
               className="btn btn-primary btn-sm"
               style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}
@@ -276,18 +276,18 @@ export default function MahasiswaDashboardPage() {
               <span style={{ fontSize: "11.5px", color: "rgba(255, 255, 255, 0.65)" }}>
                 UID RFID: <code style={{ color: "var(--green-accent)", fontWeight: 700 }}>{user?.student_profile?.rfid_uid || "BELUM TERDAFTAR"}</code>
               </span>
-              <StatusBadge 
-                status={user?.student_profile?.rfid_uid ? "success" : "warning"} 
-                label={user?.student_profile?.rfid_uid ? "KTM Terhubung" : "Belum Ada KTM"} 
+              <StatusBadge
+                status={user?.student_profile?.rfid_uid ? "success" : "warning"}
+                label={user?.student_profile?.rfid_uid ? "KTM Terhubung" : "Belum Ada KTM"}
               />
             </div>
           </div>
 
           <div style={{ display: "grid", gap: "0.6rem" }}>
-            <button 
-              type="button" 
+            <button
+              type="button"
               onClick={handleOpenKtmModal}
-              className="btn btn-secondary" 
+              className="btn btn-secondary"
               style={{ justifyContent: "flex-start", background: "rgba(56, 189, 248, 0.08)", borderColor: "rgba(56, 189, 248, 0.25)" }}
             >
               <CreditCard size={16} color="var(--primary-light)" />
@@ -310,8 +310,7 @@ export default function MahasiswaDashboardPage() {
         <div style={{
           position: "fixed",
           inset: 0,
-          background: "rgba(0, 0, 0, 0.75)",
-          backdropFilter: "blur(6px)",
+          background: "rgba(0, 0, 0, 0.4)",
           display: "grid",
           placeItems: "center",
           zIndex: 9999,

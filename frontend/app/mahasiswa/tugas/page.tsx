@@ -271,7 +271,7 @@ export default function MahasiswaTugasPage() {
 
       {/* Submission Modal */}
       {submitTarget && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", backdropFilter: "blur(6px)", display: "grid", placeItems: "center", zIndex: 9999, padding: "1rem" }}>
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0, 0, 0, 0.4)", display: "grid", placeItems: "center", zIndex: 9999, padding: "1rem" }}>
           <div className="card" style={{ maxWidth: "34rem", width: "100%", padding: "1.75rem" }}>
             <h3 style={{ fontSize: "1.1rem", fontWeight: 800, marginBottom: "0.4rem" }}>
               Kumpulkan Tugas — {submitTarget.title}

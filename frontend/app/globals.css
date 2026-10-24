@@ -1185,8 +1185,8 @@ a {
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.65);
-  backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.4);
+  /* Soft black overlay without excessive thickness */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1294,6 +1294,52 @@ a {
 
 .kobar-fab:hover {
   transform: scale(1.08);
+}
+
+/* ---------- Global Back to Top Button ---------- */
+.back-to-top-btn {
+  position: fixed;
+  bottom: calc(2rem + 70px);
+  /* 14px clear gap directly above SI KOBAR FAB */
+  right: calc(2rem + 6px);
+  /* Horizontally centered with SI KOBAR FAB */
+  width: 44px;
+  /* Apple HIG 44px minimum touch target */
+  height: 44px;
+  border-radius: var(--radius-full);
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  color: #2563eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.12), 0 1px 3px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  z-index: 998;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.back-to-top-btn:hover {
+  transform: translateY(-3px);
+  background: #2563eb;
+  color: #ffffff;
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.28);
+}
+
+.back-to-top-btn:active {
+  transform: scale(0.95);
+}
+
+@media (max-width: 640px) {
+  .kobar-fab {
+    bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
+    right: 1.5rem;
+  }
+
+  .back-to-top-btn {
+    bottom: calc(1.5rem + 70px + env(safe-area-inset-bottom, 0px));
+    right: calc(1.5rem + 6px);
+  }
 }
 
 .kobar-window {

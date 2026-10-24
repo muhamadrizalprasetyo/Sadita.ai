@@ -222,3 +222,19 @@ Setiap PR (*Pull Request*) atau perubahan UI wajib lolos checklist pengujian res
 - [x] Area klik semua tombol dan link minimal 44 × 44 pixel.
 - [x] Formulir input tidak memicu zoom layar otomatis di iOS Safari.
 - [x] Tabel data memiliki pembungkus scroll horizontal halus (`overflow-x: auto`) saat dibuka di layar ponsel sempit.
+
+---
+
+## 6. Hirarki Tombol Melayang (Floating Controls) & Standar Backdrop Modal
+
+### 6.1 Koordinasi Tombol Melayang (SI KOBAR FAB & Back to Top)
+Untuk mencegah tombol melayang saling menumpuk (*overlapping/clipping*):
+1. **SI KOBAR Assistant FAB**: Diletakkan pada sudut kanan bawah (`bottom: 2rem`, `right: 2rem`, ukuran `56px × 56px`, `z-index: 999`).
+2. **Back to Top Button**: Diletakkan tepat di atas SI KOBAR dengan jarak pemisah vertikal bersih 14px (`bottom: calc(2rem + 70px)`), sejajar horizontal pada sumbu tengah FAB (`right: calc(2rem + 6px)`, ukuran `44px × 44px` sesuai Apple HIG, `z-index: 998`).
+3. **Responsif Mobile & Safe Area**: Pada layar ponsel (`<= 640px`), kedua tombol otomatis menyesuaikan jarak terhadap `env(safe-area-inset-bottom)` agar tidak bertabrakan dengan bilah navigasi bawah iOS/Android.
+
+### 6.2 Standar Overlay Modal & Dialog
+1. **Bebas Blur Berlebihan (No Backdrop Blur)**: Hindari `backdrop-filter: blur(...)` pada overlay modal agar konten di balik dialog tetap tajam dan terbaca secara kontekstual.
+2. **Transparansi Hitam Lembut (Soft Black Tint)**: Menggunakan `background: rgba(0, 0, 0, 0.4)` (atau maksimal `0.45`) sehingga latar belakang teredup secara elegan tanpa terasa terlalu tebal atau pekat.
+3. **Scroll Lock Terisolasi**: Saat modal terbuka, scrolling halaman luar dinonaktifkan (`overflow: hidden` pada `html` & `body`, `touch-action: none` pada overlay) dengan momentum touch scroll tetap aktif pada kontainer isi modal (`modal-box`).
+
