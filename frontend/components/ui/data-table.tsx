@@ -1094,8 +1094,8 @@ export function DataTable<T extends { id?: string | number }>({
             borderBottomRightRadius: "8px",
           }}
         >
-          {/* Result Count */}
-          <div>
+          {/* Sisi Kiri: Result Count */}
+          <div style={{ flex: 1, minWidth: "160px" }}>
             Showing{" "}
             <strong style={{ color: "#111827", fontWeight: 600 }}>
               {pagination.totalRecords ? (pagination.currentPage - 1) * perPage + 1 : 1}
@@ -1113,35 +1113,54 @@ export function DataTable<T extends { id?: string | number }>({
             results
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            {/* Per page selector */}
-            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-              <span style={{ fontSize: "11.5px" }}>Per page</span>
-              <select
-                value={perPage}
-                onChange={(e) => {
-                  const val = Number(e.target.value);
-                  setPerPage(val);
-                  pagination.onPerPageChange?.(val);
-                }}
-                style={{
-                  padding: "3px 6px",
-                  fontSize: "11.5px",
-                  borderRadius: "6px",
-                  border: "1px solid #e5e7eb",
-                  background: "#ffffff",
-                  color: "#374151",
-                  cursor: "pointer",
-                  outline: "none",
-                }}
-              >
-                {(pagination.perPageOptions || [10, 25, 50, 100]).map((opt) => (
-                  <option key={opt} value={opt}>
-                    {opt}
-                  </option>
-                ))}
-              </select>
-            </div>
+          {/* Sisi Tengah: Per page selector */}
+          <div
+            style={{
+              flex: 1,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: "6px",
+              minWidth: "140px",
+            }}
+          >
+            <span style={{ fontSize: "11.5px" }}>Per page</span>
+            <select
+              value={perPage}
+              onChange={(e) => {
+                const val = Number(e.target.value);
+                setPerPage(val);
+                pagination.onPerPageChange?.(val);
+              }}
+              style={{
+                padding: "3px 6px",
+                fontSize: "11.5px",
+                borderRadius: "6px",
+                border: "1px solid #e5e7eb",
+                background: "#ffffff",
+                color: "#374151",
+                cursor: "pointer",
+                outline: "none",
+              }}
+            >
+              {(pagination.perPageOptions || [10, 25, 50, 100]).map((opt) => (
+                <option key={opt} value={opt}>
+                  {opt}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Sisi Kanan: Segmented Page Numbers Box */}
+          <div
+            style={{
+              flex: 1,
+              display: "flex",
+              justifyContent: "flex-end",
+              alignItems: "center",
+              minWidth: "160px",
+            }}
+          >
 
             {/* Segmented Page Numbers Box */}
             {pagination.totalPages > 1 && (

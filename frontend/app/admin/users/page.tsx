@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo, useCallback } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Pencil } from "lucide-react";
 import { userApi, type UserItem } from "@/lib/api";
 import {
   Modal,
@@ -22,6 +22,7 @@ export default function UserManagementPage() {
   const [selectedKeys, setSelectedKeys] = useState<(string | number)[]>([]);
   const [sortKey, setSortKey] = useState<string>("full_name");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+  const [viewTarget, setViewTarget] = useState<UserItem | null>(null);
 
   // Create modal state
   const [createOpen, setCreateOpen] = useState(false);
@@ -314,8 +315,10 @@ export default function UserManagementPage() {
         sortable: false,
         toggleable: false,
         render: (u) => (
-          <div style={{ display: "inline-flex", alignItems: "center", gap: "12px", justifyContent: "flex-end" }}>
-            <FilamentAction type="show" label="Show" onClick={() => openEdit(u)} />
+          <div
+            style={{ display: "inline-flex", alignItems: "center", gap: "10px", justifyContent: "flex-end" }}
+            onClick={(e) => e.stopPropagation()}
+          >
             <FilamentAction type="edit" label="Edit" onClick={() => openEdit(u)} />
             <FilamentAction type="delete" label="" onClick={() => handleDelete(u)} />
           </div>
@@ -347,6 +350,7 @@ export default function UserManagementPage() {
         loading={loading}
         loadingText="Memuat data pengguna…"
         emptyMessage="Tidak ada pengguna yang cocok dengan filter atau pencarian."
+        onRowClick={(u) => setViewTarget(u)}
         selectable
         selectedKeys={selectedKeys}
         onSelectionChange={setSelectedKeys}
@@ -611,6 +615,210 @@ export default function UserManagementPage() {
               </button>
             </div>
           </form>
+        </Modal>
+      )}
+
+      {/* Detail / View Modal (Triggered by clicking row background) */}
+      {viewTarget && (
+        <Modal
+          isOpen
+          onClose={() => setViewTarget(null)}
+          title={`Detail Pengguna — ${viewTarget.full_name}`}
+        >
+          <div style={{ display: "grid", gap: "1.25rem" }}>
+            {/* Header Profile Summary */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "1rem",
+                padding: "1rem",
+                background: "#f8fafc",
+                borderRadius: "8px",
+                border: "1px solid #e2e8f0",
+              }}
+            >
+              <div
+                style={{
+                  width: "48px",
+                  height: "48px",
+                  borderRadius: "50%",
+                  background: "#2563eb",
+                  color: "#ffffff",
+                  display: "grid",
+                  placeItems: "center",
+                  fontSize: "1.2rem",
+                  fontWeight: 700,
+                  flexShrink: 0,
+                }}
+              >
+                {viewTarget.full_name.charAt(0).toUpperCase()}
+              </div>
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                  <h3 style={{ margin: 0, fontSize: "1.05rem", fontWeight: 700, color: "#0f172a" }}>
+                    {viewTarget.full_name}
+                  </h3>
+                  <span
+                    className={`badge ${viewTarget.role === "ADMIN"
+                        ? "badge-error"
+                        : viewTarget.role === "DOSEN"
+                          ? "badge-success"
+                          : "badge-info"
+                      }`}
+                    style={{ fontSize: "11px", padding: "2px 8px", fontWeight: 600 }}
+                  >
+                    {viewTarget.role}
+                  </span>
+                  <span
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "4px",
+                      fontSize: "11px",
+                      fontWeight: 600,
+                      color: viewTarget.is_active ? "#16a34a" : "#dc2626",
+                    }}
+                  >
+                    <FilamentBoolean value={viewTarget.is_active} />
+                    <span>{viewTarget.is_active ? "Aktif" : "Nonaktif"}</span>
+                  </span>
+                </div>
+                <p style={{ margin: "3px 0 0", fontSize: "0.85rem", color: "#64748b" }}>
+                  {viewTarget.email}
+                </p>
+              </div>
+            </div>
+
+            {/* Information Grid */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+              <div
+                style={{
+                  padding: "0.85rem 1rem",
+                  borderRadius: "8px",
+                  border: "1px solid #e2e8f0",
+                  background: "#ffffff",
+                }}
+              >
+                <h4
+                  style={{
+                    margin: "0 0 0.6rem",
+                    fontSize: "0.8rem",
+                    textTransform: "uppercase",
+                    color: "#64748b",
+                    letterSpacing: "0.05em",
+                  }}
+                >
+                  Informasi Akademik
+                </h4>
+                <div style={{ display: "grid", gap: "0.5rem", fontSize: "0.85rem" }}>
+                  <div>
+                    <span style={{ color: "#64748b" }}>Departemen / Prodi: </span>
+                    <strong style={{ color: "#1e293b" }}>
+                      {viewTarget.student_profile?.department ||
+                        viewTarget.lecturer_profile?.department ||
+                        (viewTarget.role === "ADMIN" ? "Administrator SADITA" : "Universitas Insan Pembangunan")}
+                    </strong>
+                  </div>
+                  <div>
+                    <span style={{ color: "#64748b" }}>Nomor Induk: </span>
+                    <strong style={{ color: "#1e293b", fontFamily: "var(--font-mono)" }}>
+                      {viewTarget.student_profile?.nim
+                        ? `NIM ${viewTarget.student_profile.nim}`
+                        : viewTarget.lecturer_profile?.nidn
+                          ? `NIDN ${viewTarget.lecturer_profile.nidn}`
+                          : "—"}
+                    </strong>
+                  </div>
+                  {viewTarget.student_profile?.academic_cohort && (
+                    <div>
+                      <span style={{ color: "#64748b" }}>Angkatan: </span>
+                      <strong style={{ color: "#1e293b" }}>
+                        Tahun ke-{viewTarget.student_profile.academic_cohort}
+                      </strong>
+                    </div>
+                  )}
+                  {viewTarget.student_profile?.class_type && (
+                    <div>
+                      <span style={{ color: "#64748b" }}>Tipe Kelas: </span>
+                      <strong style={{ color: "#1e293b" }}>
+                        {viewTarget.student_profile.class_type.replace("_", " ")}
+                      </strong>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div
+                style={{
+                  padding: "0.85rem 1rem",
+                  borderRadius: "8px",
+                  border: "1px solid #e2e8f0",
+                  background: "#ffffff",
+                }}
+              >
+                <h4
+                  style={{
+                    margin: "0 0 0.6rem",
+                    fontSize: "0.8rem",
+                    textTransform: "uppercase",
+                    color: "#64748b",
+                    letterSpacing: "0.05em",
+                  }}
+                >
+                  Akses Perangkat & Keamanan
+                </h4>
+                <div style={{ display: "grid", gap: "0.5rem", fontSize: "0.85rem" }}>
+                  <div>
+                    <span style={{ color: "#64748b" }}>RFID UID Kartu: </span>
+                    <strong style={{ color: "#1e293b", fontFamily: "var(--font-mono)" }}>
+                      {viewTarget.student_profile?.rfid_uid || "Belum Terdaftar"}
+                    </strong>
+                  </div>
+                  <div>
+                    <span style={{ color: "#64748b" }}>ID Sistem: </span>
+                    <span style={{ color: "#64748b", fontFamily: "var(--font-mono)", fontSize: "0.75rem" }}>
+                      {viewTarget.id}
+                    </span>
+                  </div>
+                  <div>
+                    <span style={{ color: "#64748b" }}>Terdaftar Pada: </span>
+                    <span style={{ color: "#1e293b" }}>
+                      {viewTarget.created_at
+                        ? new Date(viewTarget.created_at).toLocaleDateString("id-ID", {
+                          day: "numeric",
+                          month: "long",
+                          year: "numeric",
+                        })
+                        : "—"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Actions */}
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.6rem", marginTop: "0.5rem" }}>
+              <button
+                type="button"
+                className="btn btn-outline"
+                onClick={() => setViewTarget(null)}
+              >
+                Tutup
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => {
+                  const target = viewTarget;
+                  setViewTarget(null);
+                  openEdit(target);
+                }}
+              >
+                <Pencil size={14} /> Edit Data Pengguna
+              </button>
+            </div>
+          </div>
         </Modal>
       )}
     </div>
