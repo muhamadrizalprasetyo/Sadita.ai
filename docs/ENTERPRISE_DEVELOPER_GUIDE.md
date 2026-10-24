@@ -226,16 +226,21 @@ Sesuai arahan kalibrasi antarmuka desktop agar tidak kebesaran (*bulky*) dan tid
    - **Master Akademik:** Grid modul ringkas (`gap: 0.85rem`, kartu berpadding `12px 14px`, ikon `18px`, judul `0.96rem`).
    - **Monitoring Presensi & Materi LMS:** Toolbar pemilihan kelas perkuliahan padat (`padding: 0.65rem 0.85rem`, dropdown `max-width: 20rem`), badge status dan tombol aksi berukuran pas dan elegan.
 
-### 6.7 Rekonfigurasi Sidebar Footer & Pembersihan Linting Menyeluruh
-1. **Pemindahan Kartu Profil ke Footer Sidebar:**
-   - Komponen `.sidebar-user` (avatar, nama user, role badge) dipindahkan dari atas menu ke area bawah (`.sidebar-footer`), tepat di atas tombol "Keluar Sistem".
-   - Header logo (`.sidebar-brand`) ditambahkan garis pembatas bawah (`border-bottom: 1px solid var(--line)`).
-   - Jarak antar item tab navigasi (`.sidebar-nav`) diperlebar proporsional menjadi `gap: 6px` agar tidak terlalu rapat/cramped.
-   - Penonaktifan dev overlay `devIndicators: false` pada `next.config.ts` guna mengeliminasi logo bundar `N` (Next.js Dev Indicator) yang menghalangi tombol keluar sistem.
+### 6.7 Rekonfigurasi Sidebar Footer Interaktif & Pembersihan Linting Menyeluruh
+1. **Modern User Trigger & Popover Menu (Desain Foto 1 & 2):**
+   - Menggantikan kartu statis dan tombol logout mentah dengan menu footer interaktif berstandar enterprise:
+     - **Item Notifikasi:** Menu `Notifications` dengan ikon lonceng dan badge pill counter `6` bertema biru lembut (`.sidebar-badge-pill`).
+     - **User Trigger:** Tombol pemicu profil (`.sidebar-user-trigger`) berisi avatar inisial bulat (`AS`), nama pengguna (`Administrator SADITA`), dan ikon chevron `^` yang berotasi otomatis saat menu dibuka/tutup.
+     - **Floating Popover Menu:** Menu mengambang di atas trigger (`.sidebar-user-popover`) dengan bayangan halus (*box-shadow*), menampilkan:
+       1. Info Pengguna: Ikon User dan nama lengkap.
+       2. Pengalih Tema (*Theme Switcher*): 3 tombol ikon (Terang/Sun, Gelap/Moon, Sistem/Monitor) yang fungsional mengubah mode tampilan.
+       3. Tombol Keluar (*Sign out*): Tombol sign out dengan ikon `LogOut` yang membersihkan token dan mengarahkan ke halaman login.
+     - **Deteksi Klik Luar (*Click-Outside Detection*):** Popover otomatis menutup saat pengguna mengeklik area luar layar.
 2. **Resolusi 100% Linter & Bebas Cascading Renders (`@[current_problems]`):**
    - Mengeliminasi seluruh import ikon tidak terpakai (`UserCheck`, `UserX`, `Shield`, `GraduationCap`, `BookOpen`, `Key`, `Calendar`, `Clock`, `FileText`, `CheckSquare`, `Activity`, `Filter`, `AlertCircle`, `EmptyState`).
    - Menerapkan pola `isMounted` Promise pada `app/admin/users/page.tsx` untuk mencegah `react-hooks/set-state-in-effect`.
    - Mengintegrasikan variabel `error` pada `CoursesPage` dan `DevicesPage`, serta menyambungkan fungsi `loadData` sebagai aksi tombol penyegaran manual (*refresh*) pada halaman monitoring IoT.
+
 
 
 

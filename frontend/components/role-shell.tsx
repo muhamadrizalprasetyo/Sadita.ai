@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState, useRef, type ReactNode } from "react";
 import {
   LayoutDashboard,
   BookOpen,
@@ -20,6 +20,12 @@ import {
   Building2,
   Search,
   Settings,
+  Bell,
+  ChevronUp,
+  Sun,
+  Moon,
+  Monitor,
+  User as UserIcon,
   type LucideIcon
 } from "lucide-react";
 import { authApi, clearStoredToken, getStoredToken, type User } from "@/lib/api";
@@ -99,6 +105,36 @@ export function RoleShell({ role, children }: { role: Role; children: ReactNode 
   const router = useRouter();
   const pathname = usePathname();
   const [user, setUser] = useState<User | null>(null);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [theme, setTheme] = useState<"light" | "dark" | "system">("system");
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    }
+    if (userMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
+    }
+  }, [userMenuOpen]);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (theme === "dark") {
+      root.classList.add("dark");
+    } else if (theme === "light") {
+      root.classList.remove("dark");
+    } else {
+      if (typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+        root.classList.add("dark");
+      } else {
+        root.classList.remove("dark");
+      }
+    }
+  }, [theme]);
 
   useEffect(() => {
     if (!getStoredToken()) {
@@ -171,27 +207,106 @@ export function RoleShell({ role, children }: { role: Role; children: ReactNode 
         </ul>
 
         {/* Footer */}
-        <div className="sidebar-footer">
-          {/* User Card */}
-          <div className="sidebar-user">
-            <div className="user-avatar">{initials}</div>
-            <div className="user-meta">
-              <div className="user-name" title={user.full_name}>{user.full_name}</div>
-              <span className="user-role-badge">{user.role}</span>
-            </div>
-          </div>
-
-          <button
-            className="nav-link"
-            style={{ width: "100%", background: "none", border: "none", textAlign: "left", cursor: "pointer" }}
-            onClick={() => {
-              clearStoredToken();
-              router.replace("/login");
+        <div className="sidebar-footer" ref={menuRef} style={{ position: "relative" }}>
+          {/* Notifications Item (Photo 1) */}
+          <Link
+            href={homeFor(role)}
+            className="nav-link footer-nav-item"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              width: "100%",
+              marginBottom: "2px"
             }}
           >
-            <LogOut size={16} />
-            <span>Keluar Sistem</span>
-          </button>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <Bell size={16} />
+              <span>Notifications</span>
+            </div>
+            <span className="sidebar-badge-pill">6</span>
+          </Link>
+
+          {/* User Trigger & Popover Container */}
+          <div style={{ position: "relative", width: "100%" }}>
+            {/* User Popover Menu (Photo 2) */}
+            {userMenuOpen && (
+              <div className="sidebar-user-popover">
+                {/* User row */}
+                <div className="user-popover-header">
+                  <UserIcon size={16} style={{ color: "#475569" }} />
+                  <span className="user-popover-name" title={user.full_name}>{user.full_name}</span>
+                </div>
+
+                <div className="user-popover-divider" />
+
+                {/* Theme toggle row (Light, Dark, System) */}
+                <div className="user-popover-theme-row">
+                  <button
+                    type="button"
+                    className={`theme-btn ${theme === "light" ? "active" : ""}`}
+                    onClick={() => setTheme("light")}
+                    title="Light"
+                  >
+                    <Sun size={15} />
+                  </button>
+                  <button
+                    type="button"
+                    className={`theme-btn ${theme === "dark" ? "active" : ""}`}
+                    onClick={() => setTheme("dark")}
+                    title="Dark"
+                  >
+                    <Moon size={15} />
+                  </button>
+                  <button
+                    type="button"
+                    className={`theme-btn ${theme === "system" ? "active" : ""}`}
+                    onClick={() => setTheme("system")}
+                    title="System"
+                  >
+                    <Monitor size={15} />
+                  </button>
+                </div>
+
+                <div className="user-popover-divider" />
+
+                {/* Sign out row */}
+                <button
+                  type="button"
+                  className="user-popover-logout"
+                  onClick={() => {
+                    clearStoredToken();
+                    router.replace("/login");
+                  }}
+                >
+                  <LogOut size={16} />
+                  <span>Sign out</span>
+                </button>
+              </div>
+            )}
+
+            {/* Clickable User Trigger (Photo 1 & 2) */}
+            <button
+              type="button"
+              className="sidebar-user-trigger"
+              onClick={() => setUserMenuOpen((prev) => !prev)}
+              aria-expanded={userMenuOpen}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", minWidth: 0, flex: 1 }}>
+                <div className="user-avatar">{initials}</div>
+                <span className="user-name" title={user.full_name}>{user.full_name}</span>
+              </div>
+              <ChevronUp
+                size={16}
+                style={{
+                  color: "#64748b",
+                  transition: "transform 0.2s ease",
+                  transform: userMenuOpen ? "rotate(180deg)" : "rotate(0deg)",
+                  flexShrink: 0
+                }}
+              />
+            </button>
+          </div>
         </div>
       </aside>
 
