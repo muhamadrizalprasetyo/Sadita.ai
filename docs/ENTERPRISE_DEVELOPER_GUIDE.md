@@ -255,3 +255,28 @@ Sesuai arahan kalibrasi antarmuka desktop agar tidak kebesaran (*bulky*) dan tid
      - Lebar batang `::-webkit-scrollbar`: `4px`.
      - Track transparan: `background: transparent`.
      - Thumb: `background: #cbd5e1; border-radius: 4px;` dengan hover halus `#94a3b8`.
+
+### 6.9 Revamp Fungsional Dashboard Administrator, Eliminasi Redundansi & Monitoring Presensi Real-Time
+1. **Eliminasi Fitur Ganda / Redundan (*Zero Duplicate Elements*):**
+   - **Avatar Topbar Dihapus:** Menghilangkan avatar inisial bulat statis yang tidak fungsional pada sisi kanan topbar (`.topbar-avatar`), menggantikannya dengan badge sistem terverifikasi `SADITA Enterprise Live` yang elegan. Profil pengguna tetap terpusat pada *interactive user popover* di footer sidebar.
+   - **Tombol Aksi Unik:** Mengganti tombol ganda "Kelola Akademik" pada header dashboard dengan tombol operasional utama **"Buka Sesi Presensi"** (`/admin/presensi`), membedakannya dari tombol "Kelola Semua Kelas" (`/admin/akademik`) pada tabel perkuliahan.
+   - **Diferensiasi Ikon Stat Card:** Mengeliminasi duplikasi ikon lucide (`Users` ganda dan `BookOpen` ganda). Dosen Pengampu kini menggunakan `UserCheck`, dan Kelas Perkuliahan menggunakan `Layers`.
+2. **Navigasi Interaktif Kartu KPI (*Actionable Stat Cards*):**
+   - Seluruh 8 StatCard dibungkus dengan tautan semantik (`.stat-card-link`) dengan efek hover *micro-lift* (`translateY(-2px)`) yang langsung mengarahkan administrator ke modul terkait:
+     - Mahasiswa & Dosen: `/admin/users`
+     - Kelas & Mata Kuliah: `/admin/akademik`
+     - Sesi Aktif, Approval, & Presensi Hari Ini: `/admin/presensi`
+     - Perangkat Offline: `/admin/perangkat`
+3. **Widget Sesi Perkuliahan Berlangsung (*Real-Time Live Attendance Widget*):**
+   - Integrasi otomatis saat terdapat sesi perkuliahan aktif (`SessionStatus.OPEN`), menampilkan:
+     - Indikator live berdenyut (*pulsing emerald dot*).
+     - Rombel kelas, mata kuliah, topik pertemuan, nama dosen pengampu, dan ruang lab IoT.
+     - Penghitung live mahasiswa hadir (*present count*) dan tombol pintas `Pantau Presensi ->`.
+4. **Pencarian & Filter Kelas Cepat (*Client-Side Search & Chips*):**
+   - Kotak pencarian responsif untuk mencari kelas, mata kuliah, atau dosen secara instan.
+   - Tombol filter cepat (*Filter Chips*): `Semua`, `Pagi`, `Malam`.
+   - Kolom data tabel kaya: Rombel + Mode Kuliah, Mata Kuliah + SKS + Dosen, Jadwal + Ruangan, dan tombol aksi langsung `Presensi`.
+5. **Diagnostik Perangkat IoT & Aliran Aktivitas Terkini (*IoT Ping & Live Activity Stream*):**
+   - Tombol diagnostik cepat `Ping` pada kartu perangkat ESP32-S3 dengan umpan balik status latensi (*Aktif 12ms*).
+   - Feed linimasa aktivitas presensi terkini (*Recent Activities*) yang menampilkan stream rekaman tap RFID dan biometrik mahasiswa secara realtime.
+

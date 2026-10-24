@@ -23,6 +23,7 @@ from app.models.attendance import AttendanceRecord, AttendanceSession, SessionSt
 from app.models.device import DeviceStatus, SaditaDevice
 from app.models.lecturer import LecturerProfile
 from app.models.student import StudentProfile
+from app.models.workflow import AuditLog
 from app.repositories.academic_repo import AcademicRepository
 from app.repositories.user_repo import LecturerRepository, StudentRepository
 from app.models.user import User, UserRole
@@ -30,7 +31,9 @@ from app.services.authorization_service import require_class_access
 from app.schemas.academic import (
     AcademicTermCreate,
     AcademicTermResponse,
+    ActiveSessionInfo,
     AdminDashboardResponse,
+    RecentActivityItem,
     ClassEnrollmentCreate,
     ClassEnrollmentResponse,
     ClassRoomCreate,
@@ -92,6 +95,72 @@ def admin_dashboard(_: RequireAdmin, db: DBSession) -> AdminDashboardResponse:
         or 0
     )
 
+    # Active session details (if any open session exists)
+    active_session_info: Optional[ActiveSessionInfo] = None
+    open_sess = db.scalars(
+        select(AttendanceSession)
+        .where(AttendanceSession.status == SessionStatus.OPEN)
+        .order_by(AttendanceSession.id.desc())
+    ).first()
+    if open_sess:
+        cls = db.scalar(select(CourseClass).where(CourseClass.id == open_sess.class_id))
+        present_count = (
+            db.scalar(
+                select(func.count(AttendanceRecord.id)).where(
+                    AttendanceRecord.session_id == open_sess.id
+                )
+            )
+            or 0
+        )
+        active_session_info = ActiveSessionInfo(
+            id=open_sess.id,
+            class_id=open_sess.class_id,
+            class_name=cls.name if cls else f"Kelas #{open_sess.class_id}",
+            course_name=cls.course.name if cls and cls.course else "Mata Kuliah",
+            lecturer_name=(
+                cls.lecturer.user.full_name
+                if cls and cls.lecturer and cls.lecturer.user
+                else "Dosen Pengampu"
+            ),
+            room_name=cls.room.name if cls and cls.room else "Ruang Kelas",
+            session_number=open_sess.session_number,
+            topic=open_sess.topic or "Sesi Perkuliahan Berlangsung",
+            opened_at=open_sess.opened_at,
+            present_count=present_count,
+        )
+
+    # Recent activities (from audit trail or recent attendance taps)
+    recent_activities: List[RecentActivityItem] = []
+    audits = db.scalars(select(AuditLog).order_by(AuditLog.created_at.desc()).limit(5)).all()
+    for a in audits:
+        recent_activities.append(
+            RecentActivityItem(
+                id=a.id,
+                action=a.action,
+                description=f"{a.action} pada {a.entity} #{a.entity_id or ''}",
+                created_at=a.created_at,
+            )
+        )
+    if not recent_activities:
+        recent_recs = db.scalars(
+            select(AttendanceRecord).order_by(AttendanceRecord.id.desc()).limit(5)
+        ).all()
+        for r in recent_recs:
+            student_name = (
+                r.student.user.full_name
+                if r.student and r.student.user
+                else f"Mahasiswa #{r.student_id}"
+            )
+            method_str = r.method.value if r.method else "RFID"
+            recent_activities.append(
+                RecentActivityItem(
+                    id=r.id,
+                    action=f"PRESENSI_{r.status.value}",
+                    description=f"{student_name} ({method_str.upper()}) - {r.status.value}",
+                    created_at=r.check_in_time or datetime.now(timezone.utc),
+                )
+            )
+
     return AdminDashboardResponse(
         total_students=total_students,
         total_lecturers=total_lecturers,
@@ -102,7 +171,10 @@ def admin_dashboard(_: RequireAdmin, db: DBSession) -> AdminDashboardResponse:
         pending_approvals=pending_approvals,
         today_attendance=today_attendance,
         generated_at=datetime.now(timezone.utc),
+        active_session=active_session_info,
+        recent_activities=recent_activities,
     )
+
 
 
 # --- Terms ---
