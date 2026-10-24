@@ -128,3 +128,48 @@ Pastikan tidak ada peringatan atau error sintaks ESLint dan TypeScript compiler.
 4. **Keamanan MQTT di Produksi**:
    - Nonaktifkan `allow_anonymous true` di `mosquitto.conf`.
    - Wajibkan sertifikat klien (mTLS) atau username/password hash untuk ESP32.
+
+---
+
+## 5. Standar Git, Alur Branching & Pedoman Kontributor GitHub (Git Workflow)
+
+Bagi seluruh developer dan agen AI yang melakukan pekerjaan pada repositori ini, wajib mengikuti alur kerja Git berikut agar riwayat commit tertata rapi dan kontributor tercatat dengan benar:
+
+### 5.1 Remote Repositori Resmi
+- **URL Remote:** `git@github.com:muhamadrizalprasetyo/Sadita.ai.git`
+- **Default Branch:** `main`
+
+### 5.2 Standar Penamaan Branch Enterprise
+Dilarang membuat branch dengan nama sembarangan atau langsung push ke `main` tanpa koordinasi. Gunakan format awalan (*prefix*) terstruktur:
+- `feat/<fitur-singkat>` : Untuk pengembangan fitur baru (contoh: `feat/lms-attendance-integration`).
+- `fix/<bug-singkat>` : Untuk perbaikan bug atau logic error (contoh: `fix/grading-subquery-score`).
+- `docs/<topik-singkat>` : Untuk pembaruan atau pembuatan dokumentasi (contoh: `docs/enterprise-architecture-and-standards`).
+- `refactor/<modul>` : Untuk restrukturisasi kode tanpa mengubah fungsionalitas.
+
+### 5.3 Prosedur Push & Pull Request (End-to-End Workflow)
+```bash
+# 1. Pastikan repositori lokal terhubung dengan origin
+git remote -v
+
+# 2. Ambil perubahan terbaru dari server
+git fetch origin
+
+# 3. Buat branch baru dari branch utama
+git checkout -b <tipe>/<nama-branch> origin/main
+
+# 4. Lakukan staging dan commit dengan Conventional Commits
+git add <berkas-yang-diubah>
+git commit -m "type: deskripsi ringkas perubahan" -m "- Rincian perubahan poin 1
+- Rincian perubahan poin 2"
+
+# 5. Push branch ke GitHub
+git push -u origin <tipe>/<nama-branch>
+
+# 6. Buka Pull Request (PR)
+# Terminal akan menampilkan tautan otomatis, buka URL tersebut di browser untuk membuat PR ke 'main'.
+```
+
+### 5.4 Mengapa Nama Kontributor Belum Muncul di Halaman Utama Repositori? (PENTING)
+Banyak developer atau AI bingung ketika sudah push tetapi profilnya belum muncul di daftar **"Contributors"** di sidebar kanan repositori GitHub:
+1. **Aturan Default Branch GitHub**: GitHub **HANYA** menghitung dan menampilkan kontributor jika commit tersebut telah **di-merge ke branch utama (`main`)**. Selama commit masih berada di branch terpisah (misal `feat/*` atau `docs/*`), commit tersebut belum dihitung ke dalam widget *Contributors*.
+2. **Kesesuaian Email Git**: Pastikan email pada konfigurasi git lokal (`git config user.email`) sudah **terdaftar dan terverifikasi** di akun GitHub pengembang pada menu **Settings → Emails**. Jika email tidak cocok, GitHub tidak dapat menautkan profil akun ke commit tersebut meskipun branch sudah di-merge ke `main`.
