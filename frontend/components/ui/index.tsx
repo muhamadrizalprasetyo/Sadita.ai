@@ -7,6 +7,8 @@ export {
   DataTable,
   type ColumnDef,
   type DataTableProps,
+  type TableFilterDef,
+  type BulkActionItem,
   FilamentBoolean,
   FilamentAction,
 } from "./data-table";

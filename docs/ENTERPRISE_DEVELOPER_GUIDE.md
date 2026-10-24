@@ -311,17 +311,19 @@ Sesuai prinsip DRY (*Don't Repeat Yourself*) dan efisiensi kode frontend di selu
      } from "@/components/ui";
      ```
 
-### 6.11 Standar Desain Tabel Laravel Filament v3 (Enterprise Resource Table)
-Untuk menjamin konsistensi pengalaman pengguna (UX) bagi developer dan admin sistem, antarmuka tabel SADITA diadopsi dari standar Laravel Filament v3:
+### 6.11 Standar Desain Tabel Laravel Filament v5 (Enterprise Resource Table)
+Untuk menjamin konsistensi pengalaman pengguna (UX) bagi developer dan admin sistem, antarmuka tabel SADITA mengadopsi standar terkini Laravel Filament v5:
 1. **Container & Elevasi Card:**
    - Card putih (`#ffffff`), border 1px solid abu-abu muda (`#e5e7eb`), radius sudut seragam `rounded-lg` (8px), dan bayangan mikro tipis.
-2. **Topbar Terpadu (Search & Column Actions):**
+2. **Topbar Terpadu (Search, Filters, & Columns Visibility):**
    - Kotak pencarian (*Search*) di pojok kanan dengan ikon loop (`Search`), sudut membulat, dan efek focus ring halus.
-   - Tombol toggle kolom (*Column Visibility*) dengan ikon `Columns3` untuk kustomisasi tampilan kolom dinamis.
-   - Slot aksi bilah alat kiri (`toolbarActions`) untuk tombol filter peran, status, atau tombol ekspor data.
-3. **Penyortiran & Seleksi Baris (Sorting & Multi-Select Checkboxes):**
-   - Checkbox header untuk memilih semua data (*Select All*) dan checkbox baris interaktif dengan aksen biru Filament (`#2563eb`).
-   - Indikator panah sorting (`ChevronDown`) halus di samping label header kolom yang dapat diurutkan (*sortable*).
+   - **Tombol & Popover Filter Khusus (`ListFilter`):** Filter tidak diletakkan sebagai tab arbitrer di toolbar, melainkan diakses melalui tombol filter terdedikasi di pojok kanan atas. Ketika filter aktif, tombol menampilkan badge jumlah filter aktif dan berlatar biru lembut. Mengklik tombol membuka popover berisikan dropdown filter (`Peran Pengguna`, `Status Akun`), tombol tautan merah `Reset`, dan tombol `Apply filters`.
+   - **Tombol & Popover Kolom (`Columns3`):** Membuka popover interaktif untuk memilih visibilitas kolom (*Name*, *Parent*, *Role*, *Visibility*), tautan merah `Reset` untuk mengembalikan ke setelan default, dan tombol biru `Apply columns`.
+3. **Penyortiran & Seleksi Baris Multi-Select (Bulk Actions & Selection Bar):**
+   - Checkbox header (*Select All*) dan checkbox baris interaktif dengan aksen biru Filament (`#2563eb`).
+   - Indikator strip biru vertikal (`border-left: 3px solid #2563eb`) di sisi paling kiri setiap baris yang terpilih (*selected row*).
+   - **Tombol Aksi Massal (`Bulk actions`):** Otomatis muncul di pojok kiri atas toolbar ketika ada data terpilih, membuka menu dropdown seperti `Delete selected` dengan ikon tempat sampah merah.
+   - **Bilah Pemilihan Data (*Selection Bar*):** Tampil di bawah toolbar ketika baris dipilih, menyajikan info `X records selected`, tautan biru `Select all N`, dan tautan merah `Deselect all`.
 4. **Indikator Status Boolean Filament (`FilamentBoolean`):**
    - Ikon lingkaran centang hijau (`CheckCircle2` / `#16a34a`) untuk status aktif/visibel.
    - Ikon lingkaran silang merah (`XCircle` / `#ef4444`) untuk status nonaktif/tersembunyi.
@@ -331,6 +333,7 @@ Untuk menjamin konsistensi pengalaman pengguna (UX) bagi developer dan admin sis
    - Sisi kiri: Informasi jumlah hasil (*"Showing 1 to 10 of 42 results"*).
    - Sisi tengah: Pemilih batas per halaman (*"Per page [ 10 ˅ ]"*).
    - Sisi kanan: Kontainer paginasi nomor tersegmentasi (*`[ 1 ] [ 2 ] [ 3 ] [ ... ] [ 5 ] [ > ]`*) dengan penanda halaman aktif berwarna biru Filament (`#eff6ff` & `#2563eb`).
+
 
 
 

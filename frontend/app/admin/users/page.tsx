@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo, useCallback } from "react";
-import { Plus } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { userApi, type UserItem } from "@/lib/api";
 import {
   Modal,
@@ -16,6 +16,7 @@ export default function UserManagementPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("ALL");
+  const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [currentPage, setCurrentPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
   const [selectedKeys, setSelectedKeys] = useState<(string | number)[]>([]);
@@ -71,6 +72,13 @@ export default function UserManagementPage() {
   const filteredUsers = useMemo(() => {
     let result = users.filter((u) => {
       const matchRole = roleFilter === "ALL" || u.role === roleFilter;
+      const matchStatus =
+        statusFilter === "ALL"
+          ? true
+          : statusFilter === "ACTIVE"
+            ? u.is_active === true
+            : u.is_active === false;
+
       const q = search.trim().toLowerCase();
       const matchQuery =
         !q ||
@@ -78,7 +86,8 @@ export default function UserManagementPage() {
         u.email.toLowerCase().includes(q) ||
         (u.student_profile?.nim && u.student_profile.nim.toLowerCase().includes(q)) ||
         (u.lecturer_profile?.nidn && u.lecturer_profile.nidn.toLowerCase().includes(q));
-      return matchRole && matchQuery;
+
+      return matchRole && matchStatus && matchQuery;
     });
 
     if (sortKey) {
@@ -106,7 +115,7 @@ export default function UserManagementPage() {
     }
 
     return result;
-  }, [users, roleFilter, search, sortKey, sortDirection]);
+  }, [users, roleFilter, statusFilter, search, sortKey, sortDirection]);
 
   const totalPages = Math.ceil(filteredUsers.length / perPage) || 1;
 
@@ -222,13 +231,26 @@ export default function UserManagementPage() {
     [loadUsers]
   );
 
-  // Filament v3 Column Definitions matching user screenshot
+  const handleBulkDelete = useCallback(
+    async (keys: (string | number)[]) => {
+      if (!confirm(`Hapus ${keys.length} akun pengguna terpilih? Tindakan ini permanen.`)) return;
+      for (const key of keys) {
+        await userApi.delete(Number(key));
+      }
+      setSelectedKeys([]);
+      await loadUsers();
+    },
+    [loadUsers]
+  );
+
+  // Filament v5 Column Definitions matching user screenshots
   const userColumns = useMemo<ColumnDef<UserItem>[]>(
     () => [
       {
         key: "full_name",
         header: "Name",
         sortable: true,
+        toggleable: false, // Name is core, cannot be hidden
         render: (u) => (
           <div style={{ display: "flex", flexDirection: "column" }}>
             <span style={{ fontWeight: 600, color: "#111827", fontSize: "12.5px" }}>{u.full_name}</span>
@@ -240,6 +262,7 @@ export default function UserManagementPage() {
         key: "parent",
         header: "Parent",
         sortable: true,
+        toggleable: true,
         render: (u) => {
           const dept = u.student_profile?.department || u.lecturer_profile?.department;
           const idStr = u.student_profile?.nim
@@ -261,13 +284,14 @@ export default function UserManagementPage() {
         key: "role",
         header: "Role",
         sortable: true,
+        toggleable: true,
         render: (u) => (
           <span
             className={`badge ${u.role === "ADMIN"
-                ? "badge-error"
-                : u.role === "DOSEN"
-                  ? "badge-success"
-                  : "badge-info"
+              ? "badge-error"
+              : u.role === "DOSEN"
+                ? "badge-success"
+                : "badge-info"
               }`}
             style={{ fontSize: "11px", padding: "2px 8px", fontWeight: 600 }}
           >
@@ -280,6 +304,7 @@ export default function UserManagementPage() {
         header: "Visibility",
         align: "center",
         sortable: true,
+        toggleable: true,
         render: (u) => <FilamentBoolean value={u.is_active} />,
       },
       {
@@ -287,6 +312,7 @@ export default function UserManagementPage() {
         header: "",
         align: "right",
         sortable: false,
+        toggleable: false,
         render: (u) => (
           <div style={{ display: "inline-flex", alignItems: "center", gap: "12px", justifyContent: "flex-end" }}>
             <FilamentAction type="show" label="Show" onClick={() => openEdit(u)} />
@@ -314,16 +340,25 @@ export default function UserManagementPage() {
         </button>
       </div>
 
-      {/* Filament v3 DataTable */}
+      {/* Filament v5 DataTable with Filters Popover, Columns Popover & Bulk Actions */}
       <DataTable<UserItem>
         columns={userColumns}
         data={paginatedUsers}
         loading={loading}
         loadingText="Memuat data pengguna…"
-        emptyMessage="Tidak ada pengguna yang cocok dengan kriteria pencarian."
+        emptyMessage="Tidak ada pengguna yang cocok dengan filter atau pencarian."
         selectable
         selectedKeys={selectedKeys}
         onSelectionChange={setSelectedKeys}
+        bulkActions={[
+          {
+            key: "delete",
+            label: "Delete selected",
+            icon: <Trash2 size={13} color="#dc2626" />,
+            danger: true,
+            onClick: handleBulkDelete,
+          },
+        ]}
         sortKey={sortKey}
         sortDirection={sortDirection}
         onSort={handleSort}
@@ -335,41 +370,43 @@ export default function UserManagementPage() {
         }}
         searchPlaceholder="Search"
         showColumnToggle
-        toolbarActions={
-          <div style={{ display: "flex", gap: "4px", flexWrap: "wrap" }}>
-            {[
-              { key: "ALL", label: "Semua" },
-              { key: "ADMIN", label: "Admin" },
-              { key: "DOSEN", label: "Dosen" },
-              { key: "MAHASISWA", label: "Mahasiswa" },
-            ].map((tab) => {
-              const active = roleFilter === tab.key;
-              return (
-                <button
-                  key={tab.key}
-                  type="button"
-                  onClick={() => {
-                    setRoleFilter(tab.key);
-                    setCurrentPage(1);
-                  }}
-                  style={{
-                    padding: "4px 10px",
-                    borderRadius: "6px",
-                    fontSize: "11.5px",
-                    fontWeight: active ? 600 : 500,
-                    border: "none",
-                    cursor: "pointer",
-                    background: active ? "#eff6ff" : "transparent",
-                    color: active ? "#2563eb" : "#64748b",
-                    transition: "all 0.15s ease",
-                  }}
-                >
-                  {tab.label}
-                </button>
-              );
-            })}
-          </div>
-        }
+        filters={[
+          {
+            key: "role",
+            label: "Peran Pengguna (Role)",
+            value: roleFilter,
+            onChange: (val) => {
+              setRoleFilter(val);
+              setCurrentPage(1);
+            },
+            options: [
+              { value: "ALL", label: "Semua Peran" },
+              { value: "ADMIN", label: "Administrator" },
+              { value: "DOSEN", label: "Dosen Pengampu" },
+              { value: "MAHASISWA", label: "Mahasiswa" },
+              { value: "KETUA_KELAS", label: "Ketua Kelas" },
+            ],
+          },
+          {
+            key: "status",
+            label: "Status Akun",
+            value: statusFilter,
+            onChange: (val) => {
+              setStatusFilter(val);
+              setCurrentPage(1);
+            },
+            options: [
+              { value: "ALL", label: "Semua Status" },
+              { value: "ACTIVE", label: "Aktif Saja" },
+              { value: "INACTIVE", label: "Nonaktif / Terblokir" },
+            ],
+          },
+        ]}
+        onResetFilters={() => {
+          setRoleFilter("ALL");
+          setStatusFilter("ALL");
+          setCurrentPage(1);
+        }}
         pagination={{
           currentPage,
           totalPages,
