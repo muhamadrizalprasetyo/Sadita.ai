@@ -1,39 +1,39 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
-import { 
-  Plus, 
-  BookOpen, 
-  Calendar, 
-  Users, 
-  GraduationCap, 
-  Radio, 
-  Clock, 
-  FileText, 
-  CheckSquare, 
-  Activity, 
-  Search, 
-  Filter, 
-  CheckCircle, 
+import {
+  Plus,
+  BookOpen,
+  Calendar,
+  Users,
+  GraduationCap,
+  Radio,
+  Clock,
+  FileText,
+  CheckSquare,
+  Activity,
+  Search,
+  Filter,
+  CheckCircle,
   AlertCircle,
   Edit3,
   Upload
 } from "lucide-react";
-import { 
-  academicApi, 
-  attendanceApi, 
-  deviceApi, 
-  healthApi, 
-  lmsApi, 
-  studentApi, 
+import {
+  academicApi,
+  attendanceApi,
+  deviceApi,
+  healthApi,
+  lmsApi,
+  studentApi,
   lecturerApi,
   uploadApi,
   authApi,
   getFileUrl,
   type User,
-  type Assignment, 
-  type AttendanceSession, 
-  type CourseClass, 
+  type Assignment,
+  type AttendanceSession,
+  type CourseClass,
   type CourseMaterial,
   type Course,
   type AcademicTerm,
@@ -202,8 +202,8 @@ export function CoursesPage() {
     }
   };
 
-  const filtered = items.filter(c => 
-    c.name.toLowerCase().includes(search.toLowerCase()) || 
+  const filtered = items.filter(c =>
+    c.name.toLowerCase().includes(search.toLowerCase()) ||
     c.code.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -349,7 +349,6 @@ export function ClassesPage({ mine = false }: { mine?: boolean }) {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   const loadData = async () => {
-    setLoading(true);
     const [cRes, crsRes, tRes, lRes, uRes, rRes] = await Promise.all([
       academicApi.getClasses(),
       academicApi.getCourses(),
@@ -386,7 +385,46 @@ export function ClassesPage({ mine = false }: { mine?: boolean }) {
   };
 
   useEffect(() => {
-    void loadData();
+    let isMounted = true;
+    Promise.all([
+      academicApi.getClasses(),
+      academicApi.getCourses(),
+      academicApi.getTerms(),
+      lecturerApi.list({ limit: 100 }),
+      authApi.getMe(),
+      academicApi.getRooms(),
+    ]).then(([cRes, crsRes, tRes, lRes, uRes, rRes]) => {
+      if (!isMounted) return;
+      if (uRes.data) setCurrentUser(uRes.data);
+      if (cRes.data) setItems(cRes.data);
+      if (rRes.data) {
+        const roomList = rRes.data;
+        setRooms(roomList);
+        if (roomList.length > 0) {
+          setFormData((f) => ({ ...f, room_id: roomList[0].id }));
+        }
+      }
+      if (crsRes.data && crsRes.data.length > 0) {
+        const crsData = crsRes.data;
+        setCourses(crsData);
+        setFormData((f) => ({ ...f, course_id: crsData[0].id }));
+      }
+      if (tRes.data && tRes.data.length > 0) {
+        const tData = tRes.data;
+        setTerms(tData);
+        setFormData((f) => ({ ...f, term_id: tData[0].id }));
+      }
+      if (lRes.data && lRes.data.length > 0) {
+        const lData = lRes.data;
+        setLecturers(lData);
+        setFormData((f) => ({ ...f, lecturer_id: lData[0].id }));
+      }
+      setLoading(false);
+    });
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const handleCreate = async (e: React.FormEvent) => {
@@ -906,12 +944,11 @@ export function PeoplePage({ lecturer = false }: { lecturer?: boolean }) {
   const [classTypeFilter, setClassTypeFilter] = useState<string>("all");
 
   useEffect(() => {
-    const promises: [Promise<any>, Promise<any>] = [
+    void Promise.all([
       lecturer ? lecturerApi.list({ limit: 200 }) : studentApi.list(0, 200),
       academicApi.getClasses(),
-    ];
-    void Promise.all(promises).then(([pRes, cRes]) => {
-      setItems(pRes.data ?? []);
+    ]).then(([pRes, cRes]) => {
+      setItems((pRes.data as (LecturerProfile | StudentProfile)[]) ?? []);
       if (cRes.data) setClasses(cRes.data);
       setLoading(false);
     });
@@ -1058,8 +1095,8 @@ export function PeoplePage({ lecturer = false }: { lecturer?: boolean }) {
                 const classLabel = stu.class_type === "REGULER_MALAM"
                   ? "Reguler Malam"
                   : stu.class_type === "REGULER_SHIFT"
-                  ? "Reguler Shift"
-                  : "Reguler Pagi";
+                    ? "Reguler Shift"
+                    : "Reguler Pagi";
 
                 return (
                   <tr key={stu.id}>
@@ -1226,11 +1263,11 @@ export function AttendancePage() {
         subtitle="Riwayat pertemuan perkuliahan dan status pembukaan sesi tap RFID"
       />
 
-      <div className="card" style={{ marginBottom: "1.5rem", display: "flex", alignItems: "center", gap: "1rem" }}>
-        <label style={{ fontSize: "0.875rem", fontWeight: 600 }}>Pilih Kelas Perkuliahan:</label>
+      <div className="card" style={{ marginBottom: "0.75rem", padding: "0.55rem 0.75rem", display: "flex", alignItems: "center", gap: "0.6rem" }}>
+        <label style={{ fontSize: "0.78rem", fontWeight: 600 }}>Pilih Kelas Perkuliahan:</label>
         <select
           className="form-select"
-          style={{ maxWidth: "20rem" }}
+          style={{ maxWidth: "18rem" }}
           value={selected ?? ""}
           onChange={e => setSelected(Number(e.target.value))}
         >
@@ -1357,11 +1394,11 @@ export function LmsPage({ assignment = false }: { assignment?: boolean }) {
         subtitle={assignment ? "Tugas terstruktur kelas, pengumpulan berkas PDF, dan batas waktu" : "Dokumen modul, slide PPT perkuliahan, dan link pembelajaran"}
       />
 
-      <div className="card" style={{ marginBottom: "1.5rem", display: "flex", alignItems: "center", gap: "1rem" }}>
-        <label style={{ fontSize: "0.875rem", fontWeight: 600 }}>Pilih Kelas Perkuliahan:</label>
+      <div className="card" style={{ marginBottom: "0.75rem", padding: "0.55rem 0.75rem", display: "flex", alignItems: "center", gap: "0.6rem" }}>
+        <label style={{ fontSize: "0.78rem", fontWeight: 600 }}>Pilih Kelas Perkuliahan:</label>
         <select
           className="form-select"
-          style={{ maxWidth: "20rem" }}
+          style={{ maxWidth: "18rem" }}
           value={selected ?? ""}
           onChange={e => setSelected(Number(e.target.value))}
         >

@@ -85,47 +85,45 @@ export default function AdminDashboardPage() {
   }
 
   return (
-    <div style={{ display: "grid", gap: "14px" }}>
+    <div style={{ display: "grid", gap: "10px" }}>
       {/* 1. Header */}
       <div className="page-header" style={{ marginBottom: 0, padding: 0 }}>
         <div>
-          <h1 className="page-title" style={{ fontSize: "20px", fontWeight: 700, margin: 0 }}>
+          <h1 className="page-title" style={{ margin: 0 }}>
             Dashboard Administrator
           </h1>
-          <p className="page-subtitle" style={{ fontSize: "12.5px", color: "var(--muted)", margin: "2px 0 0" }}>
+          <p className="page-subtitle" style={{ margin: "1px 0 0" }}>
             Sistem Akademik Terintegrasi & Monitoring Presensi IoT
           </p>
         </div>
-        <div style={{ display: "flex", gap: "8px" }}>
+        <div style={{ display: "flex", gap: "6px" }}>
           <button
             onClick={() => loadData(true)}
             disabled={refreshing}
             className="btn btn-secondary btn-sm"
-            style={{ borderRadius: "8px" }}
           >
-            <RefreshCw size={14} className={refreshing ? "spin" : ""} />
+            <RefreshCw size={13} className={refreshing ? "spin" : ""} />
             <span>{refreshing ? "Memuat..." : "Segarkan"}</span>
           </button>
           <Link
             href="/admin/akademik"
             className="btn btn-primary btn-sm"
-            style={{ borderRadius: "8px" }}
           >
-            <Plus size={14} />
+            <Plus size={13} />
             <span>Kelola Akademik</span>
           </Link>
         </div>
       </div>
 
       {error && (
-        <div style={{ padding: "10px 14px", borderRadius: "10px", background: "var(--error-bg)", border: "1px solid var(--error-border)", color: "var(--error)", fontSize: "12.5px" }}>
+        <div style={{ padding: "8px 12px", borderRadius: "6px", background: "var(--error-bg)", border: "1px solid var(--error-border)", color: "var(--error)", fontSize: "11px" }}>
           {error}
         </div>
       )}
 
       {/* 2. Metrics Stat Grid (8 Cards, tightly spaced) */}
       {stats && (
-        <div className="stats" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "12px", marginBottom: 0 }}>
+        <div className="stats" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "8px", marginBottom: 0 }}>
           <StatCard
             label="Total Mahasiswa"
             value={stats.total_students}
@@ -186,37 +184,37 @@ export default function AdminDashboardPage() {
       )}
 
       {/* 3. Realtime Overview Section (Classes Table & IoT Devices) */}
-      <div style={{ display: "grid", gridTemplateColumns: "1.35fr 1fr", gap: "14px", alignItems: "start" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1.35fr 1fr", gap: "10px", alignItems: "start" }}>
 
         {/* Classes Table */}
-        <div className="card" style={{ padding: "16px 18px", borderRadius: "12px" }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
-            <h2 style={{ fontSize: "15px", fontWeight: 600, color: "var(--text)", margin: 0 }}>
+        <div className="card" style={{ padding: "12px 14px" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
+            <h2 style={{ fontSize: "13px", fontWeight: 600, color: "var(--text)", margin: 0 }}>
               Kelas Perkuliahan Aktif
             </h2>
             <Link
               href="/admin/akademik"
               className="btn btn-outline btn-sm"
-              style={{ borderRadius: "8px", padding: "4px 10px", fontSize: "12px", display: "inline-flex", alignItems: "center", gap: "5px" }}
+              style={{ padding: "2px 7px", fontSize: "10.5px" }}
             >
               <span>Semua Kelas</span>
-              <ArrowRight size={13} />
+              <ArrowRight size={12} />
             </Link>
           </div>
 
           {classes.length === 0 ? (
-            <p style={{ color: "var(--muted)", fontSize: "12.5px", padding: "16px 0", textAlign: "center" }}>
+            <p style={{ color: "var(--muted)", fontSize: "11px", padding: "12px 0", textAlign: "center" }}>
               Belum ada kelas terdaftar.
             </p>
           ) : (
-            <div className="table-container" style={{ borderRadius: "10px", border: "1px solid var(--line)", boxShadow: "none" }}>
+            <div className="table-container" style={{ border: "1px solid var(--line)", boxShadow: "none" }}>
               <table className="data-table">
                 <thead>
                   <tr>
-                    <th style={{ width: "135px" }}>Kode / Kelas</th>
+                    <th style={{ width: "120px" }}>Kode / Kelas</th>
                     <th>Mata Kuliah</th>
-                    <th style={{ width: "165px" }}>Jadwal</th>
-                    <th style={{ width: "80px", textAlign: "center" }}>Status</th>
+                    <th style={{ width: "150px" }}>Jadwal</th>
+                    <th style={{ width: "70px", textAlign: "center" }}>Status</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -226,28 +224,28 @@ export default function AdminDashboardPage() {
                     return (
                       <tr key={c.id}>
                         <td>
-                          <span className="badge-class-code" style={{ borderRadius: "6px" }}>
+                          <span className="badge-class-code">
                             {rombelCode}
                           </span>
                         </td>
                         <td>
-                          <div style={{ fontWeight: 600, fontSize: "13px", color: "var(--text)" }}>
+                          <div style={{ fontWeight: 600, fontSize: "11.5px", color: "var(--text)" }}>
                             {c.course?.name || "Mata Kuliah"}
                           </div>
                           {c.course?.code && (
-                            <div style={{ fontSize: "11px", color: "var(--muted)", marginTop: "1px" }}>
+                            <div style={{ fontSize: "10px", color: "var(--muted)", marginTop: "1px" }}>
                               Kode: {c.course.code}
                             </div>
                           )}
                         </td>
-                        <td style={{ fontSize: "12px", color: "var(--text)" }}>
+                        <td style={{ fontSize: "11px", color: "var(--text)" }}>
                           <div style={{ fontWeight: 500, color: "#1e293b" }}>{dayName}</div>
-                          <div style={{ fontSize: "11px", color: "var(--muted)" }}>
+                          <div style={{ fontSize: "10px", color: "var(--muted)" }}>
                             {formatTime(c.start_time)} - {formatTime(c.end_time)} WIB
                           </div>
                         </td>
                         <td style={{ textAlign: "center" }}>
-                          <span className="badge badge-success" style={{ fontSize: "11px", padding: "2px 7px", borderRadius: "6px" }}>
+                          <span className="badge badge-success">
                             Aktif
                           </span>
                         </td>
@@ -261,24 +259,24 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Hardware Monitoring Card */}
-        <div className="card" style={{ padding: "16px 18px", borderRadius: "12px" }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
-            <h2 style={{ fontSize: "15px", fontWeight: 600, color: "var(--text)", margin: 0 }}>
+        <div className="card" style={{ padding: "12px 14px" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
+            <h2 style={{ fontSize: "13px", fontWeight: 600, color: "var(--text)", margin: 0 }}>
               Status Perangkat Presensi IoT
             </h2>
             <Link
               href="/admin/perangkat"
               className="btn btn-outline btn-sm"
-              style={{ borderRadius: "8px", padding: "4px 10px", fontSize: "12px", display: "inline-flex", alignItems: "center", gap: "5px" }}
+              style={{ padding: "2px 7px", fontSize: "10.5px" }}
             >
               <span>Detail</span>
-              <ArrowRight size={13} />
+              <ArrowRight size={12} />
             </Link>
           </div>
 
-          <div style={{ display: "grid", gap: "8px" }}>
+          <div style={{ display: "grid", gap: "6px" }}>
             {devices.length === 0 ? (
-              <p style={{ fontSize: "12.5px", color: "var(--muted)", textAlign: "center", padding: "14px 0" }}>
+              <p style={{ fontSize: "11px", color: "var(--muted)", textAlign: "center", padding: "10px 0" }}>
                 Belum ada perangkat terdaftar.
               </p>
             ) : (
@@ -286,25 +284,25 @@ export default function AdminDashboardPage() {
                 <div
                   key={d.id}
                   style={{
-                    padding: "10px 12px",
-                    borderRadius: "10px",
+                    padding: "8px 10px",
+                    borderRadius: "6px",
                     background: "#f8fafc",
                     border: "1px solid var(--line)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "space-between",
-                    gap: "10px"
+                    gap: "8px"
                   }}
                 >
                   <div style={{ minWidth: 0 }}>
-                    <p style={{ fontWeight: 600, fontSize: "12.5px", color: "var(--text)", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    <p style={{ fontWeight: 600, fontSize: "11.5px", color: "var(--text)", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       {d.nama}
                     </p>
-                    <p style={{ fontSize: "11px", color: "var(--muted)", margin: "2px 0 0" }}>
+                    <p style={{ fontSize: "10px", color: "var(--muted)", margin: "1px 0 0" }}>
                       ID: <span style={{ fontFamily: "var(--font-mono)" }}>{d.device_id}</span> • IP: {d.ip_address || "192.168.1.150"}
                     </p>
                   </div>
-                  <span className={`badge ${d.status === "ACTIVE" ? "badge-success" : "badge-error"}`} style={{ borderRadius: "6px", fontSize: "11px", padding: "2px 7px", flexShrink: 0 }}>
+                  <span className={`badge ${d.status === "ACTIVE" ? "badge-success" : "badge-error"}`} style={{ flexShrink: 0 }}>
                     {d.status}
                   </span>
                 </div>
@@ -313,18 +311,18 @@ export default function AdminDashboardPage() {
           </div>
 
           <div style={{
-            marginTop: "12px",
-            padding: "10px 12px",
-            borderRadius: "10px",
+            marginTop: "10px",
+            padding: "8px 10px",
+            borderRadius: "6px",
             background: "rgba(18, 183, 106, 0.06)",
             border: "1px solid rgba(18, 183, 106, 0.2)",
             display: "flex",
             alignItems: "flex-start",
-            gap: "9px"
+            gap: "7px"
           }}>
-            <ShieldCheck size={16} color="var(--green)" style={{ flexShrink: 0, marginTop: "2px" }} />
-            <p style={{ fontSize: "11.5px", color: "var(--muted)", margin: 0, lineHeight: 1.45 }}>
-              Broker MQTT terhubung pada port 1883. Heartbeat perangkat otomatis disinkronkan ke database.
+            <ShieldCheck size={14} color="var(--green)" style={{ flexShrink: 0, marginTop: "1px" }} />
+            <p style={{ fontSize: "10.5px", color: "var(--muted)", margin: 0, lineHeight: 1.4 }}>
+              Broker MQTT terhubung pada port 1883. Heartbeat perangkat disinkronkan ke database.
             </p>
           </div>
         </div>

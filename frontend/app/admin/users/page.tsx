@@ -177,15 +177,15 @@ export default function UserManagementPage() {
         className="card"
         style={{
           display: "flex",
-          gap: "1rem",
+          gap: "0.6rem",
           alignItems: "center",
           flexWrap: "wrap",
-          marginBottom: "1.5rem",
-          padding: "1rem",
+          marginBottom: "0.75rem",
+          padding: "0.55rem 0.75rem",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flex: 1, minWidth: "15rem" }}>
-          <Search size={16} style={{ color: "var(--text-secondary)" }} />
+        <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", flex: 1, minWidth: "12rem" }}>
+          <Search size={14} style={{ color: "var(--text-secondary)" }} />
           <input
             type="text"
             className="form-input"
@@ -194,8 +194,8 @@ export default function UserManagementPage() {
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-          <span style={{ fontSize: "0.875rem", fontWeight: 600 }}>Filter Peran:</span>
+        <div style={{ display: "flex", gap: "0.4rem", alignItems: "center" }}>
+          <span style={{ fontSize: "0.78rem", fontWeight: 600 }}>Filter Peran:</span>
           {["ALL", "ADMIN", "DOSEN", "MAHASISWA"].map((r) => (
             <button
               key={r}
@@ -238,13 +238,12 @@ export default function UserManagementPage() {
                     <td style={{ fontFamily: "var(--font-mono)", fontSize: "0.85rem" }}>{u.email}</td>
                     <td>
                       <span
-                        className={`badge ${
-                          u.role === "ADMIN"
+                        className={`badge ${u.role === "ADMIN"
                             ? "badge-error"
                             : u.role === "DOSEN"
-                            ? "badge-success"
-                            : "badge-info"
-                        }`}
+                              ? "badge-success"
+                              : "badge-info"
+                          }`}
                       >
                         {u.role}
                       </span>
@@ -253,8 +252,8 @@ export default function UserManagementPage() {
                       {u.lecturer_profile?.nidn
                         ? `NIDN: ${u.lecturer_profile.nidn}`
                         : u.student_profile?.nim
-                        ? `NPM: ${u.student_profile.nim}`
-                        : "—"}
+                          ? `NPM: ${u.student_profile.nim}`
+                          : "—"}
                     </td>
                     <td>
                       {u.is_active ? (
