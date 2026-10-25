@@ -7,7 +7,7 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: var(--font-poppins), 'Poppins', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-sans: 'Poppins', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
   /* Brand Palette — Eduka Theme & UNIPI */
@@ -94,7 +94,7 @@
   --border-card-hover: #cbd5e1;
   --border-focus: var(--navy-accent);
 
-  --font-sans: var(--font-poppins), 'Poppins', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-sans: 'Poppins', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
   --text-primary: var(--text);
@@ -139,7 +139,7 @@ html {
 
 body {
   @apply m-0 p-0 min-h-screen bg-slate-50 text-[13px] leading-normal antialiased;
-  font-family: var(--font-poppins), 'Poppins', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', sans-serif;
   color: var(--text);
 }
 
