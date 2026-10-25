@@ -31,7 +31,7 @@ Perangkat keras (*hardware*) mikrokontroler **ESP32-S3** (RFID RC522 + Fingerpri
 | Layer | Teknologi Utama | Deskripsi Implementasi |
 |---|---|---|
 | **Frontend** | Next.js 16.4 (Turbopack) + React 19 | App Router, Server & Client Components, TypeScript 5 |
-| **UI & Styling** | Eduka Design System (Vanilla CSS) | Token CSS institusional UNIPI (Emerald `#059669` & Sapphire `#1d4ed8`), tanpa AI-slop |
+| **UI & Styling** | Tailwind CSS v4 + Eduka Design System | Diutamakan 100% Tailwind CSS (@theme, @apply, utilities), tanpa AI-slop |
 | **UI Primitives** | Universal DataTable (Filament 5 Style) | Filter inline, modal detail baris, dropdown aksi, dan tombol BackToTop ergonomis |
 | **Mobile & iOS** | Apple Human Interface Guidelines | 100% kepatuhan iPhone, Safe Area Dynamic Island/Notch, touch-target 44px, aturan font 16px |
 | **AI Assistant** | SI KOBAR (Asisten Pintar SADITA) | Widget AI melayang (*floating widget*) terkoordinasi dengan hirarki kontrol BackToTop |

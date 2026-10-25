@@ -353,3 +353,7 @@ Untuk menjamin konsistensi pengalaman pengguna (UX) bagi developer dan admin sis
 3. **Optimasi Berjalan Offline (*Offline Capability*):**
    - Mengeliminasi ketergantungan runtime dan tautan link href eksternal ke CDN Google Fonts (`@import url('https://fonts.googleapis.com/...')` maupun `<link href="...">`).
    - Menerapkan *self-hosting font* lokal menggunakan paket `@fontsource/poppins` (bobot 400, 500, 600, 700) langsung di `frontend/app/layout.tsx`. Seluruh berkas biner font (`.woff2`, `.woff`) disimpan langsung dalam dependensi proyek dan di-bundle pada proses build statis tanpa request jaringan eksternal, sehingga aplikasi beroperasi secara optimal di lingkungan offline, intranet kampus, atau jaringan terisolasi (*air-gapped*).
+4. **Aturan Mutlak Pengembang: Wajib Mengutamakan Tailwind CSS Saja:**
+   - Dalam seluruh pengembangan modul, halaman baru, komponen reusable, maupun pembenahan bug antarmuka, pengembang **WAJIB MENGUTAMAKAN TAILWIND CSS** (`className="flex ..."`).
+   - **Dilarang keras membuat berkas CSS baru secara terpisah** (seperti file `.css` khusus per komponen) atau menulis CSS murni (*raw/vanilla CSS*) yang terisolasi di luar ekosistem Tailwind.
+   - Apabila diperlukan kelas komponen khusus pada `frontend/app/globals.css`, **wajib menggunakan `@apply` dari utilitas Tailwind CSS** agar tetap terikat pada sistem desain institusional `@theme`.

@@ -17,6 +17,9 @@ SADITA.ai menggunakan 6 tingkatan breakpoint berbasis CSS media queries yang ter
 | `xl` | `1280px - 1535px`| Layar Desktop Standar Enterprise (1080p) | Sidebar penuh (260px), layout dashboard 4-kolom KPI, split-pane view |
 | `2xl`| `>= 1536px` | Monitor Resolusi Tinggi (2K, 4K, UltraWide)| Kontainer konten dibatasi (`max-width: 1600px; margin: auto`) |
 
+> **Standar Implementasi: Wajib Mengutamakan Utilitas Tailwind CSS**
+> Seluruh tata letak responsif, grid adaptif, dan penyesuaian breakpoint wajib diutamakan menggunakan kelas utilitas bawaan Tailwind CSS (`sm:`, `md:`, `lg:`, `xl:`, `2xl:`). Hindari menulis media queries CSS murni secara terpisah jika dapat ditangani langsung dengan utilitas responsif Tailwind.
+
 ---
 
 ## 2. Aturan Wajib Optimalisasi Apple iPhone & iOS
