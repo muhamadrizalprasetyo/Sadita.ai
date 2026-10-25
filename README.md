@@ -71,7 +71,7 @@ Sadita.ai/
 │   │   ├── ketua-kelas/      # Portal Ketua Kelas (Verifikasi Pengganti, Anggota Kelas)
 │   │   ├── mahasiswa/        # Portal Mahasiswa (Jadwal, Presensi, LMS, Nilai, Registrasi KTM)
 │   │   ├── login/            # Halaman autentikasi terpadu berbasis JWT
-│   │   └── globals.css       # Token CSS Eduka, reset typography, modal overlay tanpa blur
+│   │   └── globals.css       # Design system Tailwind CSS v4 (@apply & @theme), Eduka tokens, offline fonts
 │   ├── components/           # Komponen UI Reusable (DataTable, Modal, StatCard, BackToTop, SI KOBAR)
 │   ├── lib/                  # Klien API terpusat, BaseApiService, hooks kustom
 │   └── package.json          # Dependensi Next.js & React

@@ -1,150 +1,47 @@
+/* ==========================================================================
+   Page Module CSS — Migrated to Tailwind CSS v4 @apply
+   ========================================================================== */
+
 .page {
-  --background: #fafafa;
-  --foreground: #fff;
-
-  --text-primary: #000;
-  --text-secondary: #666;
-
-  --button-primary-hover: #383838;
-  --button-secondary-hover: #f2f2f2;
-  --button-secondary-border: #ebebeb;
-
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-geist-sans);
-  background-color: var(--background);
+  @apply flex flex-1 flex-col items-center justify-center bg-[#fafafa] dark:bg-black text-black dark:text-[#ededed];
 }
 
 .main {
-  display: flex;
-  flex: 1;
-  width: 100%;
-  max-width: 800px;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: space-between;
-  background-color: var(--foreground);
-  padding: 120px 60px;
+  @apply flex flex-1 w-full max-w-[800px] flex-col items-start justify-between bg-white dark:bg-black py-[120px] px-[60px] max-sm:py-12 max-sm:px-6;
 }
 
 .intro {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  text-align: left;
-  gap: 24px;
+  @apply flex flex-col items-start text-left gap-6 max-sm:gap-4;
 }
 
 .intro h1 {
-  max-width: 320px;
-  font-size: 40px;
-  font-weight: 600;
-  line-height: 48px;
-  letter-spacing: -2.4px;
-  text-wrap: balance;
-  color: var(--text-primary);
+  @apply max-w-[320px] text-[40px] font-semibold leading-[48px] tracking-[-2.4px] text-black dark:text-[#ededed] max-sm:text-[32px] max-sm:leading-[40px] max-sm:tracking-[-1.92px];
 }
 
 .intro p {
-  max-width: 440px;
-  font-size: 18px;
-  line-height: 32px;
-  text-wrap: balance;
-  color: var(--text-secondary);
+  @apply max-w-[440px] text-[18px] leading-[32px] text-[#666] dark:text-[#999];
 }
 
 .intro a {
-  font-weight: 500;
-  color: var(--text-primary);
+  @apply font-medium text-black dark:text-[#ededed];
 }
 
 .ctas {
-  display: flex;
-  flex-direction: row;
-  width: 100%;
-  max-width: 440px;
-  gap: 16px;
-  font-size: 14px;
+  @apply flex flex-row w-full max-w-[440px] gap-4 text-sm;
 }
 
 .ctas a {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 40px;
-  padding: 0 16px;
-  border-radius: 128px;
-  border: 1px solid transparent;
-  transition: 0.2s;
-  cursor: pointer;
-  width: fit-content;
-  font-weight: 500;
+  @apply flex justify-center items-center h-10 px-4 rounded-full border border-transparent transition-all cursor-pointer font-medium;
 }
 
 a.primary {
-  background: var(--text-primary);
-  color: var(--background);
-  gap: 8px;
+  @apply bg-black dark:bg-[#ededed] text-white dark:text-black gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc];
 }
 
 a.secondary {
-  border-color: var(--button-secondary-border);
-}
-
-/* Enable hover only on non-touch devices */
-@media (hover: hover) and (pointer: fine) {
-  a.primary:hover {
-    background: var(--button-primary-hover);
-    border-color: transparent;
-  }
-
-  a.secondary:hover {
-    background: var(--button-secondary-hover);
-    border-color: transparent;
-  }
-}
-
-@media (max-width: 600px) {
-  .main {
-    padding: 48px 24px;
-  }
-
-  .intro {
-    gap: 16px;
-  }
-
-  .intro h1 {
-    font-size: 32px;
-    line-height: 40px;
-    letter-spacing: -1.92px;
-  }
-}
-
-@media (prefers-color-scheme: dark) {
-  .logo {
-    filter: invert();
-  }
-
-  .page {
-    --background: #000;
-    --foreground: #000;
-
-    --text-primary: #ededed;
-    --text-secondary: #999;
-
-    --button-primary-hover: #ccc;
-    --button-secondary-hover: #1a1a1a;
-    --button-secondary-border: #1a1a1a;
-  }
+  @apply border-[#ebebeb] dark:border-[#1a1a1a] hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a];
 }
 
 .code {
-  font-family: var(--font-geist-mono);
-  font-size: 0.9em;
-  background: color-mix(in srgb, currentColor 8%, transparent);
-  padding: 0.1em 0.4em;
-  border-radius: 6px;
+  @apply font-mono text-[0.9em] py-0.5 px-1.5 rounded-md bg-black/5 dark:bg-white/10;
 }
