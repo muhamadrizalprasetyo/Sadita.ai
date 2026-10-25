@@ -240,7 +240,7 @@ a {
 }
 
 .nav-link.active {
-  @apply bg-[#1B2D4F]/[0.08] text-slate-900 font-semibold;
+  @apply bg-navy/8 text-slate-900 font-semibold;
 }
 
 .nav-link.active::before {
@@ -386,7 +386,7 @@ a {
 }
 
 .topbar-avatar {
-  @apply w-7 h-7 rounded-full text-white grid place-items-center font-semibold text-[11px] shrink-0 bg-gradient-to-br from-[#1B2D4F] to-[#3A5A8C];
+  @apply w-7 h-7 rounded-full text-white grid place-items-center font-semibold text-[11px] shrink-0 bg-linear-to-br from-navy to-[#3A5A8C];
 }
 
 /* ==========================================================================
@@ -556,7 +556,7 @@ a {
 }
 
 .btn-outline {
-  @apply border border-navy text-navy bg-transparent hover:bg-navy/[0.08];
+  @apply border border-navy text-navy bg-transparent hover:bg-navy/8;
 }
 
 .btn-danger {
@@ -662,12 +662,12 @@ a {
    Login Page (Clean Institutional Card System — 100% Tailwind CSS @apply)
    ========================================================================== */
 .login-page-wrapper {
-  @apply min-h-screen min-h-[100dvh] flex flex-col items-center justify-center p-4 sm:p-6 bg-slate-50 relative box-border w-full;
+  @apply min-h-dvh flex flex-col items-center justify-center p-4 sm:p-6 bg-slate-50 relative box-border w-full;
   @apply pt-[max(1.5rem,env(safe-area-inset-top))] pb-[max(1.5rem,env(safe-area-inset-bottom))] pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))];
 }
 
 .login-card {
-  @apply w-full max-w-[420px] bg-white border border-slate-200 rounded-[14px] p-6.5 sm:p-7.5 shadow-login-card box-border max-sm:p-5 max-sm:shadow-login-card-sm max-[480px]:p-4 max-[480px]:rounded-[12px] max-[360px]:p-3;
+  @apply w-full max-w-105 bg-white border border-slate-200 rounded-container p-6.5 sm:p-7.5 shadow-login-card box-border max-sm:p-5 max-sm:shadow-login-card-sm max-[480px]:p-4 max-[480px]:rounded-[12px] max-[360px]:p-3;
 }
 
 .login-brand-header {
@@ -675,7 +675,7 @@ a {
 }
 
 .login-brand-logo {
-  @apply inline-block mx-auto mb-3 w-[140px] h-auto object-contain;
+  @apply inline-block mx-auto mb-3 w-35 h-auto object-contain;
 }
 
 .login-card-title {
@@ -735,7 +735,7 @@ a {
 }
 
 .login-input-element {
-  @apply w-full h-[42px] !px-[38px] rounded-lg border border-slate-300 bg-white text-slate-900 text-[13.5px] font-sans outline-none transition-all duration-150 box-border focus:border-blue-600 focus:ring-3 focus:ring-blue-600/12 max-sm:!text-[16px];
+  @apply w-full h-10.5 px-9.5! rounded-lg border border-slate-300 bg-white text-slate-900 text-[13.5px] font-sans outline-none transition-all duration-150 box-border focus:border-blue-600 focus:ring-3 focus:ring-blue-600/12 max-sm:text-[16px]!;
 }
 
 .login-eye-btn {
@@ -755,7 +755,7 @@ a {
 }
 
 .login-button-primary {
-  @apply w-full h-[44px] bg-navy text-white border-none rounded-lg text-[14px] font-semibold flex items-center justify-center gap-2 cursor-pointer transition-all duration-150 shadow-navy-sm hover:bg-navy-dark hover:shadow-navy-md hover:-translate-y-px active:translate-y-0 disabled:opacity-65 disabled:cursor-not-allowed;
+  @apply w-full h-11 bg-navy text-white border-none rounded-lg text-[14px] font-semibold flex items-center justify-center gap-2 cursor-pointer transition-all duration-150 shadow-navy-sm hover:bg-navy-dark hover:shadow-navy-md hover:-translate-y-px active:translate-y-0 disabled:opacity-65 disabled:cursor-not-allowed;
 }
 
 .login-footer-help {
@@ -779,7 +779,7 @@ a {
 }
 
 .login-modal-box {
-  @apply w-full max-w-[440px] bg-white border border-slate-200 rounded-2xl shadow-login-modal p-6 max-h-[calc(100vh-36px)] max-h-[calc(100dvh-36px)] overflow-y-auto box-border max-[480px]:p-4.5 max-[480px]:rounded-[14px];
+  @apply w-full max-w-110 bg-white border border-slate-200 rounded-2xl shadow-login-modal p-6 max-h-[calc(100dvh-36px)] overflow-y-auto box-border max-[480px]:p-4.5 max-[480px]:rounded-container;
   -webkit-overflow-scrolling: touch;
   touch-action: pan-y;
 }
@@ -801,7 +801,7 @@ a {
 }
 
 .login-modal-close-btn {
-  @apply w-8.5 h-8.5 min-w-[34px] min-h-[34px] rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-500 cursor-pointer transition-all duration-150 hover:bg-slate-100 hover:text-slate-900 hover:border-slate-300;
+  @apply w-8.5 h-8.5 min-w-8.5 min-h-8.5 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-500 cursor-pointer transition-all duration-150 hover:bg-slate-100 hover:text-slate-900 hover:border-slate-300;
 }
 
 .login-modal-desc {
@@ -809,7 +809,7 @@ a {
 }
 
 .login-modal-card {
-  @apply p-3.5 rounded-[10px] mb-3 box-border;
+  @apply p-3.5 rounded-search mb-3 box-border;
 }
 
 .login-modal-card-baak {
@@ -845,7 +845,7 @@ a {
 }
 
 .login-modal-contact-chip {
-  @apply inline-flex items-center gap-1.5 py-1.5 px-2.5 rounded-md text-[11.5px] font-semibold no-underline transition-all duration-150 min-h-[32px] box-border max-[480px]:w-full max-[480px]:justify-center max-[480px]:py-2 max-[480px]:px-3 max-[480px]:min-h-[40px];
+  @apply inline-flex items-center gap-1.5 py-1.5 px-2.5 rounded-md text-[11.5px] font-semibold no-underline transition-all duration-150 min-h-8 box-border max-[480px]:w-full max-[480px]:justify-center max-[480px]:py-2 max-[480px]:px-3 max-[480px]:min-h-10;
 }
 
 .login-modal-contact-chip.wa {
@@ -857,7 +857,7 @@ a {
 }
 
 .login-modal-dismiss-btn {
-  @apply w-full h-[44px] min-h-[44px] rounded-lg bg-navy text-white border-none text-[13.5px] font-semibold cursor-pointer flex items-center justify-center transition-all duration-150 shadow-navy-sm hover:bg-navy-dark hover:shadow-navy-md;
+  @apply w-full h-11 min-h-11 rounded-lg bg-navy text-white border-none text-[13.5px] font-semibold cursor-pointer flex items-center justify-center transition-all duration-150 shadow-navy-sm hover:bg-navy-dark hover:shadow-navy-md;
 }
 
 /* ==========================================================================
@@ -940,7 +940,7 @@ a {
 }
 
 .kobar-window {
-  @apply fixed right-8 w-95 h-130 rounded-[12px] flex flex-col z-1000 overflow-hidden border border-[#eceef2] bg-white shadow-app bottom-[104px] max-w-[calc(100vw-2.5rem)] max-h-[calc(100vh-8rem)];
+  @apply fixed right-8 w-95 h-130 rounded-[12px] flex flex-col z-1000 overflow-hidden border border-[#eceef2] bg-white shadow-app bottom-26 max-w-[calc(100vw-2.5rem)] max-h-[calc(100vh-8rem)];
   animation: slideUp 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
