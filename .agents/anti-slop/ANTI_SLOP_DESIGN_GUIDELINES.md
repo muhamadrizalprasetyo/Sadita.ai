@@ -74,6 +74,13 @@ Menggunakan font modern berstandar enterprise seperti **Inter**, **Plus Jakarta 
 --leading-normal:1.5;
 ```
 
+### 2.3 Standar Kartu Autentikasi Institusional (Zero-AI-Slop Login)
+
+Halaman masuk (*login*) adalah pintu gerbang institusional bagi ribuan sivitas akademika, bukan landing page marketing produk B2C.
+1. **Pola Kartu Terpusat (*Centered Institutional Card*)**: Menolak tata letak split-screen gelap dengan banner promosi AI, gelembung gradien neon, dan kartu marketing palsu. Gunakan kartu terpusat (`max-w-[420px]`) di atas latar belakang Slate 50 netral dengan garis aksen navy UNIPI `#1B2D4F` di bagian atas viewport.
+2. **Ergonomi Input & Ikon**: Seluruh kolom input wajib memiliki gutter teks yang presisi (`padding: 0 38px`) sehingga ikon `Mail` atau `Lock` di sisi kiri tidak menabrak karakter teks atau password bullets. Ukuran font wajib $\ge 16$px pada viewport seluler untuk mencegah *auto-zoom* iOS Safari.
+3. **Penyederhanaan Selektor Uji Coba**: Quick switcher akun simulasi (Admin, Kaprodi, Dosen, Ketua Kelas, Mahasiswa) dirancang kompak dalam baris grid berprofil rendah dengan badge aktif, tidak mendominasi atau mengacaukan hierarki form login.
+
 ---
 
 ## 3. Ergonomi Data Density & Pola Tabel Enterprise
