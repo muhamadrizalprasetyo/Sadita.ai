@@ -786,13 +786,20 @@ a {
    ========================================================================== */
 .login-page-wrapper {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 32px 16px;
+  padding: 24px 16px;
+  padding-top: max(24px, env(safe-area-inset-top));
+  padding-bottom: max(24px, env(safe-area-inset-bottom));
+  padding-left: max(16px, env(safe-area-inset-left));
+  padding-right: max(16px, env(safe-area-inset-right));
   background: #f8fafc;
   position: relative;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .login-card {
@@ -801,8 +808,9 @@ a {
   background: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 14px;
-  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.06);
-  padding: 32px 28px;
+  box-shadow: 0 4px 24px rgba(15, 23, 42, 0.06);
+  padding: 30px 26px;
+  box-sizing: border-box;
 }
 
 .login-brand-header {
@@ -1067,16 +1075,270 @@ a {
   line-height: 1.5;
 }
 
+/* ==========================================================================
+   Login Help / Lupa Password Modal (Responsive & Apple iOS Compliant)
+   ========================================================================== */
+.login-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  padding-top: max(16px, env(safe-area-inset-top));
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+  padding-left: max(16px, env(safe-area-inset-left));
+  padding-right: max(16px, env(safe-area-inset-right));
+  overscroll-behavior: contain;
+  touch-action: none;
+}
+
+.login-modal-box {
+  width: 100%;
+  max-width: 440px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.22);
+  padding: 24px 22px;
+  max-height: calc(100vh - 36px);
+  max-height: calc(100dvh - 36px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  box-sizing: border-box;
+}
+
+.login-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.login-modal-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.login-modal-icon-badge {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: #eff6ff;
+  border: 1px solid #dbeafe;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1d4ed8;
+  flex-shrink: 0;
+}
+
+.login-modal-title {
+  font-size: 15.5px;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.login-modal-close-btn {
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  min-height: 34px;
+  border-radius: 8px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.login-modal-close-btn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+  border-color: #cbd5e1;
+}
+
+.login-modal-desc {
+  font-size: 12px;
+  color: #475569;
+  line-height: 1.55;
+  margin-bottom: 14px;
+}
+
+.login-modal-card {
+  padding: 13px 14px;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  box-sizing: border-box;
+}
+
+.login-modal-card-baak {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.login-modal-card-demo {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  margin-bottom: 18px;
+}
+
+.login-modal-card-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.login-modal-card-baak .login-modal-card-title {
+  color: #0f172a;
+}
+
+.login-modal-card-demo .login-modal-card-title {
+  color: #166534;
+}
+
+.login-modal-card-text {
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: #64748b;
+  margin: 0;
+}
+
+.login-modal-card-demo .login-modal-card-text {
+  color: #15803d;
+}
+
+.login-modal-contact-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.login-modal-contact-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.15s ease;
+  min-height: 32px;
+  box-sizing: border-box;
+}
+
+.login-modal-contact-chip.wa {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+
+.login-modal-contact-chip.wa:hover {
+  background: #d1fae5;
+  border-color: #6ee7b7;
+}
+
+.login-modal-contact-chip.email {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+
+.login-modal-contact-chip.email:hover {
+  background: #dbeafe;
+  border-color: #93c5fd;
+}
+
+.login-modal-dismiss-btn {
+  width: 100%;
+  height: 44px;
+  min-height: 44px;
+  border-radius: 8px;
+  background: #1B2D4F;
+  color: #ffffff;
+  border: none;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 6px rgba(27, 45, 80, 0.2);
+}
+
+.login-modal-dismiss-btn:hover {
+  background: #12203A;
+  box-shadow: 0 4px 12px rgba(27, 45, 80, 0.3);
+}
+
+/* Multi-device responsive refinements (Desktop, Tablet, Mobile, iPhone) */
 @media (max-width: 640px) {
   .login-card {
     padding: 24px 20px;
-    box-shadow: none;
-    border-color: #e2e8f0;
+    box-shadow: 0 2px 12px rgba(15, 23, 42, 0.04);
   }
 
   .login-input-element {
     font-size: 16px !important;
     /* Apple HIG: prevent iOS viewport zoom */
+  }
+}
+
+@media (max-width: 480px) {
+  .login-card {
+    padding: 20px 16px;
+    border-radius: 12px;
+  }
+
+  .login-modal-box {
+    padding: 18px 14px;
+    border-radius: 14px;
+  }
+
+  .login-modal-title {
+    font-size: 14.5px;
+  }
+
+  .login-modal-contact-row {
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .login-modal-contact-chip {
+    width: 100%;
+    justify-content: center;
+    padding: 8px 12px;
+    min-height: 40px;
+  }
+}
+
+@media (max-width: 360px) {
+  .login-card {
+    padding: 16px 12px;
+  }
+
+  .login-demo-btn {
+    font-size: 10px !important;
+    padding: 5px 1px !important;
   }
 }
 

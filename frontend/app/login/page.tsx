@@ -12,12 +12,16 @@ import {
   AlertCircle,
   HelpCircle,
   X,
+  Building2,
+  MessageCircle,
+  Sparkles,
 } from "lucide-react";
 import { authApi, setStoredToken } from "@/lib/api";
 import { homeFor, Role } from "@/components/role-shell";
 
 interface DemoAccount {
   label: string;
+  shortLabel: string;
   email: string;
   pass: string;
   roleTitle: string;
@@ -27,6 +31,7 @@ interface DemoAccount {
 const DEMO_ACCOUNTS: DemoAccount[] = [
   {
     label: "Admin",
+    shortLabel: "Admin",
     email: "admin@unipi.ac.id",
     pass: "admin123",
     roleTitle: "Administrator Sistem",
@@ -34,6 +39,7 @@ const DEMO_ACCOUNTS: DemoAccount[] = [
   },
   {
     label: "Kaprodi",
+    shortLabel: "Kaprodi",
     email: "kaprodi@unipi.ac.id",
     pass: "kaprodi123",
     roleTitle: "Ketua Program Studi TI",
@@ -41,6 +47,7 @@ const DEMO_ACCOUNTS: DemoAccount[] = [
   },
   {
     label: "Dosen",
+    shortLabel: "Dosen",
     email: "dosen@unipi.ac.id",
     pass: "dosen123",
     roleTitle: "Dosen Pengampu",
@@ -48,6 +55,7 @@ const DEMO_ACCOUNTS: DemoAccount[] = [
   },
   {
     label: "Ketua",
+    shortLabel: "Ketua",
     email: "budi@mhs.unipi.ac.id",
     pass: "mhs123",
     roleTitle: "Ketua Kelas TI-2024",
@@ -55,6 +63,7 @@ const DEMO_ACCOUNTS: DemoAccount[] = [
   },
   {
     label: "Mahasiswa",
+    shortLabel: "Mhs",
     email: "rizal@mhs.unipi.ac.id",
     pass: "mhs123",
     roleTitle: "Mahasiswa Aktif",
@@ -91,11 +100,52 @@ export default function LoginPage() {
     return () => clearTimeout(timer);
   }, []);
 
-  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+  // Lock background scroll on Desktop cursor and Apple iPhone Safari touch gestures
+  useEffect(() => {
+    if (!showHelpModal) return;
+
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+    const origBodyOverflow = document.body.style.overflow;
+    const origBodyPaddingRight = document.body.style.paddingRight;
+    const origHtmlOverflow = document.documentElement.style.overflow;
+    const origTouchAction = document.body.style.touchAction;
+
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+    document.body.style.touchAction = "none";
+    if (scrollbarWidth > 0) {
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+    }
+
+    const handleTouchMove = (e: TouchEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (!target?.closest(".login-modal-box")) {
+        if (e.cancelable) e.preventDefault();
+      }
+    };
+
+    const handleEscape = (e: globalThis.KeyboardEvent) => {
+      if (e.key === "Escape") setShowHelpModal(false);
+    };
+
+    document.addEventListener("touchmove", handleTouchMove, { passive: false });
+    window.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.body.style.overflow = origBodyOverflow;
+      document.documentElement.style.overflow = origHtmlOverflow;
+      document.body.style.paddingRight = origBodyPaddingRight;
+      document.body.style.touchAction = origTouchAction;
+      document.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("keydown", handleEscape);
+    };
+  }, [showHelpModal]);
+
+  const handleInputKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     setCapsLockActive(e.getModifierState("CapsLock"));
   };
 
-  const handleKeyUp = (e: KeyboardEvent<HTMLInputElement>) => {
+  const handleInputKeyUp = (e: KeyboardEvent<HTMLInputElement>) => {
     setCapsLockActive(e.getModifierState("CapsLock"));
   };
 
@@ -175,7 +225,8 @@ export default function LoginPage() {
                     className={`login-demo-btn ${isActive ? "active" : ""}`}
                     title={`${d.label} — ${d.roleTitle}`}
                   >
-                    {d.label}
+                    <span className="hidden sm:inline">{d.label}</span>
+                    <span className="inline sm:hidden">{d.shortLabel}</span>
                   </button>
                 );
               })}
@@ -235,8 +286,8 @@ export default function LoginPage() {
                   autoComplete="current-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  onKeyUp={handleKeyUp}
+                  onKeyDown={handleInputKeyDown}
+                  onKeyUp={handleInputKeyUp}
                   className="login-input-element"
                   placeholder="Masukkan kata sandi"
                 />
@@ -315,68 +366,96 @@ export default function LoginPage() {
         </footer>
       </div>
 
-      {/* Help Modal */}
+      {/* Help Modal (Responsive & Apple iOS Compliant) */}
       {showHelpModal && (
         <div
-          className="modal-overlay"
+          className="login-modal-overlay"
           onClick={(e) => {
             if (e.target === e.currentTarget) setShowHelpModal(false);
           }}
+          onWheel={(e) => {
+            if (e.target === e.currentTarget) {
+              e.preventDefault();
+              e.stopPropagation();
+            }
+          }}
           role="dialog"
           aria-modal="true"
+          aria-labelledby="modal-help-title"
         >
-          <div className="modal-box" style={{ maxWidth: "440px" }}>
-            <div className="modal-header">
-              <div className="flex items-center gap-2">
-                <HelpCircle size={18} className="text-blue-600" />
-                <h3 className="modal-title font-semibold text-slate-900 text-base">
+          <div className="login-modal-box">
+            <div className="login-modal-header">
+              <div className="login-modal-header-left">
+                <div className="login-modal-icon-badge">
+                  <HelpCircle size={18} />
+                </div>
+                <h3 id="modal-help-title" className="login-modal-title">
                   Bantuan Akses &amp; Reset Password
                 </h3>
               </div>
               <button
                 type="button"
                 onClick={() => setShowHelpModal(false)}
-                className="w-7 h-7 rounded-md bg-slate-100 hover:bg-slate-200 border border-slate-200 flex items-center justify-center text-slate-500 transition-colors cursor-pointer"
-                aria-label="Tutup modal"
+                className="login-modal-close-btn"
+                aria-label="Tutup jendela bantuan"
               >
-                <X size={15} />
+                <X size={16} />
               </button>
             </div>
 
-            <div className="space-y-3.5 text-xs text-slate-600">
-              <p className="leading-relaxed">
-                Untuk menjaga keamanan data akademik, pengaturan ulang kata sandi dilayani langsung oleh unit terkait:
+            <p className="login-modal-desc">
+              Untuk menjaga integritas dan kerahasiaan data akademik institusi, pengaturan ulang kata sandi diverifikasi langsung oleh unit layanan resmi BAAK UNIPI:
+            </p>
+
+            {/* Card 1: BAAK UNIPI */}
+            <div className="login-modal-card login-modal-card-baak">
+              <div className="login-modal-card-title">
+                <Building2 size={15} className="text-slate-700 shrink-0" />
+                <span>Biro Administrasi Akademik &amp; Kemahasiswaan (BAAK)</span>
+              </div>
+              <p className="login-modal-card-text">
+                Gedung Rektorat Lt. 2, Kampus UNIPI • Layanan: Senin – Jumat, 08:00 – 16:30 WIB
               </p>
-
-              <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200">
-                <strong className="block text-slate-900 font-semibold mb-1">
-                  Biro Administrasi Akademik &amp; Kemahasiswaan (BAAK)
-                </strong>
-                <p className="text-slate-500">
-                  Gedung Rektorat Lt. 2, Kampus UNIPI • Jam Layanan: 08:00 – 16:30 WIB
-                </p>
-                <p className="text-blue-600 font-medium mt-1">
-                  Email: baak@unipi.ac.id • WhatsApp: +62 812-3456-7890
-                </p>
+              <div className="login-modal-contact-row">
+                <a
+                  href="https://wa.me/6281234567890?text=Halo%20BAAK%20UNIPI,%20saya%20membutuhkan%20bantuan%20reset%20password%20akun%20SADITA"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="login-modal-contact-chip wa"
+                  title="Hubungi BAAK via WhatsApp"
+                >
+                  <MessageCircle size={14} />
+                  <span>WhatsApp: +62 812-3456-7890</span>
+                </a>
+                <a
+                  href="mailto:baak@unipi.ac.id?subject=Bantuan%20Reset%20Password%20Akun%20SADITA"
+                  className="login-modal-contact-chip email"
+                  title="Kirim email ke BAAK"
+                >
+                  <Mail size={14} />
+                  <span>Email: baak@unipi.ac.id</span>
+                </a>
               </div>
-
-              <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200">
-                <strong className="block text-slate-900 font-semibold mb-1">
-                  Akun Demo Pengujian
-                </strong>
-                <p className="text-slate-500">
-                  Gunakan tombol pilihan akun uji coba (Admin, Kaprodi, Dosen, Ketua Kelas, Mahasiswa) di atas formulir login untuk mengisi otomatis kredensial simulasi.
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setShowHelpModal(false)}
-                className="btn btn-primary w-full py-2.5 mt-2 cursor-pointer"
-              >
-                Kembali ke Halaman Login
-              </button>
             </div>
+
+            {/* Card 2: Demo Account Notice */}
+            <div className="login-modal-card login-modal-card-demo">
+              <div className="login-modal-card-title">
+                <Sparkles size={15} className="text-emerald-700 shrink-0" />
+                <span>Ingin Mencoba Akun Pengujian?</span>
+              </div>
+              <p className="login-modal-card-text">
+                Anda dapat memilih salah satu peran (Admin, Kaprodi, Dosen, Ketua Kelas, atau Mahasiswa) pada tombol pilihan cepat di atas formulir login untuk mengisi otomatis kredensial simulasi tanpa perlu memasukkan password manual.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setShowHelpModal(false)}
+              className="login-modal-dismiss-btn"
+            >
+              Kembali ke Halaman Login
+            </button>
           </div>
         </div>
       )}

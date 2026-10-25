@@ -241,13 +241,18 @@ Untuk mencegah tombol melayang saling menumpuk (*overlapping/clipping*):
 2. **Transparansi Hitam Lembut (Soft Black Tint)**: Menggunakan `background: rgba(0, 0, 0, 0.4)` (atau maksimal `0.45`) sehingga latar belakang teredup secara elegan tanpa terasa terlalu tebal atau pekat.
 3. **Scroll Lock Terisolasi**: Saat modal terbuka, scrolling halaman luar dinonaktifkan (`overflow: hidden` pada `html` & `body`, `touch-action: none` pada overlay) dengan momentum touch scroll tetap aktif pada kontainer isi modal (`modal-box`).
 
-### 6.3 Standar Halaman Login Enterprise Modern (Split-Screen Institutional Portal)
-1. **Tata Letak Dua Panel (*Split-Screen Layout*)**:
-   - **Panel Kiri (Otoritas Institusi & Nilai Sistem)**: Latar belakang Navy dalam (`#0b1528` - `#112240`) dengan aksen mikro-grid, lencana resmi UNIPI, ringkasan 3 pilar fitur (Presensi IoT, LMS & Kurikulum, Keamanan Zero-Trust), dan indikator status operasional MQTT broker & TLS 1.3 secara *real-time*.
-   - **Panel Kanan (Formulir Autentikasi Modern)**: Kanvas putih berdensitas fokus tinggi, pemilih role simulasi (*segmented account switcher*), input NIM/Email dengan ikon terpadu, toggle *show/hide password*, detektor *Caps Lock*, dan footer bantuan resmi BAAK.
-2. **Kepatuhan Responsif Apple iPhone**:
-   - Pada layar `< 1024px`, tata letak bertransisi mulus menjadi satu kolom vertikal yang ergonomis.
-   - Ukuran font input wajib `16px` (`1rem`) pada perangkat mobile untuk mencegah auto-zoom liar di iOS Safari.
-   - Tombol aksi utama memiliki tinggi 48px, melebihi batas minimum Apple HIG 44px untuk kenyamanan sentuhan satu tangan (*Thumb Zone*).
+### 6.3 Standar Halaman Login Institusional & Modal Responsif (Full Device Support)
+1. **Tata Letak Kartu Terpusat (*Centered Institutional Card*)**:
+   - Menolak *split-screen* gelap dengan jargon promosi AI. Menggunakan kartu terpusat elegan (`max-w-[420px]`) di atas latar netral Slate 50 dengan garis aksen navy UNIPI `#1B2D4F` di puncak viewport.
+   - Quick switcher akun uji coba responsif 5-kolom dengan penyesuaian label otomatis (`Mahasiswa` di layar lebar, `Mhs` di layar ponsel sempit $\le 380$px) untuk mencegah pemotongan teks.
+2. **Kepatuhan Responsif Apple iPhone (Semua Varian iPhone)**:
+   - Mendukung penuh seluruh varian iPhone (iPhone SE 320/375px, iPhone 12/13/14/15/16 390/393px, Plus/Pro Max 428/430px).
+   - Penggunaan `min-height: 100dvh` dan fungsi safe area `padding: max(24px, env(safe-area-inset-*))` untuk mencegah terpotongnya konten oleh Notch, Dynamic Island, dan Home Indicator.
+   - Ukuran font input wajib $\ge 16$px (`1rem`) pada perangkat mobile untuk mencegah *auto-zoom* liar di iOS Safari.
+   - Tinggi tombol utama 44px dengan target sentuh ergonomis sesuai Apple Human Interface Guidelines (*Thumb Zone*).
+3. **Standar Modal Bantuan / Lupa Password (*Help Modal System*)**:
+   - Kartu terpisah dengan hierarki visual tegas: Unit Layanan Resmi BAAK UNIPI (Slate-50) dan Akun Pengujian Simulasi (Emerald-50).
+   - Tombol aksi cepat terintegrasi: *Direct WhatsApp Chat* (`wa.me`) dan *Direct Email* (`mailto:`) yang otomatis bertumpuk vertikal di layar ponsel untuk target sentuh optimal.
+   - Penguncian scroll latar belakang (*Background Scroll Lock*) pada kursor desktop dan sentuhan layar iPhone Safari (`touch-action: none; overflow: hidden;` serta penutupan instan via tombol `Escape`).
 
 
