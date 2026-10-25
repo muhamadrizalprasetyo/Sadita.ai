@@ -176,13 +176,13 @@ a {
 }
 
 .sidebar-brand {
-  @apply shrink-0 mb-3 flex flex-col items-start gap-[3px] border-b;
+  @apply shrink-0 mb-3 flex flex-col items-start gap-0.75 border-b;
   border-color: var(--line);
   padding: 0 4px 10px 4px;
 }
 
 .brand-logo {
-  @apply w-[126px] max-w-full h-auto object-contain block;
+  @apply w-31.5 max-w-full h-auto object-contain block;
 }
 
 .brand-title {
@@ -195,15 +195,15 @@ a {
 }
 
 .brand-badge {
-  @apply text-[9px] font-semibold tracking-[0.04em] uppercase text-slate-500 mt-[1px];
+  @apply text-[9px] font-semibold tracking-[0.04em] uppercase text-slate-500 mt-px;
 }
 
 .sidebar-user {
-  @apply flex items-center gap-2 py-[7px] px-[9px] mb-1 bg-slate-100 border border-slate-200 rounded-lg;
+  @apply flex items-center gap-2 py-1.75 px-2.25 mb-1 bg-slate-100 border border-slate-200 rounded-lg;
 }
 
 .user-avatar {
-  @apply w-[30px] h-[30px] rounded-full bg-slate-900 text-white grid place-items-center font-semibold text-[11.5px] shrink-0 shadow-xs;
+  @apply w-7.5 h-7.5 rounded-full bg-slate-900 text-white grid place-items-center font-semibold text-[11.5px] shrink-0 shadow-xs;
 }
 
 .user-meta {
@@ -211,7 +211,7 @@ a {
 }
 
 .user-name {
-  @apply text-[12px] font-semibold text-slate-900 truncate leading-[1.25];
+  @apply text-[12px] font-semibold text-slate-900 truncate leading-tight;
 }
 
 .user-role-badge {
@@ -243,11 +243,11 @@ a {
 }
 
 .sidebar-section-title {
-  @apply text-[9px] font-bold uppercase tracking-[0.08em] text-slate-400 py-2 px-2 pb-[3px];
+  @apply text-[9px] font-bold uppercase tracking-[0.08em] text-slate-400 py-2 px-2 pb-0.75;
 }
 
 .nav-link {
-  @apply flex items-center gap-2 py-[7px] px-[9px] text-slate-600 text-[12.5px] font-medium relative rounded-md transition-all;
+  @apply flex items-center gap-2 py-1.75 px-2.25 text-slate-600 text-[12.5px] font-medium relative rounded-md transition-all;
 }
 
 .nav-link:hover {
@@ -261,7 +261,7 @@ a {
 
 .nav-link.active::before {
   content: "";
-  @apply absolute left-0 top-1 bottom-1 w-[3px] rounded-r;
+  @apply absolute left-0 top-1 bottom-1 w-0.75 rounded-r-sm;
   background: #1B2D4F;
 }
 
@@ -275,11 +275,11 @@ a {
 }
 
 .sidebar-footer .nav-link {
-  @apply text-[#5b6170] text-[12px] py-[7px] px-[9px];
+  @apply text-[#5b6170] text-[12px] py-1.75 px-2.25;
 }
 
 .sidebar-badge-pill {
-  @apply inline-flex items-center justify-center py-[1px] px-[7px] text-[11px] font-semibold text-blue-600 bg-blue-50 border border-blue-100 rounded-md leading-[1.4];
+  @apply inline-flex items-center justify-center py-px px-1.75 text-[11px] font-semibold text-blue-600 bg-blue-50 border border-blue-100 rounded-md leading-[1.4];
 }
 
 .sidebar-user-trigger {
@@ -300,7 +300,7 @@ a {
 
 /* User Popover Menu */
 .sidebar-user-popover {
-  @apply absolute left-0 right-0 bg-white border border-slate-200 rounded-[10px] p-1.5 z-[100] shadow-lg;
+  @apply absolute left-0 right-0 bg-white border border-slate-200 rounded-search p-1.5 z-100 shadow-lg;
   bottom: calc(100% + 6px);
   animation: popoverFadeIn 0.15s ease-out;
 }
@@ -318,7 +318,7 @@ a {
 }
 
 .user-popover-header {
-  @apply flex items-center gap-2 py-[7px] px-[9px] rounded-md text-slate-800 text-[12.5px] font-medium;
+  @apply flex items-center gap-2 py-1.75 px-2.25 rounded-md text-slate-800 text-[12.5px] font-medium;
 }
 
 .user-popover-name {
@@ -326,15 +326,15 @@ a {
 }
 
 .user-popover-divider {
-  @apply h-[1px] bg-slate-100 my-1;
+  @apply h-px bg-slate-100 my-1;
 }
 
 .user-popover-theme-row {
-  @apply grid grid-cols-3 gap-1 p-[3px] bg-slate-50 rounded-[7px] border border-slate-100 my-0.5;
+  @apply grid grid-cols-3 gap-1 p-0.75 bg-slate-50 rounded-[7px] border border-slate-100 my-0.5;
 }
 
 .user-popover-theme-row .theme-btn {
-  @apply flex items-center justify-center h-[30px] rounded-[5px] bg-transparent border border-transparent text-slate-500 cursor-pointer transition-all;
+  @apply flex items-center justify-center h-7.5 rounded-[5px] bg-transparent border border-transparent text-slate-500 cursor-pointer transition-all;
 }
 
 .user-popover-theme-row .theme-btn:hover {
@@ -346,7 +346,7 @@ a {
 }
 
 .user-popover-logout {
-  @apply flex items-center gap-2 py-[7px] px-[9px] w-full rounded-md border-none bg-transparent text-slate-600 text-[12.5px] font-medium cursor-pointer text-left transition-all;
+  @apply flex items-center gap-2 py-1.75 px-2.25 w-full rounded-md border-none bg-transparent text-slate-600 text-[12.5px] font-medium cursor-pointer text-left transition-all;
 }
 
 .user-popover-logout:hover {
@@ -360,7 +360,7 @@ a {
 
 /* ---------- Topbar ---------- */
 .topbar {
-  @apply flex items-center justify-between gap-2.5 mb-3 rounded-lg py-1.5 px-[15px] border shadow-xs;
+  @apply flex items-center justify-between gap-2.5 mb-3 rounded-lg py-1.5 px-3.75 border shadow-xs;
   background: var(--card);
   border-color: var(--line);
 }
@@ -371,7 +371,7 @@ a {
 }
 
 .badge-class-code {
-  @apply inline-flex items-center py-[3px] px-2 bg-slate-100 border border-slate-200 rounded-md text-[12px] font-semibold text-slate-900 font-mono;
+  @apply inline-flex items-center py-0.75 px-2 bg-slate-100 border border-slate-200 rounded-md text-[12px] font-semibold text-slate-900 font-mono;
 }
 
 .term-chip {
@@ -408,7 +408,7 @@ a {
 }
 
 .topbar-search {
-  @apply flex items-center gap-2 bg-slate-50 border rounded-md py-[5px] px-[11px] w-[240px] shadow-none;
+  @apply flex items-center gap-2 bg-slate-50 border rounded-md py-1.25 px-2.75 w-60 shadow-none;
   border-color: var(--line);
 }
 
@@ -450,11 +450,11 @@ a {
    Stat Cards
    ========================================================================== */
 .stats {
-  @apply grid grid-cols-4 gap-[9px] mb-0;
+  @apply grid grid-cols-4 gap-2.25 mb-0;
 }
 
 .stat {
-  @apply rounded-lg py-2.5 px-3 pb-2 text-white relative flex flex-col justify-between min-h-[80px] transition-all shadow-xs;
+  @apply rounded-lg py-2.5 px-3 pb-2 text-white relative flex flex-col justify-between min-h-20 transition-all shadow-xs;
 }
 
 .stat:hover {
@@ -564,7 +564,7 @@ a {
 }
 
 .filter-tab-btn {
-  @apply py-[3px] px-[9px] text-[11.5px] font-medium rounded-md border bg-slate-50 text-slate-500 cursor-pointer transition-all hover:bg-slate-100 hover:text-slate-800;
+  @apply py-0.75 px-2.25 text-[11.5px] font-medium rounded-md border bg-slate-50 text-slate-500 cursor-pointer transition-all hover:bg-slate-100 hover:text-slate-800;
   border-color: var(--line);
 }
 
@@ -578,7 +578,7 @@ a {
    Cards
    ========================================================================== */
 .card {
-  @apply rounded-lg py-[13px] px-[15px] border min-w-0;
+  @apply rounded-lg py-3.25 px-3.75 border min-w-0;
   background: var(--card);
   border-color: var(--line);
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
@@ -610,7 +610,7 @@ a {
    Buttons
    ========================================================================== */
 .btn {
-  @apply inline-flex items-center justify-center gap-1.5 whitespace-nowrap font-semibold transition-all py-1.5 px-[13px] text-[12px] rounded-md cursor-pointer;
+  @apply inline-flex items-center justify-center gap-1.5 whitespace-nowrap font-semibold transition-all py-1.5 px-3.25 text-[12px] rounded-md cursor-pointer;
 }
 
 .btn-primary {
@@ -654,7 +654,7 @@ a {
 }
 
 .btn-sm {
-  @apply py-[3px] px-2 text-[10.5px] rounded-[5px] gap-1;
+  @apply py-0.75 px-2 text-[10.5px] rounded-[5px] gap-1;
 }
 
 .btn:disabled {
@@ -675,13 +675,13 @@ a {
 }
 
 .data-table th {
-  @apply bg-[#fafbfc] py-[7px] px-[11px] text-[10.5px] font-bold uppercase tracking-[0.05em] border-b;
+  @apply bg-[#fafbfc] py-1.75 px-2.75 text-[10.5px] font-bold uppercase tracking-wider border-b;
   color: var(--muted);
   border-color: var(--line);
 }
 
 .data-table td {
-  @apply py-[7.5px] px-[11px] border-b text-[12px];
+  @apply py-[7.5px] px-2.75 border-b text-[12px];
   color: var(--text);
   border-color: var(--line);
 }
@@ -698,12 +698,12 @@ a {
    Tabs
    ========================================================================== */
 .tabs {
-  @apply flex gap-[3px] border-b mb-1;
+  @apply flex gap-0.75 border-b mb-1;
   border-color: var(--line);
 }
 
 .tab {
-  @apply bg-transparent border-none text-[11.5px] text-[#555b69] py-[7px] px-3 cursor-pointer relative font-medium font-sans;
+  @apply bg-transparent border-none text-[11.5px] text-[#555b69] py-1.75 px-3 cursor-pointer relative font-medium font-sans;
 }
 
 .tab.active {
@@ -713,7 +713,7 @@ a {
 
 .tab.active::after {
   content: "";
-  @apply absolute left-0 right-0 -bottom-px h-[2px] rounded-[2px];
+  @apply absolute left-0 right-0 -bottom-px h-0.5 rounded-xs;
   background: var(--navy);
 }
 
@@ -721,7 +721,7 @@ a {
    Badges
    ========================================================================== */
 .badge {
-  @apply inline-flex items-center gap-[3px] py-0.5 px-1.5 rounded text-[9.5px] font-semibold;
+  @apply inline-flex items-center gap-0.75 py-0.5 px-1.5 rounded text-[9.5px] font-semibold;
 }
 
 .badge-success {
@@ -753,7 +753,7 @@ a {
    Form Controls
    ========================================================================== */
 .form-group {
-  @apply flex flex-col gap-[3px] mb-2.5;
+  @apply flex flex-col gap-0.75 mb-2.5;
 }
 
 .form-label {
@@ -763,7 +763,7 @@ a {
 .form-input,
 .form-select,
 .form-textarea {
-  @apply border rounded-md py-[5px] px-[9px] text-[11.5px] outline-none transition-all w-full font-sans;
+  @apply border rounded-md py-1.25 px-2.25 text-[11.5px] outline-none transition-all w-full font-sans;
   background: var(--card);
   border-color: var(--line);
   color: var(--text);
@@ -817,7 +817,7 @@ a {
 }
 
 .login-showcase-hero {
-  @apply relative z-10 my-10 max-w-[580px];
+  @apply relative z-10 my-10 max-w-145;
 }
 
 .login-showcase-tag {
@@ -841,11 +841,11 @@ a {
 }
 
 .login-feature-card:hover {
-  @apply bg-white/[0.065] border-white/20 translate-x-1;
+  @apply bg-white/6.5 border-white/20 translate-x-1;
 }
 
 .login-feature-icon-wrap {
-  @apply w-10 h-10 rounded-[10px] flex items-center justify-center shrink-0;
+  @apply w-10 h-10 rounded-search flex items-center justify-center shrink-0;
 }
 
 .login-feature-title {
@@ -890,7 +890,7 @@ a {
 }
 
 .login-form-container {
-  @apply w-full max-w-[440px];
+  @apply w-full max-w-110;
 }
 
 .login-form-header {
@@ -898,7 +898,7 @@ a {
 }
 
 .login-form-logo {
-  @apply w-[180px] h-auto object-contain block mb-4.5;
+  @apply w-45 h-auto object-contain block mb-4.5;
 }
 
 .login-form-title {
@@ -935,7 +935,7 @@ a {
 }
 
 .login-role-btn {
-  @apply inline-flex items-center gap-1.5 text-[12px] py-1.5 px-3 rounded-full border bg-white font-medium cursor-pointer transition-all min-h-[32px] font-sans;
+  @apply inline-flex items-center gap-1.5 text-[12px] py-1.5 px-3 rounded-full border bg-white font-medium cursor-pointer transition-all min-h-8 font-sans;
   border-color: var(--line);
   color: var(--text);
 }
@@ -983,7 +983,7 @@ a {
 }
 
 .login-input-field {
-  @apply w-full h-[46px] px-[42px] rounded-[10px] border border-slate-200 bg-white text-[13.5px] font-sans transition-all outline-none;
+  @apply w-full h-11.5 px-10.5 rounded-search border border-slate-200 bg-white text-[13.5px] font-sans transition-all outline-none;
   color: var(--text);
 }
 
@@ -1018,7 +1018,7 @@ a {
 }
 
 .login-submit-btn {
-  @apply w-full h-12 rounded-[10px] text-white border-none text-[14px] font-semibold font-sans flex items-center justify-center gap-2 cursor-pointer transition-all shadow-md;
+  @apply w-full h-12 rounded-search text-white border-none text-[14px] font-semibold font-sans flex items-center justify-center gap-2 cursor-pointer transition-all shadow-md;
   background: var(--navy);
 }
 
@@ -1032,7 +1032,7 @@ a {
 }
 
 .login-error-alert {
-  @apply py-3 px-3.5 rounded-[10px] bg-red-50 border border-red-200 text-red-700 text-[12.5px] leading-normal flex items-start gap-2.5 mb-4;
+  @apply py-3 px-3.5 rounded-search bg-red-50 border border-red-200 text-red-700 text-[12.5px] leading-normal flex items-start gap-2.5 mb-4;
 }
 
 .login-form-footer {
@@ -1107,14 +1107,14 @@ a {
    Modal
    ========================================================================== */
 .modal-overlay {
-  @apply fixed inset-0 flex items-center justify-center z-[1000] p-6;
+  @apply fixed inset-0 flex items-center justify-center z-1000 p-6;
   background: rgba(0, 0, 0, 0.4);
   overscroll-behavior: contain;
   touch-action: none;
 }
 
 .modal-box {
-  @apply rounded-[12px] p-7 w-full max-w-[540px] max-h-[90vh] overflow-y-auto shadow-2xl;
+  @apply rounded-[12px] p-7 w-full max-w-135 max-h-[90vh] overflow-y-auto shadow-2xl;
   background: var(--card);
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
@@ -1170,7 +1170,7 @@ a {
    SI KOBAR AI Assistant Widget & Floating Controls
    ========================================================================== */
 .kobar-fab {
-  @apply fixed bottom-8 right-8 w-14 h-14 rounded-full text-white flex items-center justify-center cursor-pointer z-[999] transition-transform;
+  @apply fixed bottom-8 right-8 w-14 h-14 rounded-full text-white flex items-center justify-center cursor-pointer z-999 transition-transform;
   background: var(--grad-blue);
   box-shadow: 0 8px 24px rgba(10, 127, 216, 0.4);
 }
@@ -1181,7 +1181,7 @@ a {
 
 /* Global Back to Top Button */
 .back-to-top-btn {
-  @apply fixed w-11 h-11 rounded-full bg-white border border-slate-200 text-blue-600 flex items-center justify-center cursor-pointer z-[998] transition-all;
+  @apply fixed w-11 h-11 rounded-full bg-white border border-slate-200 text-blue-600 flex items-center justify-center cursor-pointer z-998 transition-all;
   bottom: calc(2rem + 70px);
   right: calc(2rem + 6px);
   box-shadow: 0 4px 14px rgba(15, 23, 42, 0.12), 0 1px 3px rgba(0, 0, 0, 0.08);
@@ -1209,7 +1209,7 @@ a {
 }
 
 .kobar-window {
-  @apply fixed right-8 w-[380px] h-[520px] rounded-[12px] flex flex-col z-[1000] overflow-hidden border;
+  @apply fixed right-8 w-95 h-130 rounded-[12px] flex flex-col z-1000 overflow-hidden border;
   bottom: 104px;
   max-width: calc(100vw - 2.5rem);
   max-height: calc(100vh - 8rem);
@@ -1232,7 +1232,7 @@ a {
 }
 
 .kobar-header {
-  @apply py-3.5 px-[18px] text-white flex items-center justify-between;
+  @apply py-3.5 px-4.5 text-white flex items-center justify-between;
   background: var(--grad-blue);
 }
 
@@ -1241,18 +1241,18 @@ a {
 }
 
 .kobar-msg {
-  @apply py-2.5 px-3.5 rounded-[10px] text-[13px] leading-relaxed max-w-[85%];
+  @apply py-2.5 px-3.5 rounded-search text-[13px] leading-relaxed max-w-[85%];
 }
 
 .kobar-msg-bot {
-  @apply self-start rounded-bl-[4px] border;
+  @apply self-start rounded-bl-sm border;
   background: var(--bg);
   border-color: var(--line);
   color: var(--text);
 }
 
 .kobar-msg-user {
-  @apply text-white self-end rounded-br-[4px];
+  @apply text-white self-end rounded-br-sm;
   background: var(--navy);
 }
 
