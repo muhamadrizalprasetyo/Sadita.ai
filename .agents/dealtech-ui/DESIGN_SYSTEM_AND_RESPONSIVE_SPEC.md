@@ -238,3 +238,13 @@ Untuk mencegah tombol melayang saling menumpuk (*overlapping/clipping*):
 2. **Transparansi Hitam Lembut (Soft Black Tint)**: Menggunakan `background: rgba(0, 0, 0, 0.4)` (atau maksimal `0.45`) sehingga latar belakang teredup secara elegan tanpa terasa terlalu tebal atau pekat.
 3. **Scroll Lock Terisolasi**: Saat modal terbuka, scrolling halaman luar dinonaktifkan (`overflow: hidden` pada `html` & `body`, `touch-action: none` pada overlay) dengan momentum touch scroll tetap aktif pada kontainer isi modal (`modal-box`).
 
+### 6.3 Standar Halaman Login Enterprise Modern (Split-Screen Institutional Portal)
+1. **Tata Letak Dua Panel (*Split-Screen Layout*)**:
+   - **Panel Kiri (Otoritas Institusi & Nilai Sistem)**: Latar belakang Navy dalam (`#0b1528` - `#112240`) dengan aksen mikro-grid, lencana resmi UNIPI, ringkasan 3 pilar fitur (Presensi IoT, LMS & Kurikulum, Keamanan Zero-Trust), dan indikator status operasional MQTT broker & TLS 1.3 secara *real-time*.
+   - **Panel Kanan (Formulir Autentikasi Modern)**: Kanvas putih berdensitas fokus tinggi, pemilih role simulasi (*segmented account switcher*), input NIM/Email dengan ikon terpadu, toggle *show/hide password*, detektor *Caps Lock*, dan footer bantuan resmi BAAK.
+2. **Kepatuhan Responsif Apple iPhone**:
+   - Pada layar `< 1024px`, tata letak bertransisi mulus menjadi satu kolom vertikal yang ergonomis.
+   - Ukuran font input wajib `16px` (`1rem`) pada perangkat mobile untuk mencegah auto-zoom liar di iOS Safari.
+   - Tombol aksi utama memiliki tinggi 48px, melebihi batas minimum Apple HIG 44px untuk kenyamanan sentuhan satu tangan (*Thumb Zone*).
+
+
