@@ -457,6 +457,7 @@ Semua itu harus dibangun dengan struktur yang jelas, bukan dashboard yang keliha
 
 ### 4. Standar Desain Human-Crafted & Anti-AI Slop
 - **Penolakan Mutlak AI Slop**: Dilarang menggunakan gelembung gradien neon ungu-cyan, glassmorphism buram berlebihan, ilustrasi robot 3D plastik tanpa fungsi, kartu statistik palsu, dan animasi lambat yang memantul.
+- **Wajib Mengutamakan Tailwind CSS (Tailwind-First)**: Seluruh pembuatan antarmuka, tata letak, komponen UI, dan styling **wajib mengutamakan Tailwind CSS** (`@tailwindcss/postcss` v4 dengan utility classes atau `@apply`). Dilarang membuat file CSS baru terpisah atau menulis CSS murni (*raw/vanilla CSS*) yang terisolasi tanpa memanfaatkan utilitas Tailwind CSS.
 - **Estetika Institusional UNIPI**: Menampilkan kredibilitas enterprise dengan palet Slate 50-900, aksen hijau zamrud UNIPI (`#059669`), dan biru safir akademik (`#1d4ed8`).
 - **Kepadatan Data Tinggi (Data Density)**: Tabel operasional yang kompak (baris 44-48px), perataan kolom angka monospace, dan badge status presensi yang tegas (`HADIR`, `TERLAMBAT`, `IZIN`, `SAKIT`, `ALPHA`).
 - 📖 *Panduan Lengkap:* [ANTI_SLOP_DESIGN_GUIDELINES.md](file:///home/whoami/Documents/Projects/Sadita.ai/.agents/anti-slop/ANTI_SLOP_DESIGN_GUIDELINES.md)

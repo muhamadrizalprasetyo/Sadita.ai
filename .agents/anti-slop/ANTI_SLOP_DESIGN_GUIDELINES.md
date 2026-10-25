@@ -74,6 +74,26 @@ Menggunakan font modern berstandar enterprise seperti **Inter**, **Plus Jakarta 
 --leading-normal:1.5;
 ```
 
+### 2.3 Standar Kartu Autentikasi Institusional (Zero-AI-Slop Login)
+
+Halaman masuk (*login*) adalah pintu gerbang institusional bagi ribuan sivitas akademika, bukan landing page marketing produk B2C.
+1. **Pola Kartu Terpusat (*Centered Institutional Card*)**: Menolak tata letak split-screen gelap dengan banner promosi AI, gelembung gradien neon, dan kartu marketing palsu. Gunakan kartu terpusat (`max-w-[420px]`) di atas latar belakang Slate 50 netral dengan garis aksen navy UNIPI `#1B2D4F` di bagian atas viewport.
+2. **Ergonomi Input & Ikon**: Seluruh kolom input wajib memiliki gutter teks yang presisi (`padding: 0 38px`) sehingga ikon `Mail` atau `Lock` di sisi kiri tidak menabrak karakter teks atau password bullets. Ukuran font wajib $\ge 16$px pada viewport seluler untuk mencegah *auto-zoom* iOS Safari.
+3. **Penyederhanaan Selektor Uji Coba**: Quick switcher akun simulasi (Admin, Kaprodi, Dosen, Ketua Kelas, Mahasiswa) dirancang kompak dalam baris grid berprofil rendah dengan badge aktif, tidak mendominasi atau mengacaukan hierarki form login.
+
+### 2.4 Standar Mutlak Styling: Wajib Mengutamakan Tailwind CSS Saja (Tailwind-First Architecture)
+
+Setiap pengembang maupun agen AI **WAJIB MENGUTAMAKAN TAILWIND CSS** dalam seluruh pembuatan antarmuka, tata letak, komponen, dan perbaikan tampilan di SADITA.ai:
+1. **Utamakan Kelas Utilitas Tailwind CSS**:
+   - Seluruh penyusunan layout (`flex`, `grid`, `col-span-*`), jarak spasial (`p-*`, `m-*`, `gap-*`), warna (`bg-*`, `text-*`, `border-*`), tipografi, radius, dan bayangan wajib mengutamakan utilitas Tailwind CSS.
+2. **Larangan Keras Menulis File CSS Murni Terpisah (*No Isolated Vanilla CSS*)**:
+   - Dilarang membuat file `.css` baru atau modul CSS terpisah untuk halaman/komponen jika kebutuhan styling tersebut dapat diselesaikan secara langsung menggunakan utilitas Tailwind CSS.
+   - Jangan menulis kode CSS murni (*raw/vanilla CSS*) yang berdiri sendiri di luar ekosistem Tailwind.
+3. **Pola `@apply` Terpusat di `globals.css`**:
+   - Apabila diperlukan kelas reusable khusus (misalnya styling tabel enterprise atau modal sistem), penulisan CSS pada `frontend/app/globals.css` **wajib mengutamakan direktif `@apply` dari utilitas Tailwind CSS** agar tetap terikat pada token institusional `@theme`.
+4. **Offline-First & Kemandirian Dependensi**:
+   - Menggunakan engine `@tailwindcss/postcss` v4 yang bekerja mandiri secara offline bersama paket lokal `@fontsource/poppins`, tanpa bergantung pada CDN eksternal.
+
 ---
 
 ## 3. Ergonomi Data Density & Pola Tabel Enterprise
