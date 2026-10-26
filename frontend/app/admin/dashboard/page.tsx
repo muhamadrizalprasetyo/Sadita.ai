@@ -251,7 +251,7 @@ export default function AdminDashboardPage() {
       </div>
 
       {error && (
-        <div style={{ padding: "8px 12px", borderRadius: "6px", background: "var(--error-bg)", border: "1px solid var(--error-border)", color: "var(--error)", fontSize: "11px" }}>
+        <div className="rounded-lg" style={{ padding: "8px 12px", background: "var(--error-bg)", border: "1px solid var(--error-border)", color: "var(--error)", fontSize: "11px" }}>
           {error}
         </div>
       )}
@@ -259,9 +259,9 @@ export default function AdminDashboardPage() {
       {/* 2. Operational Attention Banner (Kebutuhan Perhatian as per AGENTS.md) */}
       {stats && stats.devices_offline > 0 && (
         <div
+          className="rounded-lg"
           style={{
             padding: "9px 12px",
-            borderRadius: "7px",
             background: "rgba(239, 68, 68, 0.08)",
             border: "1px solid rgba(239, 68, 68, 0.25)",
             display: "flex",
@@ -278,7 +278,7 @@ export default function AdminDashboardPage() {
           </div>
           <Link
             href="/admin/perangkat"
-            className="btn btn-sm"
+            className="btn btn-sm rounded-md"
             style={{
               background: "#ef4444",
               color: "#ffffff",

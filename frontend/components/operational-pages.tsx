@@ -1855,10 +1855,10 @@ export function DevicesPage() {
         render: (d) => (
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             <div
+              className="rounded-md"
               style={{
                 width: "32px",
                 height: "32px",
-                borderRadius: "8px",
                 background: "rgba(56, 189, 248, 0.12)",
                 color: "var(--primary-light)",
                 display: "flex",
@@ -2028,10 +2028,10 @@ export function DevicesPage() {
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
                   <div
+                    className="rounded-md"
                     style={{
                       width: "2.5rem",
                       height: "2.5rem",
-                      borderRadius: "var(--radius-md)",
                       background: "rgba(56, 189, 248, 0.12)",
                       color: "var(--primary-light)",
                       display: "flex",
@@ -2050,6 +2050,7 @@ export function DevicesPage() {
               </div>
 
               <div
+                className="rounded-md"
                 style={{
                   display: "grid",
                   gap: "0.4rem",
@@ -2057,7 +2058,6 @@ export function DevicesPage() {
                   color: "var(--text-secondary)",
                   background: "rgba(0,0,0,0.2)",
                   padding: "0.85rem",
-                  borderRadius: "var(--radius-md)",
                 }}
               >
                 <div>
@@ -2627,11 +2627,11 @@ export function LmsPage({ assignment = false }: { assignment?: boolean }) {
           <form onSubmit={handleSubmitAssignment} style={{ display: "grid", gap: "1rem" }}>
             {submitSuccess && (
               <div
+                className="rounded-md"
                 style={{
                   background: "#dcfce7",
                   color: "#166534",
                   padding: "0.75rem",
-                  borderRadius: "0.375rem",
                   fontSize: "0.875rem",
                   fontWeight: 600,
                 }}
@@ -2642,11 +2642,11 @@ export function LmsPage({ assignment = false }: { assignment?: boolean }) {
 
             {submitTarget.description && (
               <div
+                className="rounded-md"
                 style={{
                   fontSize: "0.875rem",
                   background: "var(--bg-secondary, #f8fafc)",
                   padding: "0.75rem",
-                  borderRadius: "0.375rem",
                 }}
               >
                 <strong>Petunjuk Tugas:</strong>

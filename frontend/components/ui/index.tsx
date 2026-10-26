@@ -167,10 +167,10 @@ export function Modal({
           <button
             type="button"
             onClick={onClose}
+            className="rounded-md"
             style={{
               width: "32px",
               height: "32px",
-              borderRadius: "8px",
               background: "var(--bg)",
               border: "1px solid var(--line)",
               display: "flex",

@@ -25,12 +25,12 @@
   --color-green-dark: #0a9a58;
   --color-green-accent: #1ed38a;
 
-  --radius-container: 14px;
-  --radius-card: 12px;
-  --radius-search: 10px;
-  --radius-nav: 8px;
+  --radius-container: 8px;
+  --radius-card: 8px;
+  --radius-search: 6px;
+  --radius-nav: 6px;
   --radius-thumb: 6px;
-  --radius-tooltip: 8px;
+  --radius-tooltip: 6px;
   --radius-full: 9999px;
 
   --shadow-eduka: 0 6px 24px rgba(20, 30, 60, .06);
@@ -78,12 +78,12 @@
   --grad-purple: linear-gradient(135deg, #7a3cf0, #b57cff);
   --grad-orange: linear-gradient(135deg, #f0460a, #ff7a2f);
 
-  --radius-container: 14px;
-  --radius-card: 12px;
-  --radius-search: 10px;
-  --radius-nav: 8px;
+  --radius-container: 8px;
+  --radius-card: 8px;
+  --radius-search: 6px;
+  --radius-nav: 6px;
   --radius-thumb: 6px;
-  --radius-tooltip: 8px;
+  --radius-tooltip: 6px;
   --radius-full: 9999px;
 
   --bg-app: #e9ebef;
@@ -564,7 +564,7 @@ a {
 }
 
 .btn-sm {
-  @apply py-0.75 px-2 text-[10.5px] rounded-[5px] gap-1;
+  @apply py-0.75 px-2 text-[10.5px] rounded-md gap-1;
 }
 
 /* ==========================================================================
@@ -618,7 +618,7 @@ a {
    Badges
    ========================================================================== */
 .badge {
-  @apply inline-flex items-center gap-0.75 py-0.5 px-1.5 rounded text-[9.5px] font-semibold;
+  @apply inline-flex items-center gap-0.75 py-0.5 px-1.5 rounded-md text-[9.5px] font-semibold;
 }
 
 .badge-success {
@@ -663,11 +663,14 @@ a {
    ========================================================================== */
 .login-page-wrapper {
   @apply min-h-dvh flex flex-col items-center justify-center p-4 sm:p-6 bg-slate-50 relative box-border w-full;
-  @apply pt-[max(1.5rem,env(safe-area-inset-top))] pb-[max(1.5rem,env(safe-area-inset-bottom))] pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))];
+  padding-top: max(1.5rem, env(safe-area-inset-top));
+  padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+  padding-left: max(1rem, env(safe-area-inset-left));
+  padding-right: max(1rem, env(safe-area-inset-right));
 }
 
 .login-card {
-  @apply w-full max-w-105 bg-white border border-slate-200 rounded-container p-6.5 sm:p-7.5 shadow-login-card box-border max-sm:p-5 max-sm:shadow-login-card-sm max-[480px]:p-4 max-[480px]:rounded-[12px] max-[360px]:p-3;
+  @apply w-full max-w-105 bg-white border border-slate-200 rounded-container p-6.5 sm:p-7.5 shadow-login-card box-border max-sm:p-5 max-sm:shadow-login-card-sm max-[480px]:p-4 max-[480px]:rounded-xl max-[360px]:p-3;
 }
 
 .login-brand-header {
@@ -735,7 +738,7 @@ a {
 }
 
 .login-input-element {
-  @apply w-full h-10.5 px-9.5! rounded-lg border border-slate-300 bg-white text-slate-900 text-[13.5px] font-sans outline-none transition-all duration-150 box-border focus:border-blue-600 focus:ring-3 focus:ring-blue-600/12 max-sm:text-[16px]!;
+  @apply w-full h-10.5 px-9.5 rounded-lg border border-slate-300 bg-white text-slate-900 text-[13.5px] font-sans outline-none transition-all duration-150 box-border focus:border-blue-600 focus:ring-3 focus:ring-blue-600/12 max-sm:text-[16px];
 }
 
 .login-eye-btn {
@@ -775,7 +778,10 @@ a {
    ========================================================================== */
 .login-modal-overlay {
   @apply fixed inset-0 z-1000 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overscroll-contain touch-none;
-  @apply pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))] pl-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))];
+  padding-top: max(1rem, env(safe-area-inset-top));
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  padding-left: max(1rem, env(safe-area-inset-left));
+  padding-right: max(1rem, env(safe-area-inset-right));
 }
 
 .login-modal-box {
@@ -868,7 +874,7 @@ a {
 }
 
 .modal-box {
-  @apply rounded-[12px] p-7 w-full max-w-135 max-h-[90vh] overflow-y-auto shadow-2xl bg-white overscroll-contain;
+  @apply rounded-lg p-7 w-full max-w-135 max-h-[90vh] overflow-y-auto shadow-2xl bg-white overscroll-contain;
   -webkit-overflow-scrolling: touch;
   touch-action: pan-y;
 }
@@ -940,7 +946,7 @@ a {
 }
 
 .kobar-window {
-  @apply fixed right-8 w-95 h-130 rounded-[12px] flex flex-col z-1000 overflow-hidden border border-[#eceef2] bg-white shadow-app bottom-26 max-w-[calc(100vw-2.5rem)] max-h-[calc(100vh-8rem)];
+  @apply fixed right-8 w-95 h-130 rounded-lg flex flex-col z-1000 overflow-hidden border border-[#eceef2] bg-white shadow-app bottom-26 max-w-[calc(100vw-2.5rem)] max-h-[calc(100vh-8rem)];
   animation: slideUp 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -966,7 +972,7 @@ a {
 }
 
 .kobar-msg {
-  @apply py-2.5 px-3.5 rounded-search text-[13px] leading-relaxed max-w-[85%];
+  @apply py-2 px-3 rounded-md text-[13px] leading-relaxed max-w-[85%];
 }
 
 .kobar-msg-bot {

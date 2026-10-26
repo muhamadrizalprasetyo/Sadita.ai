@@ -343,9 +343,9 @@ export function AttendanceWorkspace() {
 
       {error && (
         <div
+          className="rounded-lg"
           style={{
             padding: "12px 16px",
-            borderRadius: "var(--radius-search)",
             background: "var(--error-bg)",
             border: "1px solid var(--error-border)",
             color: "var(--error)",
@@ -357,9 +357,9 @@ export function AttendanceWorkspace() {
       )}
       {message && (
         <div
+          className="rounded-lg"
           style={{
             padding: "12px 16px",
-            borderRadius: "var(--radius-search)",
             background: "var(--success-bg)",
             border: "1px solid var(--success-border)",
             color: "var(--success)",

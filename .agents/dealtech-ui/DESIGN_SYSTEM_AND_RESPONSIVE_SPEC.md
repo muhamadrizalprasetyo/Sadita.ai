@@ -97,6 +97,13 @@ Sesuai panduan *Apple Human Interface Guidelines*, setiap tombol atau elemen yan
 }
 ```
 
+### 2.4 Standar Hirarki Border Radius: Container `rounded-lg` & Descendants `rounded-md`
+Untuk menghasilkan visual yang konsisten, proporsional, dan elegan di seluruh dashboard admin SADITA.ai:
+1. **Container Utama (Level 1 - `rounded-lg` / 8px)**:
+   - Digunakan pada seluruh kontainer kartu (`.card`), pembungkus tabel (`.table-container`), popup/modal dialog (`.modal-box`), topbar navigasi (`.topbar`), kartu metrik (`.stat`), panel asisten AI (`.kobar-window`), dan alert banner.
+2. **Elemen Turunan / Anak (Level 2 - `rounded-md` / 6px)**:
+   - Digunakan pada seluruh komponen yang berada di dalam kontainer: tombol (`.btn`, `.btn-sm`, `.filter-tab-btn`), input form (`.form-input`, `.form-select`, `.form-textarea`), kolom pencarian (`.topbar-search`), badge status (`.badge`, `.badge-class-code`), kotak icon stat (`.stat-icon`), dan tombol paginasi tabel.
+
 ---
 
 ## 3. Ergonomi "Thumb Zone" untuk Mobile
