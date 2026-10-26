@@ -253,6 +253,20 @@ export function DataTable<T extends { id?: string | number }>({
 }
 ```
 
+#### Modul Admin yang Mengadopsi Universal `DataTable<T>` 100%:
+Seluruh tabel operasional di Admin Dashboard telah distandarisasi menggunakan `DataTable<T>` (`frontend/components/ui/data-table.tsx`):
+1. **Tahun Akademik & Semester** (`/admin/akademik/tahun-akademik`): `DataTable<AcademicTerm>` (pencarian nama, filter status semester aktif/selesai, sorting kalender, paginasi).
+2. **Katalog Mata Kuliah** (`/admin/akademik/mata-kuliah`): `DataTable<Course>` (pencarian kode/nama, filter bobot SKS & semester rekomendasi, sorting, paginasi).
+3. **Kelas & Enrollment KRS** (`/admin/akademik/kelas`): `DataTable<CourseClass>` (pencarian rombel/dosen/ruangan, filter cohort TEKFO 1–8, hari, jenis kelas, sorting jadwal, dan sub-modal `DataTable<ClassEnrollment>`).
+4. **Direktori Dosen Pengajar** (`/admin/akademik/dosen`): `DataTable<LecturerProfile>` (pencarian NIDN/nama, sorting, penugasan kelas badge).
+5. **Direktori Mahasiswa** (`/admin/akademik/mahasiswa`): `DataTable<StudentProfile>` (pencarian NPM/nama, filter cohort TEKFO, jenis kelas pagi/malam/shift, status KTM/RFID).
+6. **Perangkat Presensi IoT** (`/admin/perangkat`): `DataTable<SaditaDevice>` (tampilan switchable tabel & kartu, status online/offline, IP, firmware, broker MQTT).
+7. **Monitoring Sesi Presensi** (`/admin/presensi`): `DataTable<AttendanceSession>` (pencarian topik/tanggal, filter status sesi terbuka/selesai/terjadwal).
+8. **LMS Materi & Tugas** (`/admin/lms`, `/admin/lms/materi`, `/admin/lms/tugas`): `DataTable<CourseMaterial | Assignment>` (pencarian judul, deadline, pengumpulan berkas PDF).
+9. **Workspace Presensi Terpadu** (`/admin/presensi/sesi`): `DataTable<AttendanceSession>` & `DataTable<AttendanceRequest>` (kontrol buka/tutup sesi, verifikasi kehadiran sesi pengganti).
+10. **Manajemen Pengguna & Hak Akses** (`/admin/users`): `DataTable<UserItem>` (filter multi-role, visibilitas status aktif, seleksi baris, aksi massal).
+11. **Admin Main Dashboard** (`/admin/dashboard`): `DataTable<CourseClass>` (monitoring kelas harian terintegrasi).
+
 ### 3.2 Universal Modal & Dialog Primitives
 Untuk form tambah data, edit data, dan konfirmasi tindakan penting tanpa menulis boilerplate HTML dialog berulang kali:
 

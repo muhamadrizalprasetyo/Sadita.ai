@@ -1,9 +1,24 @@
 "use client";
 
 import { useEffect, useMemo, useState, type FormEvent } from "react";
-import { academicApi, attendanceApi, authApi, workflowApi, type AttendanceRequest, type AttendanceSession, type CourseClass, type User } from "@/lib/api";
-import { LoadingSpinner, StatusBadge } from "@/components/ui";
-import { Clock, Plus, CheckCircle, ShieldCheck } from "lucide-react";
+import {
+  academicApi,
+  attendanceApi,
+  authApi,
+  workflowApi,
+  type AttendanceRequest,
+  type AttendanceSession,
+  type CourseClass,
+  type User,
+} from "@/lib/api";
+import {
+  LoadingSpinner,
+  StatusBadge,
+  DataTable,
+  type ColumnDef,
+  type TableFilterDef,
+} from "@/components/ui";
+import { Plus, CheckCircle, ShieldCheck } from "lucide-react";
 
 export function AttendanceWorkspace() {
   const [user, setUser] = useState<User>();
@@ -15,7 +30,31 @@ export function AttendanceWorkspace() {
   const [error, setError] = useState<string>();
   const [loading, setLoading] = useState(true);
 
+  // DataTable State for Sessions
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("ALL");
+  const [sortKey, setSortKey] = useState<string>("session_number");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [perPage, setPerPage] = useState(10);
+
+  // DataTable State for Requests
+  const [reqSearch, setReqSearch] = useState("");
+
   const active = useMemo(() => sessions.find((item) => item.status === "OPEN"), [sessions]);
+
+  async function loadClass(id: number, current = user) {
+    const sessionResult = await attendanceApi.getSessions(id);
+    if (!sessionResult.data) {
+      setError(sessionResult.error);
+      return;
+    }
+    setSessions(sessionResult.data);
+    if (current?.role === "MAHASISWA" || current?.role === "KETUA_KELAS") {
+      const pending = await workflowApi.pendingPresence(id);
+      setRequests(pending.data ?? []);
+    }
+  }
 
   async function load() {
     setLoading(true);
@@ -34,21 +73,9 @@ export function AttendanceWorkspace() {
     setLoading(false);
   }
 
-  async function loadClass(id: number, current = user) {
-    const sessionResult = await attendanceApi.getSessions(id);
-    if (!sessionResult.data) {
-      setError(sessionResult.error);
-      return;
-    }
-    setSessions(sessionResult.data);
-    if (current?.role === "MAHASISWA" || current?.role === "KETUA_KELAS") {
-      const pending = await workflowApi.pendingPresence(id);
-      setRequests(pending.data ?? []);
-    }
-  }
-
   useEffect(() => {
     void load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function mutate(action: () => Promise<{ error?: string }>) {
@@ -76,6 +103,205 @@ export function AttendanceWorkspace() {
     );
     e.currentTarget.reset();
   }
+
+  const filteredAndSortedSessions = useMemo(() => {
+    let result = sessions.filter((s) => {
+      if (statusFilter !== "ALL" && s.status !== statusFilter) return false;
+      if (search.trim()) {
+        const q = search.toLowerCase();
+        const match =
+          (s.topic && s.topic.toLowerCase().includes(q)) ||
+          s.date.includes(q) ||
+          `pertemuan ${s.session_number}`.includes(q);
+        if (!match) return false;
+      }
+      return true;
+    });
+
+    if (sortKey) {
+      result = [...result].sort((a, b) => {
+        let valA: string | number = "";
+        let valB: string | number = "";
+        if (sortKey === "session_number") {
+          valA = a.session_number;
+          valB = b.session_number;
+        } else if (sortKey === "date") {
+          valA = a.date;
+          valB = b.date;
+        } else if (sortKey === "topic") {
+          valA = (a.topic || "").toLowerCase();
+          valB = (b.topic || "").toLowerCase();
+        } else if (sortKey === "status") {
+          valA = a.status;
+          valB = b.status;
+        }
+        if (valA < valB) return sortDirection === "asc" ? -1 : 1;
+        if (valA > valB) return sortDirection === "asc" ? 1 : -1;
+        return 0;
+      });
+    }
+
+    return result;
+  }, [sessions, search, statusFilter, sortKey, sortDirection]);
+
+  const totalPages = Math.ceil(filteredAndSortedSessions.length / perPage) || 1;
+  const paginatedSessions = useMemo(() => {
+    const start = (currentPage - 1) * perPage;
+    return filteredAndSortedSessions.slice(start, start + perPage);
+  }, [filteredAndSortedSessions, currentPage, perPage]);
+
+  const handleSort = (key: string) => {
+    if (sortKey === key) {
+      setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortDirection("asc");
+    }
+  };
+
+  const sessionColumns = useMemo<ColumnDef<AttendanceSession>[]>(
+    () => [
+      {
+        key: "session_number",
+        header: "Pertemuan",
+        sortable: true,
+        toggleable: false,
+        width: "140px",
+        render: (item) => <span style={{ fontWeight: 600 }}>Pertemuan {item.session_number}</span>,
+      },
+      {
+        key: "date",
+        header: "Tanggal",
+        sortable: true,
+        width: "130px",
+        render: (item) => <span style={{ fontSize: "12.5px", fontFamily: "var(--font-mono)" }}>{item.date}</span>,
+      },
+      {
+        key: "topic",
+        header: "Topik Perkuliahan",
+        sortable: true,
+        render: (item) => (
+          <span style={{ color: item.topic ? "var(--text)" : "var(--muted)", fontWeight: 500 }}>
+            {item.topic ?? "—"}
+          </span>
+        ),
+      },
+      {
+        key: "status",
+        header: "Status",
+        align: "center",
+        sortable: true,
+        width: "140px",
+        render: (item) => (
+          <StatusBadge
+            status={item.status === "OPEN" ? "warning" : item.status === "CLOSED" ? "success" : "neutral"}
+            label={item.status}
+          />
+        ),
+      },
+      {
+        key: "actions",
+        header: "Aksi",
+        align: "right",
+        sortable: false,
+        toggleable: false,
+        render: (item) => (
+          <div style={{ display: "inline-flex", gap: "6px" }} onClick={(e) => e.stopPropagation()}>
+            {(user?.role === "ADMIN" || user?.role === "DOSEN") && item.status === "SCHEDULED" && (
+              <button
+                className="btn btn-primary btn-sm"
+                onClick={() => void mutate(() => attendanceApi.openSession(item.id))}
+              >
+                Buka Sesi
+              </button>
+            )}
+            {(user?.role === "ADMIN" || user?.role === "DOSEN") && item.status === "OPEN" && (
+              <button
+                className="btn btn-danger btn-sm"
+                onClick={() => void mutate(() => attendanceApi.closeSession(item.id))}
+              >
+                Tutup Sesi
+              </button>
+            )}
+          </div>
+        ),
+      },
+    ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [user]
+  );
+
+  const sessionFilters: TableFilterDef[] = useMemo(
+    () => [
+      {
+        key: "status",
+        label: "Status Sesi",
+        value: statusFilter,
+        onChange: (v) => {
+          setStatusFilter(v);
+          setCurrentPage(1);
+        },
+        options: [
+          { value: "ALL", label: "Semua Status" },
+          { value: "OPEN", label: "Sesi Terbuka" },
+          { value: "CLOSED", label: "Selesai Ditutup" },
+          { value: "SCHEDULED", label: "Terjadwal" },
+        ],
+      },
+    ],
+    [statusFilter]
+  );
+
+  // Requests DataTable Columns & Data
+  const requestColumns = useMemo<ColumnDef<AttendanceRequest>[]>(
+    () => [
+      {
+        key: "id",
+        header: "ID Pengajuan",
+        sortable: true,
+        toggleable: false,
+        render: (req) => (
+          <span style={{ fontWeight: 600, fontFamily: "var(--font-mono)" }}>#{req.id}</span>
+        ),
+      },
+      {
+        key: "session_id",
+        header: "Sesi Perkuliahan",
+        sortable: true,
+        render: (req) => <span>Sesi Pertemuan {req.session_id}</span>,
+      },
+      {
+        key: "status",
+        header: "Status",
+        align: "center",
+        render: (req) => <StatusBadge status="warning" label={req.status} />,
+      },
+      {
+        key: "actions",
+        header: "Aksi",
+        align: "right",
+        sortable: false,
+        render: (req) => (
+          <button
+            className="btn btn-primary btn-sm"
+            onClick={() => classId && void mutate(() => workflowApi.verifyPresence(classId, req.id))}
+          >
+            Verifikasi
+          </button>
+        ),
+      },
+    ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [classId]
+  );
+
+  const filteredRequests = useMemo(() => {
+    if (!reqSearch.trim()) return requests;
+    const q = reqSearch.toLowerCase();
+    return requests.filter(
+      (r) => String(r.id).includes(q) || String(r.session_id).includes(q) || r.status.toLowerCase().includes(q)
+    );
+  }, [requests, reqSearch]);
 
   if (loading) return <LoadingSpinner text="Memuat workspace presensi…" />;
 
@@ -116,12 +342,30 @@ export function AttendanceWorkspace() {
       </div>
 
       {error && (
-        <div style={{ padding: "12px 16px", borderRadius: "var(--radius-search)", background: "var(--error-bg)", border: "1px solid var(--error-border)", color: "var(--error)", fontSize: "13px" }}>
+        <div
+          style={{
+            padding: "12px 16px",
+            borderRadius: "var(--radius-search)",
+            background: "var(--error-bg)",
+            border: "1px solid var(--error-border)",
+            color: "var(--error)",
+            fontSize: "13px",
+          }}
+        >
           {error}
         </div>
       )}
       {message && (
-        <div style={{ padding: "12px 16px", borderRadius: "var(--radius-search)", background: "var(--success-bg)", border: "1px solid var(--success-border)", color: "var(--success)", fontSize: "13px" }}>
+        <div
+          style={{
+            padding: "12px 16px",
+            borderRadius: "var(--radius-search)",
+            background: "var(--success-bg)",
+            border: "1px solid var(--success-border)",
+            color: "var(--success)",
+            fontSize: "13px",
+          }}
+        >
           {message}
         </div>
       )}
@@ -152,104 +396,59 @@ export function AttendanceWorkspace() {
         </div>
       )}
 
-      {/* Sessions Table */}
-      <div className="card">
-        <div className="card-head">
-          <h3 className="lg">Daftar Sesi Presensi</h3>
-        </div>
-
-        <div className="table-container">
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Pertemuan</th>
-                <th>Tanggal</th>
-                <th>Topik Perkuliahan</th>
-                <th>Status</th>
-                <th>Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sessions.length === 0 ? (
-                <tr>
-                  <td colSpan={5} style={{ textAlign: "center", padding: "32px", color: "var(--muted)" }}>
-                    Belum ada sesi presensi untuk kelas ini.
-                  </td>
-                </tr>
-              ) : (
-                sessions.map((item) => (
-                  <tr key={item.id}>
-                    <td style={{ fontWeight: 600 }}>Pertemuan {item.session_number}</td>
-                    <td style={{ fontSize: "12.5px" }}>{item.date}</td>
-                    <td style={{ color: item.topic ? "var(--text)" : "var(--muted)" }}>{item.topic ?? "—"}</td>
-                    <td>
-                      <StatusBadge
-                        status={item.status === "OPEN" ? "warning" : item.status === "CLOSED" ? "success" : "neutral"}
-                        label={item.status}
-                      />
-                    </td>
-                    <td>
-                      {(user?.role === "ADMIN" || user?.role === "DOSEN") && item.status === "SCHEDULED" && (
-                        <button className="btn btn-primary btn-sm" onClick={() => void mutate(() => attendanceApi.openSession(item.id))}>
-                          Buka Sesi
-                        </button>
-                      )}
-                      {(user?.role === "ADMIN" || user?.role === "DOSEN") && item.status === "OPEN" && (
-                        <button className="btn btn-danger btn-sm" onClick={() => void mutate(() => attendanceApi.closeSession(item.id))}>
-                          Tutup Sesi
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+      {/* Sessions DataTable */}
+      <div style={{ display: "grid", gap: "12px" }}>
+        <h3 style={{ fontSize: "1rem", fontWeight: 700, margin: 0 }}>Daftar Sesi Presensi Perkuliahan</h3>
+        <DataTable<AttendanceSession>
+          columns={sessionColumns}
+          data={paginatedSessions}
+          loading={loading}
+          loadingText="Memuat data sesi presensi…"
+          emptyMessage="Belum ada sesi presensi untuk kelas ini."
+          searchable
+          searchQuery={search}
+          onSearchChange={(q) => {
+            setSearch(q);
+            setCurrentPage(1);
+          }}
+          searchPlaceholder="Cari topik atau tanggal pertemuan..."
+          filters={sessionFilters}
+          showColumnToggle
+          sortKey={sortKey}
+          sortDirection={sortDirection}
+          onSort={handleSort}
+          pagination={{
+            currentPage,
+            totalPages,
+            perPage,
+            onPageChange: setCurrentPage,
+            onPerPageChange: (p) => {
+              setPerPage(p);
+              setCurrentPage(1);
+            },
+            totalRecords: filteredAndSortedSessions.length,
+          }}
+        />
       </div>
 
       {/* Requests Pending Verification for Ketua Kelas / Mahasiswa */}
       {requests.length > 0 && (
-        <div className="card">
-          <div className="card-head">
-            <h3 style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <ShieldCheck size={18} color="var(--green)" /> Pengajuan Presensi Menunggu Verifikasi
-            </h3>
-          </div>
-          <div className="table-container">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>ID Request</th>
-                  <th>ID Sesi</th>
-                  <th>Status</th>
-                  <th>Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {requests.map((request) => (
-                  <tr key={request.id}>
-                    <td style={{ fontWeight: 600 }}>#{request.id}</td>
-                    <td>Sesi {request.session_id}</td>
-                    <td>
-                      <StatusBadge status="warning" label={request.status} />
-                    </td>
-                    <td>
-                      <button
-                        className="btn btn-primary btn-sm"
-                        onClick={() => classId && void mutate(() => workflowApi.verifyPresence(classId, request.id))}
-                      >
-                        Verifikasi
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+        <div style={{ display: "grid", gap: "12px", marginTop: "12px" }}>
+          <h3 style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "1rem", fontWeight: 700, margin: 0 }}>
+            <ShieldCheck size={18} color="var(--green)" /> Pengajuan Presensi Menunggu Verifikasi
+          </h3>
+          <DataTable<AttendanceRequest>
+            columns={requestColumns}
+            data={filteredRequests}
+            loading={false}
+            emptyMessage="Tidak ada pengajuan presensi yang menunggu verifikasi."
+            searchable
+            searchQuery={reqSearch}
+            onSearchChange={setReqSearch}
+            searchPlaceholder="Cari ID request atau sesi..."
+          />
         </div>
       )}
     </div>
   );
 }
-

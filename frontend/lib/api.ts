@@ -153,6 +153,7 @@ export interface Course {
   name: string;
   credits: number;
   description?: string;
+  semester_ke?: number;
 }
 
 export interface ClassRoom {
