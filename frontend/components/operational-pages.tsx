@@ -37,10 +37,10 @@ import {
   type ClassRoom,
 } from "@/lib/api";
 import {
-  LoadingSpinner,
   Modal,
   StatusBadge,
   DataTable,
+  useConfirm,
   type ColumnDef,
   type TableFilterDef,
 } from "@/components/ui";
@@ -69,6 +69,7 @@ function PageHeader({
 // 1. Terms / Semester Page with Reusable DataTable & Add Modal
 // ============================================================================
 export function TermsPage() {
+  const confirm = useConfirm();
   const [items, setItems] = useState<AcademicTerm[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>();
@@ -83,8 +84,7 @@ export function TermsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
 
-  const loadData = useCallback(() => {
-    setLoading(true);
+  useEffect(() => {
     void academicApi.getTerms().then((r) => {
       setItems(r.data ?? []);
       setError(r.error);
@@ -92,9 +92,14 @@ export function TermsPage() {
     });
   }, []);
 
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
+  const refreshData = () => {
+    setLoading(true);
+    void academicApi.getTerms().then((r) => {
+      setItems(r.data ?? []);
+      setError(r.error);
+      setLoading(false);
+    });
+  };
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -102,9 +107,9 @@ export function TermsPage() {
     if (res.data) {
       setIsModalOpen(false);
       setFormData({ name: "", start_date: "", end_date: "", is_active: true });
-      loadData();
+      refreshData();
     } else {
-      alert(res.error || "Gagal menambah semester");
+      await confirm.alert(res.error || "Gagal menambah semester", "Gagal Menambah Semester", "danger");
     }
   };
 
@@ -314,6 +319,7 @@ export function TermsPage() {
 // 2. Courses / Mata Kuliah Page with Reusable DataTable & Add Modal
 // ============================================================================
 export function CoursesPage() {
+  const confirm = useConfirm();
   const [items, setItems] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>();
@@ -328,8 +334,7 @@ export function CoursesPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
 
-  const loadData = useCallback(() => {
-    setLoading(true);
+  useEffect(() => {
     void academicApi.getCourses().then((r) => {
       setItems(r.data ?? []);
       setError(r.error);
@@ -337,9 +342,14 @@ export function CoursesPage() {
     });
   }, []);
 
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
+  const refreshData = () => {
+    setLoading(true);
+    void academicApi.getCourses().then((r) => {
+      setItems(r.data ?? []);
+      setError(r.error);
+      setLoading(false);
+    });
+  };
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -347,9 +357,9 @@ export function CoursesPage() {
     if (res.data) {
       setIsModalOpen(false);
       setFormData({ code: "", name: "", credits: 3, semester_ke: 1, description: "" });
-      loadData();
+      refreshData();
     } else {
-      alert(res.error || "Gagal menambah mata kuliah");
+      await confirm.alert(res.error || "Gagal menambah mata kuliah", "Gagal Menambah Mata Kuliah", "danger");
     }
   };
 
@@ -596,6 +606,7 @@ export function CoursesPage() {
 // 3. Classes / Kelas Kuliah Page with Reusable DataTable & Student Enrollment
 // ============================================================================
 export function ClassesPage({ mine = false }: { mine?: boolean }) {
+  const confirm = useConfirm();
   const [items, setItems] = useState<CourseClass[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
   const [terms, setTerms] = useState<AcademicTerm[]>([]);
@@ -691,8 +702,41 @@ export function ClassesPage({ mine = false }: { mine?: boolean }) {
   }, []);
 
   useEffect(() => {
-    void loadData();
-  }, [loadData]);
+    void Promise.all([
+      academicApi.getClasses(),
+      academicApi.getCourses(),
+      academicApi.getTerms(),
+      lecturerApi.list({ limit: 100 }),
+      authApi.getMe(),
+      academicApi.getRooms(),
+    ]).then(([cRes, crsRes, tRes, lRes, uRes, rRes]) => {
+      if (uRes.data) setCurrentUser(uRes.data);
+      if (cRes.data) setItems(cRes.data);
+      if (rRes.data) {
+        const roomList = rRes.data;
+        setRooms(roomList);
+        if (roomList.length > 0) {
+          setFormData((f) => ({ ...f, room_id: roomList[0].id }));
+        }
+      }
+      if (crsRes.data && crsRes.data.length > 0) {
+        const crsData = crsRes.data;
+        setCourses(crsData);
+        setFormData((f) => ({ ...f, course_id: crsData[0].id }));
+      }
+      if (tRes.data && tRes.data.length > 0) {
+        const tData = tRes.data;
+        setTerms(tData);
+        setFormData((f) => ({ ...f, term_id: tData[0].id }));
+      }
+      if (lRes.data && lRes.data.length > 0) {
+        const lData = lRes.data;
+        setLecturers(lData);
+        setFormData((f) => ({ ...f, lecturer_id: lData[0].id }));
+      }
+      setLoading(false);
+    });
+  }, []);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -701,7 +745,7 @@ export function ClassesPage({ mine = false }: { mine?: boolean }) {
       setIsModalOpen(false);
       await loadData();
     } else {
-      alert(res.error || "Gagal membuat kelas perkuliahan");
+      await confirm.alert(res.error || "Gagal membuat kelas perkuliahan", "Gagal Membuat Kelas", "danger");
     }
   };
 
@@ -727,7 +771,7 @@ export function ClassesPage({ mine = false }: { mine?: boolean }) {
       setEditTarget(null);
       await loadData();
     } else {
-      alert(res.error || "Gagal memperbarui dosen pengampu / jadwal kelas");
+      await confirm.alert(res.error || "Gagal memperbarui dosen pengampu / jadwal kelas", "Gagal Memperbarui", "danger");
     }
   };
 
@@ -751,7 +795,7 @@ export function ClassesPage({ mine = false }: { mine?: boolean }) {
     setEnrolling(true);
     const res = await academicApi.enrollStudent(selectedClass.id, studentToEnroll);
     if (res.error) {
-      alert(res.error);
+      await confirm.alert(res.error, "Gagal Menambah Mahasiswa", "danger");
     } else {
       const refreshed = await academicApi.getClassStudents(selectedClass.id);
       if (refreshed.data) setEnrollments(refreshed.data);
@@ -1784,8 +1828,7 @@ export function DevicesPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
 
-  const loadData = useCallback(() => {
-    setLoading(true);
+  useEffect(() => {
     void deviceApi.list().then((r) => {
       setItems(r.data ?? []);
       setError(r.error);
@@ -1793,9 +1836,14 @@ export function DevicesPage() {
     });
   }, []);
 
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
+  const refreshData = () => {
+    setLoading(true);
+    void deviceApi.list().then((r) => {
+      setItems(r.data ?? []);
+      setError(r.error);
+      setLoading(false);
+    });
+  };
 
   const filteredAndSorted = useMemo(() => {
     let result = items.filter((d) => {
@@ -1981,7 +2029,7 @@ export function DevicesPage() {
                 <LayoutGrid size={14} /> Kartu
               </button>
             </div>
-            <button className="btn btn-secondary btn-sm" onClick={loadData}>
+            <button className="btn btn-secondary btn-sm rounded-md" onClick={refreshData}>
               Segarkan
             </button>
           </div>
@@ -2305,6 +2353,7 @@ export function AttendancePage() {
 // 7. LMS Materials & Assignments Page with Reusable DataTable
 // ============================================================================
 export function LmsPage({ assignment = false }: { assignment?: boolean }) {
+  const confirm = useConfirm();
   const [classes, setClasses] = useState<CourseClass[]>([]);
   const [selected, setSelected] = useState<number>();
   const [items, setItems] = useState<(Assignment | CourseMaterial)[]>([]);
@@ -2348,11 +2397,11 @@ export function LmsPage({ assignment = false }: { assignment?: boolean }) {
     e.preventDefault();
     if (!submitTarget) return;
     if (!submitFile) {
-      alert("Harap pilih berkas PDF untuk dikumpulkan.");
+      await confirm.alert("Harap pilih berkas PDF untuk dikumpulkan.", "Pilih Berkas", "warning");
       return;
     }
     if (!submitFile.name.toLowerCase().endsWith(".pdf")) {
-      alert("Format berkas harus berformat PDF (.pdf)!");
+      await confirm.alert("Format berkas harus berformat PDF (.pdf)!", "Format Berkas Tidak Sesuai", "warning");
       return;
     }
 
@@ -2363,7 +2412,7 @@ export function LmsPage({ assignment = false }: { assignment?: boolean }) {
     const uploadRes = await uploadApi.upload(submitFile);
     if (!uploadRes.data?.file_url) {
       setSubmitting(false);
-      alert(uploadRes.error || "Gagal mengunggah berkas PDF.");
+      await confirm.alert(uploadRes.error || "Gagal mengunggah berkas PDF.", "Gagal Mengunggah", "danger");
       return;
     }
 
@@ -2383,7 +2432,7 @@ export function LmsPage({ assignment = false }: { assignment?: boolean }) {
         setSubmitSuccess(null);
       }, 1500);
     } else {
-      alert(res.error || "Gagal mengumpulkan tugas.");
+      await confirm.alert(res.error || "Gagal mengumpulkan tugas.", "Gagal Mengumpulkan", "danger");
     }
   };
 
@@ -2663,10 +2712,10 @@ export function LmsPage({ assignment = false }: { assignment?: boolean }) {
                 type="file"
                 accept=".pdf,application/pdf"
                 className="form-input"
-                onChange={(e) => {
+                onChange={async (e) => {
                   const f = e.target.files?.[0] ?? null;
                   if (f && !f.name.toLowerCase().endsWith(".pdf")) {
-                    alert("Berkas yang dipilih harus berformat PDF (.pdf)!");
+                    await confirm.alert("Berkas yang dipilih harus berformat PDF (.pdf)!", "Format Berkas Tidak Sesuai", "warning");
                     e.target.value = "";
                     setSubmitFile(null);
                     return;

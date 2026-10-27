@@ -26,8 +26,9 @@ import {
   Moon,
   Monitor,
   User as UserIcon,
-  type LucideIcon
+  type LucideIcon,
 } from "lucide-react";
+import { useConfirm } from "@/components/ui";
 import { authApi, clearStoredToken, getStoredToken, type User } from "@/lib/api";
 import { KobarAssistant } from "./kobar-assistant";
 import { BackToTop } from "@/components/ui";
@@ -105,6 +106,7 @@ function getGreeting() {
 export function RoleShell({ role, children }: { role: Role; children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
+  const confirm = useConfirm();
   const [user, setUser] = useState<User | null>(null);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [theme, setTheme] = useState<"light" | "dark" | "system">("system");
@@ -275,9 +277,20 @@ export function RoleShell({ role, children }: { role: Role; children: ReactNode 
                 <button
                   type="button"
                   className="user-popover-logout"
-                  onClick={() => {
-                    clearStoredToken();
-                    router.replace("/login");
+                  onClick={async () => {
+                    setUserMenuOpen(false);
+                    const ok = await confirm({
+                      title: "Keluar dari SADITA",
+                      message: "Apakah Anda yakin ingin mengakhiri sesi dan keluar dari sistem? Anda harus masuk kembali untuk mengakses akun Anda.",
+                      variant: "warning",
+                      confirmText: "Ya, Keluar",
+                      cancelText: "Batal",
+                      icon: LogOut,
+                    });
+                    if (ok) {
+                      clearStoredToken();
+                      router.replace("/login");
+                    }
                   }}
                 >
                   <LogOut size={16} />

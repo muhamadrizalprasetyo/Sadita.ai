@@ -15,12 +15,14 @@ import {
   LoadingSpinner,
   StatusBadge,
   DataTable,
+  useConfirm,
   type ColumnDef,
   type TableFilterDef,
 } from "@/components/ui";
 import { Plus, CheckCircle, ShieldCheck } from "lucide-react";
 
 export function AttendanceWorkspace() {
+  const confirm = useConfirm();
   const [user, setUser] = useState<User>();
   const [classes, setClasses] = useState<CourseClass[]>([]);
   const [classId, setClassId] = useState<number>();
@@ -56,25 +58,21 @@ export function AttendanceWorkspace() {
     }
   }
 
-  async function load() {
-    setLoading(true);
-    setError(undefined);
-    const [me, classResult] = await Promise.all([authApi.getMe(), academicApi.getClasses()]);
-    if (!me.data || !classResult.data) {
-      setError(me.error ?? classResult.error ?? "Data tidak dapat dimuat.");
-      setLoading(false);
-      return;
-    }
-    setUser(me.data);
-    setClasses(classResult.data);
-    const chosen = classId ?? classResult.data[0]?.id;
-    setClassId(chosen);
-    if (chosen) await loadClass(chosen, me.data);
-    setLoading(false);
-  }
 
   useEffect(() => {
-    void load();
+    void Promise.all([authApi.getMe(), academicApi.getClasses()]).then(async ([me, classResult]) => {
+      if (!me.data || !classResult.data) {
+        setError(me.error ?? classResult.error ?? "Data tidak dapat dimuat.");
+        setLoading(false);
+        return;
+      }
+      setUser(me.data);
+      setClasses(classResult.data);
+      const chosen = classId ?? classResult.data[0]?.id;
+      setClassId(chosen);
+      if (chosen) await loadClass(chosen, me.data);
+      setLoading(false);
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -217,8 +215,19 @@ export function AttendanceWorkspace() {
             )}
             {(user?.role === "ADMIN" || user?.role === "DOSEN") && item.status === "OPEN" && (
               <button
-                className="btn btn-danger btn-sm"
-                onClick={() => void mutate(() => attendanceApi.closeSession(item.id))}
+                className="btn btn-danger btn-sm rounded-md"
+                onClick={async () => {
+                  const ok = await confirm({
+                    title: "Tutup Sesi Presensi",
+                    message: `Apakah Anda yakin ingin menutup sesi presensi pertemuan ke-${item.session_number}? Mahasiswa tidak dapat melakukan presensi lagi setelah sesi ditutup.`,
+                    variant: "warning",
+                    confirmText: "Ya, Tutup Sesi",
+                    cancelText: "Batal",
+                  });
+                  if (ok) {
+                    void mutate(() => attendanceApi.closeSession(item.id));
+                  }
+                }}
               >
                 Tutup Sesi
               </button>

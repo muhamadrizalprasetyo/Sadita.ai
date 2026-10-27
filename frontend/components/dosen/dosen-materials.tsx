@@ -6,9 +6,10 @@ import { Plus, Trash2, FileText, Upload } from "lucide-react";
 import { lmsApi, uploadApi, getFileUrl, type CourseMaterial, type MaterialType } from "@/lib/api";
 import { ClassToolbar } from "@/components/dosen/class-toolbar";
 import { useLecturerClasses } from "@/components/dosen/use-lecturer-classes";
-import { EmptyState, LoadingSpinner, Modal } from "@/components/ui";
+import { EmptyState, LoadingSpinner, Modal, useConfirm } from "@/components/ui";
 
 export function DosenMaterialsPage() {
+  const confirm = useConfirm();
   const { classes, loading: classesLoading, error: classesError, reload } = useLecturerClasses();
   const [classId, setClassId] = useInitialClassId(classes);
   const [items, setItems] = useState<CourseMaterial[]>([]);
@@ -39,8 +40,18 @@ export function DosenMaterialsPage() {
   }, []);
 
   useEffect(() => {
-    if (classId) void loadMaterials(classId);
-  }, [classId, loadMaterials]);
+    if (classId) {
+      void lmsApi.getMaterials(classId).then((res) => {
+        if (res.error) {
+          setError(res.error);
+          setItems([]);
+        } else {
+          setItems(res.data ?? []);
+        }
+        setLoading(false);
+      });
+    }
+  }, [classId]);
 
   const handleCreate = async (e: FormEvent) => {
     e.preventDefault();
@@ -52,14 +63,14 @@ export function DosenMaterialsPage() {
     if (form.material_type === "DOCUMENT") {
       const file = fileInputRef.current?.files?.[0];
       if (!file) {
-        alert("Silakan pilih berkas dokumen/slide materi yang ingin diunggah!");
+        await confirm.alert("Silakan pilih berkas dokumen/slide materi yang ingin diunggah!", "Pilih Berkas", "warning");
         return;
       }
       setUploading(true);
       const uploadRes = await uploadApi.upload(file);
       setUploading(false);
       if (uploadRes.error || !uploadRes.data) {
-        alert(uploadRes.error || "Upload gagal");
+        await confirm.alert(uploadRes.error || "Upload gagal", "Gagal Mengunggah", "danger");
         return;
       }
       resourceUrl = uploadRes.data.file_url;
@@ -74,7 +85,7 @@ export function DosenMaterialsPage() {
       content: form.material_type === "TEXT" ? form.content : undefined,
     });
     if (res.error) {
-      alert(res.error);
+      await confirm.alert(res.error, "Gagal Menambah Materi", "danger");
       return;
     }
     setModalOpen(false);
@@ -84,10 +95,20 @@ export function DosenMaterialsPage() {
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm("Hapus materi ini?")) return;
+    const ok = await confirm({
+      title: "Hapus Materi Perkuliahan",
+      message: "Apakah Anda yakin ingin menghapus materi ini? Mahasiswa di kelas tidak akan dapat mengakses materi ini lagi.",
+      variant: "danger",
+      confirmText: "Ya, Hapus",
+      cancelText: "Batal",
+    });
+    if (!ok) return;
     const res = await lmsApi.deleteMaterial(id);
-    if (res.error) alert(res.error);
-    else if (classId) void loadMaterials(classId);
+    if (res.error) {
+      await confirm.alert(res.error, "Gagal Menghapus Materi", "danger");
+    } else if (classId) {
+      void loadMaterials(classId);
+    }
   };
 
   if (classesLoading) return <LoadingSpinner text="Memuat kelas…" />;

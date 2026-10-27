@@ -46,10 +46,13 @@
   --shadow-login-modal: 0 20px 60px rgba(15, 23, 42, 0.22);
 }
 
-*,
-*::before,
-*::after {
-  @apply box-border m-0 p-0;
+@layer base {
+
+  *,
+  *::before,
+  *::after {
+    @apply box-border;
+  }
 }
 
 /* ---------- Design Tokens (Runtime & Dynamic References) ---------- */
@@ -87,6 +90,7 @@
   --radius-full: 9999px;
 
   --bg-app: #e9ebef;
+  --surface: #ffffff;
   --bg-surface: #ffffff;
   --bg-card: #ffffff;
   --bg-card-hover: #fafbfc;
@@ -141,40 +145,42 @@ html {
   font-size: 14.5px;
 }
 
-body {
-  @apply m-0 p-0 min-h-screen bg-slate-50 text-[13px] leading-normal antialiased text-slate-800 font-sans;
-}
+@layer base {
+  body {
+    @apply m-0 p-0 min-h-screen bg-slate-50 text-[13px] leading-normal antialiased text-slate-800 font-sans;
+  }
 
-button,
-input,
-select,
-textarea {
-  font: inherit;
-  color: inherit;
-}
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+    color: inherit;
+  }
 
-button {
-  @apply cursor-pointer border-none bg-transparent;
-}
+  button {
+    @apply cursor-pointer;
+  }
 
-a {
-  @apply no-underline text-inherit transition-colors duration-200;
+  a {
+    @apply no-underline text-inherit transition-colors duration-200;
+  }
 }
 
 /* ==========================================================================
    App Shell Layout (Enterprise Full-Viewport)
    ========================================================================== */
 .app-shell {
-  @apply grid min-h-screen w-full m-0 rounded-none shadow-none bg-slate-50 grid-cols-[228px_1fr];
+  @apply grid min-h-screen w-full m-0 rounded-none shadow-none bg-slate-50 grid-cols-1 md:grid-cols-[228px_1fr];
 }
 
 /* ---------- Sidebar ---------- */
 .sidebar {
-  @apply bg-white flex flex-col sticky top-0 h-screen max-h-screen overflow-hidden z-20 border-r border-[#eceef2] py-3.5 px-2.5 overscroll-contain;
+  @apply bg-white flex flex-col sticky top-0 h-screen max-h-screen overflow-hidden z-20 border-r border-[#eceef2] py-3.5 px-2.5 overscroll-contain max-md:flex-row max-md:items-center max-md:py-3 max-md:px-4 max-md:h-auto max-md:relative max-md:overflow-x-auto max-md:gap-2;
 }
 
 .sidebar-brand {
-  @apply shrink-0 mb-3 flex flex-col items-start gap-0.75 border-b border-[#eceef2] px-1 pb-2.5;
+  @apply shrink-0 mb-3 flex flex-col items-start gap-0.75 border-b border-[#eceef2] px-1 pb-2.5 max-md:mb-0 max-md:mr-3 max-md:pr-0 max-md:border-b-0;
 }
 
 .brand-logo {
@@ -214,7 +220,7 @@ a {
 }
 
 .sidebar-nav {
-  @apply list-none flex flex-col gap-1.5 flex-1 min-h-0 overflow-y-auto overflow-x-hidden m-0 pt-0.5 pr-0.5 pb-2 pl-0 overscroll-contain;
+  @apply list-none flex flex-col gap-1.5 flex-1 min-h-0 overflow-y-auto overflow-x-hidden m-0 pt-0.5 pr-0.5 pb-2 pl-0 overscroll-contain max-md:flex-row max-md:flex-none;
   scrollbar-width: thin;
   scrollbar-color: #cbd5e1 transparent;
 }
@@ -236,7 +242,7 @@ a {
 }
 
 .nav-link {
-  @apply flex items-center gap-2 py-1.75 px-2.25 text-slate-600 text-[12.5px] font-medium relative rounded-md transition-all hover:bg-slate-100 hover:text-slate-900 hover:no-underline;
+  @apply flex items-center gap-2 py-1.75 px-2.25 text-slate-600 text-[12.5px] font-medium relative rounded-md transition-all hover:bg-slate-100 hover:text-slate-900 hover:no-underline max-md:rounded-lg max-md:whitespace-nowrap max-md:py-2.5 max-md:px-3;
 }
 
 .nav-link.active {
@@ -245,7 +251,7 @@ a {
 
 .nav-link.active::before {
   content: "";
-  @apply absolute left-0 top-1 bottom-1 w-0.75 rounded-r-xs bg-navy;
+  @apply absolute left-0 top-1 bottom-1 w-0.75 rounded-r-xs bg-navy max-md:hidden;
 }
 
 .nav-link svg {
@@ -253,7 +259,7 @@ a {
 }
 
 .sidebar-footer {
-  @apply shrink-0 pt-2.5 mt-auto flex flex-col gap-1 relative bg-white border-t border-[#eceef2];
+  @apply shrink-0 pt-2.5 mt-auto flex flex-col gap-1 relative bg-white border-t border-[#eceef2] max-md:hidden;
 }
 
 .sidebar-footer .nav-link {
@@ -324,12 +330,12 @@ a {
 
 /* ---------- Main Content ---------- */
 .content-area {
-  @apply py-3.5 px-5 pb-7 min-w-0 overflow-x-hidden;
+  @apply py-3.5 px-5 pb-7 min-w-0 overflow-x-hidden max-md:p-4;
 }
 
 /* ---------- Topbar ---------- */
 .topbar {
-  @apply flex items-center justify-between gap-2.5 mb-3 rounded-lg py-1.5 px-3.75 border border-[#eceef2] bg-white shadow-xs;
+  @apply flex items-center justify-between gap-2.5 mb-3 rounded-lg py-1.5 px-3.75 border border-[#eceef2] bg-white shadow-xs max-md:flex-wrap;
 }
 
 .topbar-greeting {
@@ -374,7 +380,7 @@ a {
 }
 
 .topbar-search {
-  @apply flex items-center gap-2 bg-slate-50 border border-[#eceef2] rounded-md py-1.25 px-2.75 w-60 shadow-none;
+  @apply flex items-center gap-2 bg-slate-50 border border-[#eceef2] rounded-md py-1.25 px-2.75 w-60 shadow-none max-md:order-5 max-md:w-full;
 }
 
 .topbar-search svg {
@@ -408,7 +414,7 @@ a {
    Stat Cards
    ========================================================================== */
 .stats {
-  @apply grid grid-cols-4 gap-2.25 mb-0;
+  @apply grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-2.25 mb-0;
 }
 
 .stat {
@@ -416,19 +422,19 @@ a {
 }
 
 .stat.stat-green {
-  background: var(--grad-green);
+  @apply bg-linear-to-br from-[#0aa85a] to-[#29c973];
 }
 
 .stat.stat-blue {
-  background: var(--grad-blue);
+  @apply bg-linear-to-br from-[#0a7fd8] to-[#35a4f2];
 }
 
 .stat.stat-purple {
-  background: var(--grad-purple);
+  @apply bg-linear-to-br from-[#7a3cf0] to-[#b57cff];
 }
 
 .stat.stat-orange {
-  background: var(--grad-orange);
+  @apply bg-linear-to-br from-[#f0460a] to-[#ff7a2f];
 }
 
 .stat-label {
@@ -536,7 +542,7 @@ a {
 }
 
 .grid2 {
-  @apply grid gap-3 mb-3 grid-cols-[1.25fr_1fr] last:mb-0;
+  @apply grid grid-cols-1 lg:grid-cols-[1.25fr_1fr] gap-3 mb-3 last:mb-0;
 }
 
 /* ==========================================================================
@@ -656,6 +662,49 @@ a {
 .form-select,
 .form-textarea {
   @apply border border-[#eceef2] bg-white text-slate-800 rounded-md py-1.25 px-2.25 text-[11.5px] outline-none transition-all w-full font-sans placeholder:text-slate-400 focus:border-navy-accent focus:ring-3 focus:ring-navy-accent/20;
+}
+
+/* ==========================================================================
+   Workspace Alerts & Toolbars (100% Tailwind CSS @apply)
+   ========================================================================== */
+.alert {
+  @apply py-2.5 px-3.5 rounded-md text-[13px] mb-3.5 border border-transparent;
+}
+
+.alert-error {
+  @apply bg-red-500/12 border-red-500/30 text-red-600;
+}
+
+.alert-success {
+  @apply bg-emerald-500/12 border-emerald-500/30 text-emerald-600;
+}
+
+.alert-info {
+  @apply bg-sky-500/12 border-sky-500/30 text-sky-600;
+}
+
+.toolbar-row {
+  @apply flex flex-wrap items-center gap-2.5 md:gap-3.5 mb-3.5 py-3 px-4 bg-white border border-[#eceef2] rounded-md;
+}
+
+.inline-metrics {
+  @apply flex flex-wrap gap-3.5 mb-5;
+}
+
+.inline-metrics .stat-card {
+  @apply flex-1 min-w-35;
+}
+
+.text-status-open {
+  @apply text-amber-500 font-semibold;
+}
+
+.text-status-closed {
+  @apply text-emerald-600 font-medium;
+}
+
+.text-status-scheduled {
+  @apply text-slate-400;
 }
 
 /* ==========================================================================
@@ -921,28 +970,11 @@ a {
    SI KOBAR AI Assistant Widget & Floating Controls
    ========================================================================== */
 .kobar-fab {
-  @apply fixed bottom-8 right-8 w-14 h-14 rounded-full text-white flex items-center justify-center cursor-pointer z-999 transition-transform hover:scale-105;
-  background: var(--grad-blue);
-  box-shadow: 0 8px 24px rgba(10, 127, 216, 0.4);
+  @apply fixed bottom-8 right-8 max-sm:bottom-6 max-sm:right-6 w-14 h-14 rounded-full text-white flex items-center justify-center cursor-pointer z-999 transition-transform hover:scale-105 bg-linear-to-br from-[#0a7fd8] to-[#35a4f2] shadow-lg;
 }
 
 .back-to-top-btn {
-  @apply fixed w-11 h-11 rounded-full bg-white border border-slate-200 text-blue-600 flex items-center justify-center cursor-pointer z-998 transition-all hover:-translate-y-0.5 hover:bg-blue-600 hover:text-white active:scale-95;
-  bottom: calc(2rem + 70px);
-  right: calc(2rem + 6px);
-  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.12), 0 1px 3px rgba(0, 0, 0, 0.08);
-}
-
-@media (max-width: 640px) {
-  .kobar-fab {
-    bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
-    right: 1.5rem;
-  }
-
-  .back-to-top-btn {
-    bottom: calc(1.5rem + 70px + env(safe-area-inset-bottom, 0px));
-    right: calc(1.5rem + 6px);
-  }
+  @apply fixed bottom-25 right-9.5 max-sm:bottom-24 max-sm:right-7.5 w-11 h-11 rounded-full bg-white border border-slate-200 text-blue-600 flex items-center justify-center cursor-pointer z-998 transition-all hover:-translate-y-0.5 hover:bg-blue-600 hover:text-white active:scale-95 shadow-md;
 }
 
 .kobar-window {
@@ -963,8 +995,7 @@ a {
 }
 
 .kobar-header {
-  @apply py-3.5 px-4.5 text-white flex items-center justify-between;
-  background: var(--grad-blue);
+  @apply py-3.5 px-4.5 text-white flex items-center justify-between bg-linear-to-br from-[#0a7fd8] to-[#35a4f2];
 }
 
 .kobar-messages {
@@ -1005,71 +1036,4 @@ a {
 
 ::-webkit-scrollbar-thumb {
   @apply bg-slate-300 rounded hover:bg-slate-400;
-}
-
-/* ==========================================================================
-   Responsive Shell Layout
-   ========================================================================== */
-@media (max-width: 1100px) {
-  .stats {
-    @apply grid-cols-2;
-  }
-
-  .grid2 {
-    @apply grid-cols-1;
-  }
-}
-
-@media (max-width: 760px) {
-  body {
-    @apply p-0;
-  }
-
-  .app-shell {
-    @apply grid-cols-1 rounded-none;
-  }
-
-  .sidebar {
-    @apply flex-row items-center py-3 px-4 h-auto relative top-0 overflow-x-auto gap-2;
-  }
-
-  .sidebar-brand {
-    @apply mb-0 mr-3 pr-0 border-b-0;
-  }
-
-  .sidebar-nav {
-    @apply flex-row flex-none;
-  }
-
-  .nav-link {
-    @apply rounded-lg whitespace-nowrap py-2.5 px-3;
-  }
-
-  .nav-link.active::before {
-    @apply hidden;
-  }
-
-  .nav-link.active {
-    @apply bg-navy/10;
-  }
-
-  .sidebar-footer {
-    @apply hidden;
-  }
-
-  .topbar {
-    @apply flex-wrap;
-  }
-
-  .topbar-search {
-    @apply order-5 w-full;
-  }
-
-  .stats {
-    @apply grid-cols-1;
-  }
-
-  .content-area {
-    @apply p-4;
-  }
 }

@@ -141,7 +141,7 @@ Komponen tabel serbaguna untuk seluruh modul (Mahasiswa, Dosen, Kelas, Presensi,
 'use client';
 
 import React from 'react';
-import styles from './data-table.module.css';
+// Styled 100% using Tailwind CSS utility classes (no CSS modules or raw CSS)
 
 export interface ColumnDef<T> {
   key: string;
@@ -275,7 +275,7 @@ Untuk form tambah data, edit data, dan konfirmasi tindakan penting tanpa menulis
 'use client';
 
 import React, { useEffect } from 'react';
-import styles from './modal.module.css';
+// Styled 100% using Tailwind CSS utility classes (no CSS modules or raw CSS)
 
 interface ModalProps {
   isOpen: boolean;
@@ -329,6 +329,57 @@ export function Modal({
   );
 }
 ```
+
+### 3.2.1 Universal Dynamic Confirmation Dialog (`ConfirmDialog` & `useConfirm`)
+Untuk mengeliminasi dialog browser bawaan (`window.confirm()`) yang kaku dan tidak konsisten antar-perangkat, SADITA.ai menyediakan sistem konfirmasi global terpadu berbasis *Promise* dan *Declarative Component* (`frontend/components/ui/confirm-dialog.tsx`):
+
+```tsx
+// Pemanggilan deklaratif atau imperatif via hook:
+const confirm = useConfirm();
+
+// 1. Pemanggilan konfirmasi deklaratif via hook:
+const confirm = useConfirm();
+
+const handleDelete = async (user: UserItem) => {
+  const ok = await confirm({
+    title: "Hapus Pengguna",
+    message: `Apakah Anda yakin ingin menghapus akun ${user.full_name}? Tindakan ini bersifat permanen.`,
+    variant: "danger", // 'danger' | 'warning' | 'primary' | 'info' | 'success'
+    confirmText: "Ya, Hapus",
+    cancelText: "Batal",
+  });
+  if (!ok) return;
+  // Eksekusi aksi...
+};
+
+// 2. Pemanggilan dialog informasi / peringatan tunggal (Alert replacement):
+await confirm.alert("Akun Administrator Utama dilindungi sistem dan tidak dapat dihapus.", "Aksi Dilindungi", "warning");
+// Atau via hook useAlert():
+// const alert = useAlert();
+// await alert("Pemberitahuan penting", "Informasi", "info");
+```
+
+#### Aturan Hirarki Radius & Desain Dialog Konfirmasi:
+1. **Overlay Latar Belakang (Backdrop)**: Menggunakan peredupan netral `rgba(0, 0, 0, 0.4)` (`bg-black/40`) tanpa efek blur (`backdrop-blur`) dan tanpa saturasi warna biru untuk mempertahankan fokus pembacaan data secara jernih dan ringan.
+2. **Container Dialog Popup**: Menggunakan token terluar `rounded-lg` (8px) dengan border `border-slate-200` (`border-[var(--line)]`) dan bayangan `shadow-xl`.
+3. **Pemisahan Header & Konten**: Header (ikon dan judul) berada pada baris tersendiri berdampingan dengan tombol tutup (`X`), sementara teks pesan/deskripsi berada di bawahnya untuk mengeliminasi tumpang tindih (*overlap*) antar-elemen.
+4. **Bilah Aksi Terpisah (Footer Actions Bar)**: Terisolasi secara rapi di bagian bawah dengan `border-t border-slate-100`, background netral `bg-slate-50`, dan padding `px-6 py-3.5` sehingga tombol aksi tidak pernah terhimpit ke tepi bawah dialog. Mendukung mode tombol tunggal (`showCancel: false` / `cancelText: null`) untuk pesan alert/pemberitahuan.
+5. **Elemen Turunan (Descendant Controls)**: Tombol aksi ("Batal", "Konfirmasi", "Ya, Keluar", "Mengerti"), badge icon status, dan tombol `X` wajib menggunakan `rounded-md` (6px).
+6. **Intersepsi window.alert Klien 100%**: `ConfirmProvider` secara otomatis mengintersepsi seluruh pemanggilan `window.alert(...)` bawaan peramban dan mengarahkannya ke dialog kustom SADITA yang elegan.
+7. **Penyatuan Aksesibilitas**:
+   - Dukungan tombol `Escape` untuk membatalkan dialog.
+   - Kunci scroll latar belakang (*body scroll lock*) pada desktop dan layar Apple iPhone / Safari tanpa pergeseran lebar layar (*scrollbar shift prevention*).
+   - Indikator pemuatan (*loading spinner*) otomatis saat memproses mutasi asinkron.
+8. **100% Menggunakan Utilitas Tailwind CSS (Zero Raw CSS Mandate)**:
+   - Komponen `ConfirmDialog` dan `Modal` sepenuhnya di-styling menggunakan kelas utilitas murni bawaan Tailwind CSS (`fixed inset-0 z-99999 flex items-center justify-center p-4 bg-black/40`, `w-full max-w-[440px] bg-white rounded-lg`, `min-h-9 px-4 rounded-md`).
+   - Dilarang keras menulis kode CSS murni (*raw/vanilla CSS*) pada `frontend/app/globals.css`. Tidak ada selektor komponen manual dengan `!important` atau CSS murni terpisah.
+9. **Penerapan Global 100% pada Seluruh Alur Operasional**:
+   - **Logout / Sign Out Global** (`frontend/components/role-shell.tsx`): Konfirmasi keluar akun dengan ikon `LogOut` dan varian `warning`.
+   - **Penghapusan Akun Pengguna Tunggal & Masal & Guard Akun Admin** (`frontend/app/admin/users/page.tsx`): Varian `danger` untuk hapus dan `warning` via `confirm.alert` saat mencoba menghapus admin dilindungi.
+   - **Penutupan Sesi Presensi Aktif** (`frontend/components/attendance-workspace.tsx`): Varian `warning` untuk mencegah penutupan sesi yang tidak disengaja.
+   - **Penghapusan Materi & Tugas Perkuliahan** (`dosen-materials.tsx`, `dosen-assignments.tsx`): Varian `danger` dengan pengingat data submisi.
+   - **Pengumpulan & Pembatalan Kuis** (`mahasiswa/kuis/page.tsx`): Varian `primary` untuk pengumpulan dan `warning` untuk pembatalan.
+   - **Pembatalan Pengajuan KRS** (`mahasiswa/krs/page.tsx`): Varian `warning` dengan opsi kembali.
 
 ### 3.3 Reusable Custom Hooks (State & Data Fetching)
 

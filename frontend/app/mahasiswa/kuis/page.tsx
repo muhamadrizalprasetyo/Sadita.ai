@@ -7,10 +7,8 @@ import {
   Award,
   CheckCircle,
   XCircle,
-  AlertCircle,
   ArrowRight,
   RefreshCw,
-  BookOpen,
   ChevronRight,
   RotateCcw
 } from "lucide-react";
@@ -22,9 +20,10 @@ import {
   QuizQuestion,
   QuizSubmission
 } from "@/lib/api";
-import { LoadingSpinner, EmptyState, StatusBadge } from "@/components/ui";
+import { LoadingSpinner, EmptyState, StatusBadge, useConfirm } from "@/components/ui";
 
 export default function MahasiswaKuisPage() {
+  const confirm = useConfirm();
   const [classes, setClasses] = useState<CourseClass[]>([]);
   const [selectedClass, setSelectedClass] = useState<number>();
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
@@ -92,7 +91,7 @@ export default function MahasiswaKuisPage() {
       setTextAnswers({});
       setLastResult(null);
     } else {
-      alert("Gagal memuat pertanyaan kuis.");
+      await confirm.alert("Gagal memuat pertanyaan kuis.", "Gagal Memuat Kuis", "danger");
     }
     setLoading(false);
   };
@@ -103,13 +102,14 @@ export default function MahasiswaKuisPage() {
 
   const handleSubmitQuiz = async () => {
     if (!activeQuiz) return;
-    if (
-      !confirm(
-        `Kirim jawaban kuis sekarang? Pastikan Anda sudah memeriksa seluruh jawaban.`
-      )
-    ) {
-      return;
-    }
+    const ok = await confirm({
+      title: "Kirim Jawaban Kuis",
+      message: "Apakah Anda yakin ingin mengirim jawaban kuis sekarang? Pastikan Anda sudah memeriksa seluruh jawaban sebelum mengumpulkan.",
+      variant: "primary",
+      confirmText: "Ya, Kirim Jawaban",
+      cancelText: "Periksa Lagi",
+    });
+    if (!ok) return;
 
     setSubmitting(true);
     const answers = quizQuestions.map(q => ({
@@ -128,7 +128,7 @@ export default function MahasiswaKuisPage() {
         void loadQuizzes(selectedClass);
       }
     } else {
-      alert(res.error || "Gagal mengirimkan kuis.");
+      await confirm.alert(res.error || "Gagal mengirimkan kuis.", "Gagal Mengirimkan Kuis", "danger");
     }
   };
 
@@ -258,9 +258,16 @@ export default function MahasiswaKuisPage() {
               </div>
             )}
             <button
-              className="btn btn-secondary btn-sm"
-              onClick={() => {
-                if (confirm("Yakin ingin membatalkan pengerjaan kuis? Jawaban belum tersimpan.")) {
+              className="btn btn-secondary btn-sm rounded-md"
+              onClick={async () => {
+                const ok = await confirm({
+                  title: "Batalkan Pengerjaan Kuis",
+                  message: "Apakah Anda yakin ingin membatalkan pengerjaan kuis? Jawaban belum tersimpan dan progres Anda akan hilang.",
+                  variant: "warning",
+                  confirmText: "Ya, Batalkan",
+                  cancelText: "Lanjutkan Kuis",
+                });
+                if (ok) {
                   setActiveQuiz(null);
                 }
               }}

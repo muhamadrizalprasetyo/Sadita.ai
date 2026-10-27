@@ -1,36 +1,30 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
-import { 
-  Calendar, 
-  BookOpen, 
-  Clock, 
-  AlertCircle, 
-  CheckCircle, 
-  XCircle, 
-  Plus, 
-  Search, 
-  Users, 
-  GraduationCap, 
+import { useState, useEffect, useMemo, useCallback } from "react";
+import {
+  BookOpen,
+  AlertCircle,
+  CheckCircle,
+  Plus,
+  Search,
   RotateCcw,
-  FileText,
   Trash2,
   Info
 } from "lucide-react";
-import { 
-  academicApi, 
-  krsApi, 
+import {
+  academicApi,
+  krsApi,
   studentApi,
-  type CourseClass, 
-  type ClassEnrollment, 
+  type CourseClass,
   type KrsRequest,
   type StudentProfile
 } from "@/lib/api";
-import { LoadingSpinner, EmptyState, Modal, StatusBadge } from "@/components/ui";
+import { LoadingSpinner, EmptyState, Modal, useConfirm } from "@/components/ui";
 
 const DAY_NAMES = ["", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"];
 
 export default function MahasiswaKrsPage() {
+  const confirm = useConfirm();
   const [activeTab, setActiveTab] = useState<"krs_saya" | "katalog" | "riwayat">("krs_saya");
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<StudentProfile | null>(null);
@@ -73,10 +67,18 @@ export default function MahasiswaKrsPage() {
   };
 
   useEffect(() => {
-    void loadData();
+    let ignore = false;
+    Promise.resolve().then(() => {
+      if (!ignore) {
+        void loadData();
+      }
+    });
+    return () => {
+      ignore = true;
+    };
   }, []);
 
-  const loadKatalog = async () => {
+  const loadKatalog = useCallback(async () => {
     setKatalogLoading(true);
     const cohortParam = cohortFilter !== "all" ? parseInt(cohortFilter, 10) : undefined;
     const res = await krsApi.getAvailableClasses({
@@ -85,13 +87,21 @@ export default function MahasiswaKrsPage() {
     });
     if (res.data) setAvailableClasses(res.data);
     setKatalogLoading(false);
-  };
+  }, [cohortFilter, searchKatalog]);
 
   useEffect(() => {
+    let ignore = false;
     if (activeTab === "katalog") {
-      void loadKatalog();
+      Promise.resolve().then(() => {
+        if (!ignore) {
+          void loadKatalog();
+        }
+      });
     }
-  }, [activeTab, cohortFilter, searchKatalog]);
+    return () => {
+      ignore = true;
+    };
+  }, [activeTab, loadKatalog]);
 
   const handleOpenRequestModal = (c: CourseClass) => {
     setSelectedClass(c);
@@ -134,12 +144,19 @@ export default function MahasiswaKrsPage() {
   };
 
   const handleCancelRequest = async (id: number) => {
-    if (!confirm("Apakah Anda yakin ingin membatalkan pengajuan KRS ini?")) return;
+    const ok = await confirm({
+      title: "Batalkan Pengajuan KRS",
+      message: "Apakah Anda yakin ingin membatalkan pengajuan KRS ini? Pengajuan yang dibatalkan tidak dapat diproses lebih lanjut.",
+      variant: "warning",
+      confirmText: "Ya, Batalkan",
+      cancelText: "Kembali",
+    });
+    if (!ok) return;
     setCancellingId(id);
     const res = await krsApi.cancelRequest(id);
     setCancellingId(null);
     if (res.error) {
-      alert(res.error);
+      await confirm.alert(res.error, "Gagal Membatalkan", "danger");
     } else {
       void loadData();
     }
@@ -486,7 +503,7 @@ export default function MahasiswaKrsPage() {
                 </thead>
                 <tbody>
                   {myRequests.map((r) => {
-                    const statusBadge = 
+                    const statusBadge =
                       r.status === "APPROVED" ? (
                         <span className="badge badge-success">Disetujui</span>
                       ) : r.status === "REJECTED" ? (

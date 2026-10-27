@@ -15,6 +15,16 @@ export {
 export { SectionCard, type SectionCardProps } from "./section-card";
 export { TableToolbar, type TableToolbarProps, type FilterTabOption } from "./table-toolbar";
 export { BackToTop } from "./back-to-top";
+export {
+  ConfirmDialog,
+  ConfirmProvider,
+  useConfirm,
+  useAlert,
+  useLocalConfirm,
+  type ConfirmDialogProps,
+  type ConfirmOptions,
+  type ConfirmVariant,
+} from "./confirm-dialog";
 
 interface StatCardProps {
   label: string;

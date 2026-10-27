@@ -1,6 +1,5 @@
 import { Suspense, type ReactNode } from "react";
 import { DosenShell } from "@/components/dosen/dosen-shell";
-import "./dosen-workspace.css";
 
 function DosenFallback() {
   return (

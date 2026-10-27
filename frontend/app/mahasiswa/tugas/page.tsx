@@ -10,7 +10,7 @@ import {
   type AssignmentSubmission,
   type CourseClass,
 } from "@/lib/api";
-import { LoadingSpinner } from "@/components/ui";
+import { LoadingSpinner, useConfirm } from "@/components/ui";
 import { Upload, CheckCircle, Clock, AlertCircle, FileText } from "lucide-react";
 
 const DAY_NAMES = ["", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"];
@@ -37,6 +37,7 @@ function SubmissionBadge({ sub }: { sub: AssignmentSubmission | null | undefined
 }
 
 export default function MahasiswaTugasPage() {
+  const confirm = useConfirm();
   const [classes, setClasses] = useState<CourseClass[]>([]);
   const [selectedClass, setSelectedClass] = useState<number>();
   const [assignments, setAssignments] = useState<Assignment[]>([]);
@@ -326,10 +327,10 @@ export default function MahasiswaTugasPage() {
                   type="file"
                   accept=".pdf,application/pdf"
                   className="form-input"
-                  onChange={(e) => {
+                  onChange={async (e) => {
                     const f = e.target.files?.[0] ?? null;
                     if (f && !f.name.toLowerCase().endsWith(".pdf")) {
-                      alert("Berkas harus berformat PDF!");
+                      await confirm.alert("Berkas yang dipilih harus berformat PDF (.pdf)!", "Format Berkas Tidak Sesuai", "warning");
                       e.target.value = "";
                       setSubmitFile(null);
                       return;

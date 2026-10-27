@@ -17,8 +17,8 @@ SADITA.ai menggunakan 6 tingkatan breakpoint berbasis CSS media queries yang ter
 | `xl` | `1280px - 1535px`| Layar Desktop Standar Enterprise (1080p) | Sidebar penuh (260px), layout dashboard 4-kolom KPI, split-pane view |
 | `2xl`| `>= 1536px` | Monitor Resolusi Tinggi (2K, 4K, UltraWide)| Kontainer konten dibatasi (`max-width: 1600px; margin: auto`) |
 
-> **Standar Implementasi: Wajib Mengutamakan Utilitas Tailwind CSS**
-> Seluruh tata letak responsif, grid adaptif, dan penyesuaian breakpoint wajib diutamakan menggunakan kelas utilitas bawaan Tailwind CSS (`sm:`, `md:`, `lg:`, `xl:`, `2xl:`). Hindari menulis media queries CSS murni secara terpisah jika dapat ditangani langsung dengan utilitas responsif Tailwind.
+> **Standar Implementasi: Wajib 100% Utilitas Tailwind CSS (Zero Raw CSS)**
+> Seluruh tata letak responsif, grid adaptif, dan penyesuaian breakpoint wajib menggunakan kelas utilitas bawaan Tailwind CSS (`sm:`, `md:`, `lg:`, `xl:`, `2xl:`). Dilarang keras menulis blok media queries CSS murni manual di dalam `globals.css`.
 
 ---
 
@@ -34,27 +34,16 @@ Perangkat iPhone memiliki lekukan kamera (Notch pada iPhone 11-14) atau Dynamic 
    ```html
    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5" />
    ```
-2. Seluruh container tata letak wajib menggunakan fungsi CSS `env(safe-area-inset-*)`:
-   ```css
-   /* Header / Top Navigation */
-   .topbar {
-     padding-top: max(12px, env(safe-area-inset-top));
-     padding-left: max(16px, env(safe-area-inset-left));
-     padding-right: max(16px, env(safe-area-inset-right));
-   }
+2. Seluruh container tata letak wajib diimplementasikan menggunakan utilitas Tailwind CSS:
+   ```tsx
+   /* Header / Top Navigation (Tailwind Utility) */
+   <header className="pt-3 px-4 max-md:flex-wrap bg-white border border-[#eceef2] rounded-lg">
 
    /* Bottom Navigation Bar di iPhone */
-   .mobile-bottom-nav {
-     padding-bottom: max(12px, env(safe-area-inset-bottom));
-     height: calc(60px + env(safe-area-inset-bottom));
-   }
+   <nav className="fixed bottom-0 inset-x-0 h-15 pb-3 bg-white/95 border-t border-slate-200">
 
    /* Container Konten Utama */
-   .main-content {
-     padding-left: max(16px, env(safe-area-inset-left));
-     padding-right: max(16px, env(safe-area-inset-right));
-     padding-bottom: calc(80px + env(safe-area-inset-bottom)); /* Ruang untuk bottom bar */
-   }
+   <main className="p-4 md:py-3.5 md:px-5 pb-7 min-w-0 overflow-x-hidden">
    ```
 
 ### 2.2 Pencegahan Auto-Zoom Mengganggu di iOS Safari (16px Input Rule)
