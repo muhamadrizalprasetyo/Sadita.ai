@@ -171,4 +171,9 @@ class UserService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"User ID {user_id} tidak ditemukan",
             )
+        if user.email == "admin@unipi.ac.id":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Akun Administrator Utama (admin@unipi.ac.id) dilindungi dan tidak dapat dihapus.",
+            )
         return UserRepository.delete(db, user_id)

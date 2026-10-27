@@ -353,7 +353,8 @@ Untuk menjamin konsistensi pengalaman pengguna (UX) bagi developer dan admin sis
 3. **Optimasi Berjalan Offline (*Offline Capability*):**
    - Mengeliminasi ketergantungan runtime dan tautan link href eksternal ke CDN Google Fonts (`@import url('https://fonts.googleapis.com/...')` maupun `<link href="...">`).
    - Menerapkan *self-hosting font* lokal menggunakan paket `@fontsource/poppins` (bobot 400, 500, 600, 700) langsung di `frontend/app/layout.tsx`. Seluruh berkas biner font (`.woff2`, `.woff`) disimpan langsung dalam dependensi proyek dan di-bundle pada proses build statis tanpa request jaringan eksternal, sehingga aplikasi beroperasi secara optimal di lingkungan offline, intranet kampus, atau jaringan terisolasi (*air-gapped*).
-4. **Aturan Mutlak Pengembang: Wajib Mengutamakan Tailwind CSS Saja:**
-   - Dalam seluruh pengembangan modul, halaman baru, komponen reusable, maupun pembenahan bug antarmuka, pengembang **WAJIB MENGUTAMAKAN TAILWIND CSS** (`className="flex ..."`).
-   - **Dilarang keras membuat berkas CSS baru secara terpisah** (seperti file `.css` khusus per komponen) atau menulis CSS murni (*raw/vanilla CSS*) yang terisolasi di luar ekosistem Tailwind.
-   - Apabila diperlukan kelas komponen khusus pada `frontend/app/globals.css`, **wajib menggunakan `@apply` dari utilitas Tailwind CSS** agar tetap terikat pada sistem desain institusional `@theme`.
+4. **Aturan Mutlak Pengembang: Wajib 100% Menggunakan Tailwind CSS Saja (Zero Raw CSS Mandate):**
+   - Dalam seluruh pengembangan modul, halaman baru, komponen reusable, custom dialog, modal, maupun pembenahan bug antarmuka, pengembang **WAJIB 100% MENGGUNAKAN TAILWIND CSS** (`className="flex ..."`).
+   - **Dilarang keras menulis kode CSS murni (*raw/vanilla CSS*)** di dalam `frontend/app/globals.css` (seperti manual `position: fixed; inset: 0; background-color: rgba(...) !important;` atau manual `@media`). Seluruh styling dialog (`ConfirmDialog`, `Modal`, `Alert`) dan tata letak responsif wajib menggunakan kelas utilitas bawaan Tailwind CSS langsung pada komponen TSX.
+   - **Dilarang keras membuat berkas CSS baru secara terpisah** (seperti file `.css` terisolasi atau modul `.module.css`).
+   - Berkas `frontend/app/globals.css` hanya digunakan untuk inisialisasi `@import "tailwindcss";`, token institusional pada `@theme`, dan reset `@layer base`.

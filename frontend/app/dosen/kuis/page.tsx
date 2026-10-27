@@ -10,9 +10,10 @@ import {
 import { ClassToolbar } from "@/components/dosen/class-toolbar";
 import { useInitialClassId } from "@/components/dosen/use-class-query";
 import { useLecturerClasses } from "@/components/dosen/use-lecturer-classes";
-import { EmptyState, LoadingSpinner, Modal } from "@/components/ui";
+import { EmptyState, LoadingSpinner, Modal, useConfirm } from "@/components/ui";
 
 export default function DosenKuisPage() {
+  const confirm = useConfirm();
   const { classes, loading: classesLoading, error: classesError, reload } = useLecturerClasses();
   const [classId, setClassId] = useInitialClassId(classes);
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
@@ -60,15 +61,25 @@ export default function DosenKuisPage() {
   }, []);
 
   useEffect(() => {
-    if (classId) void loadQuizzes(classId);
-  }, [classId, loadQuizzes]);
+    if (classId) {
+      void lmsApi.getQuizzes(classId).then((res) => {
+        if (res.error) {
+          setError(res.error);
+          setQuizzes([]);
+        } else {
+          setQuizzes(res.data ?? []);
+        }
+        setLoading(false);
+      });
+    }
+  }, [classId]);
 
   const handleCreateQuiz = async (e: FormEvent) => {
     e.preventDefault();
     if (!classId) return;
     const res = await lmsApi.createQuiz({ class_id: classId, ...quizForm });
     if (res.error) {
-      alert(res.error);
+      await confirm.alert(res.error, "Gagal Membuat Kuis", "danger");
       return;
     }
     setIsQuizModalOpen(false);
@@ -97,7 +108,7 @@ export default function DosenKuisPage() {
     });
 
     if (!qRes.data) {
-      alert(qRes.error || "Gagal menambah pertanyaan");
+      await confirm.alert(qRes.error || "Gagal menambah pertanyaan", "Gagal Menambah Pertanyaan", "danger");
       return;
     }
 
@@ -128,10 +139,20 @@ export default function DosenKuisPage() {
   };
 
   const handleDeleteQuiz = async (id: number) => {
-    if (!confirm("Hapus kuis ini?")) return;
+    const ok = await confirm({
+      title: "Hapus Kuis Perkuliahan",
+      message: "Apakah Anda yakin ingin menghapus kuis ini? Seluruh daftar pertanyaan dan respon nilai mahasiswa akan ikut terhapus.",
+      variant: "danger",
+      confirmText: "Ya, Hapus",
+      cancelText: "Batal",
+    });
+    if (!ok) return;
     const res = await lmsApi.deleteQuiz(id);
-    if (res.error) alert(res.error);
-    else if (classId) void loadQuizzes(classId);
+    if (res.error) {
+      await confirm.alert(res.error, "Gagal Menghapus Kuis", "danger");
+    } else if (classId) {
+      void loadQuizzes(classId);
+    }
   };
 
   const openSubmissions = async (quiz: Quiz) => {

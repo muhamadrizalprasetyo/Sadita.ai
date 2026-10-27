@@ -6,12 +6,14 @@ import { userApi, type UserItem } from "@/lib/api";
 import {
   Modal,
   DataTable,
+  useConfirm,
   type ColumnDef,
   FilamentBoolean,
   FilamentAction,
 } from "@/components/ui";
 
 export default function UserManagementPage() {
+  const confirm = useConfirm();
   const [users, setUsers] = useState<UserItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -181,7 +183,7 @@ export default function UserManagementPage() {
       });
       await loadUsers();
     } else {
-      alert(res.error || "Gagal membuat user");
+      await confirm.alert(res.error || "Gagal membuat user", "Gagal Menambah Pengguna", "danger");
     }
   };
 
@@ -215,33 +217,67 @@ export default function UserManagementPage() {
       setEditTarget(null);
       await loadUsers();
     } else {
-      alert(res.error || "Gagal memperbarui user");
+      await confirm.alert(res.error || "Gagal memperbarui user", "Gagal Memperbarui", "danger");
     }
   };
 
   const handleDelete = useCallback(
     async (u: UserItem) => {
-      if (!confirm(`Hapus pengguna ${u.full_name} (${u.email})? Tindakan ini tidak dapat dibatalkan.`)) return;
+      if (u.email === "admin@unipi.ac.id") {
+        await confirm.alert(
+          "Akun Administrator Utama (admin@unipi.ac.id) dilindungi sistem dan tidak dapat dihapus.",
+          "Aksi Dilindungi",
+          "warning"
+        );
+        return;
+      }
+      const ok = await confirm({
+        title: "Hapus Pengguna",
+        message: `Apakah Anda yakin ingin menghapus akun ${u.full_name} (${u.email})? Tindakan ini bersifat permanen dan data profil terkait akan dihapus.`,
+        variant: "danger",
+        confirmText: "Ya, Hapus",
+        cancelText: "Batal",
+      });
+      if (!ok) return;
       const res = await userApi.delete(u.id);
       if (!res.error) {
         await loadUsers();
       } else {
-        alert(res.error || "Gagal menghapus user");
+        await confirm.alert(res.error || "Gagal menghapus user", "Gagal Menghapus", "danger");
       }
     },
-    [loadUsers]
+    [confirm, loadUsers]
   );
 
   const handleBulkDelete = useCallback(
     async (keys: (string | number)[]) => {
-      if (!confirm(`Hapus ${keys.length} akun pengguna terpilih? Tindakan ini permanen.`)) return;
-      for (const key of keys) {
+      const targetKeys = keys.filter((key) => {
+        const found = users.find((u) => u.id === Number(key));
+        return found?.email !== "admin@unipi.ac.id";
+      });
+      if (targetKeys.length === 0) {
+        await confirm.alert(
+          "Tidak ada akun yang dapat dihapus. Akun Administrator Utama dilindungi sistem.",
+          "Aksi Dilindungi",
+          "warning"
+        );
+        return;
+      }
+      const ok = await confirm({
+        title: "Hapus Masal Pengguna",
+        message: `Apakah Anda yakin ingin menghapus ${targetKeys.length} akun pengguna terpilih secara bersamaan? Tindakan ini tidak dapat dibatalkan.`,
+        variant: "danger",
+        confirmText: `Hapus ${targetKeys.length} Pengguna`,
+        cancelText: "Batal",
+      });
+      if (!ok) return;
+      for (const key of targetKeys) {
         await userApi.delete(Number(key));
       }
       setSelectedKeys([]);
       await loadUsers();
     },
-    [loadUsers]
+    [confirm, loadUsers, users]
   );
 
   // Filament v5 Column Definitions matching user screenshots
@@ -661,10 +697,10 @@ export default function UserManagementPage() {
                   </h3>
                   <span
                     className={`badge ${viewTarget.role === "ADMIN"
-                        ? "badge-error"
-                        : viewTarget.role === "DOSEN"
-                          ? "badge-success"
-                          : "badge-info"
+                      ? "badge-error"
+                      : viewTarget.role === "DOSEN"
+                        ? "badge-success"
+                        : "badge-info"
                       }`}
                     style={{ fontSize: "11px", padding: "2px 8px", fontWeight: 600 }}
                   >

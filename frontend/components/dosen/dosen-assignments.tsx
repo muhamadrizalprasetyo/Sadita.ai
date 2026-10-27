@@ -11,9 +11,10 @@ import {
 } from "@/lib/api";
 import { ClassToolbar } from "@/components/dosen/class-toolbar";
 import { useLecturerClasses } from "@/components/dosen/use-lecturer-classes";
-import { EmptyState, LoadingSpinner, Modal } from "@/components/ui";
+import { EmptyState, LoadingSpinner, Modal, useConfirm } from "@/components/ui";
 
 export function DosenAssignmentsPage() {
+  const confirm = useConfirm();
   const { classes, loading: classesLoading, error: classesError, reload } = useLecturerClasses();
   const [classId, setClassId] = useInitialClassId(classes);
   const [items, setItems] = useState<Assignment[]>([]);
@@ -49,8 +50,18 @@ export function DosenAssignmentsPage() {
   }, []);
 
   useEffect(() => {
-    if (classId) void loadAssignments(classId);
-  }, [classId, loadAssignments]);
+    if (classId) {
+      void lmsApi.getAssignments(classId).then((res) => {
+        if (res.error) {
+          setError(res.error);
+          setItems([]);
+        } else {
+          setItems(res.data ?? []);
+        }
+        setLoading(false);
+      });
+    }
+  }, [classId]);
 
   const openSubmissions = async (assignment: Assignment) => {
     setActiveAssignment(assignment);
@@ -74,7 +85,7 @@ export function DosenAssignmentsPage() {
       is_published: true,
     });
     if (res.error) {
-      alert(res.error);
+      await confirm.alert(res.error, "Gagal Membuat Tugas", "danger");
       return;
     }
     setCreateOpen(false);
@@ -83,10 +94,20 @@ export function DosenAssignmentsPage() {
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm("Hapus tugas ini?")) return;
+    const ok = await confirm({
+      title: "Hapus Tugas Perkuliahan",
+      message: "Apakah Anda yakin ingin menghapus tugas ini? Seluruh data pengumpulan mahasiswa akan ikut terhapus.",
+      variant: "danger",
+      confirmText: "Ya, Hapus",
+      cancelText: "Batal",
+    });
+    if (!ok) return;
     const res = await lmsApi.deleteAssignment(id);
-    if (res.error) alert(res.error);
-    else if (classId) void loadAssignments(classId);
+    if (res.error) {
+      await confirm.alert(res.error, "Gagal Menghapus Tugas", "danger");
+    } else if (classId) {
+      void loadAssignments(classId);
+    }
   };
 
   const handleGrade = async (e: FormEvent) => {
@@ -97,7 +118,7 @@ export function DosenAssignmentsPage() {
       feedback: gradeForm.feedback || undefined,
     });
     if (res.error) {
-      alert(res.error);
+      await confirm.alert(res.error, "Gagal Memberi Nilai", "danger");
       return;
     }
     setGradeTarget(null);

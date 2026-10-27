@@ -6,19 +6,19 @@ import {
   academicApi,
   gradingApi,
   type ClassEnrollment,
-  type CourseClass,
   type StudentGrade,
 } from "@/lib/api";
 import { ClassToolbar } from "@/components/dosen/class-toolbar";
 import { useInitialClassId } from "@/components/dosen/use-class-query";
 import { useLecturerClasses } from "@/components/dosen/use-lecturer-classes";
-import { EmptyState, LoadingSpinner, Modal } from "@/components/ui";
+import { EmptyState, LoadingSpinner, Modal, useConfirm } from "@/components/ui";
 
 /** Bobot resmi dari backend GradingService.WEIGHTS */
 const WEIGHT_LABEL =
   "Bobot sistem: UTS 30%, UAS 35%, Keaktifan 10%, Tugas 15%, Presensi 10%. Nilai akhir dihitung di server.";
 
 export default function DosenNilaiPage() {
+  const confirm = useConfirm();
   const { classes, loading: classesLoading, error: classesError, reload } = useLecturerClasses();
   const [classId, setClassId] = useInitialClassId(classes);
   const [grades, setGrades] = useState<StudentGrade[]>([]);
@@ -49,7 +49,17 @@ export default function DosenNilaiPage() {
   };
 
   useEffect(() => {
-    if (classId) void loadData(classId);
+    let ignore = false;
+    if (classId) {
+      Promise.resolve().then(() => {
+        if (!ignore) {
+          void loadData(classId);
+        }
+      });
+    }
+    return () => {
+      ignore = true;
+    };
   }, [classId]);
 
   const rows = useMemo(() => {
@@ -72,8 +82,9 @@ export default function DosenNilaiPage() {
     setCalculating(true);
     const res = await gradingApi.calculateClassGrades(classId, true);
     setCalculating(false);
-    if (res.error) alert(res.error);
-    else if (res.data) {
+    if (res.error) {
+      await confirm.alert(res.error, "Gagal Menghitung Nilai", "danger");
+    } else if (res.data) {
       setGrades(res.data);
     }
   };
@@ -87,8 +98,9 @@ export default function DosenNilaiPage() {
       editRow.component,
       editRow.score
     );
-    if (res.error) alert(res.error);
-    else {
+    if (res.error) {
+      await confirm.alert(res.error, "Gagal Memperbarui Nilai", "danger");
+    } else {
       setEditRow(null);
       void loadData(classId);
     }

@@ -81,16 +81,16 @@ Halaman masuk (*login*) adalah pintu gerbang institusional bagi ribuan sivitas a
 2. **Ergonomi Input & Ikon**: Seluruh kolom input wajib memiliki gutter teks yang presisi (`padding: 0 38px`) sehingga ikon `Mail` atau `Lock` di sisi kiri tidak menabrak karakter teks atau password bullets. Ukuran font wajib $\ge 16$px pada viewport seluler untuk mencegah *auto-zoom* iOS Safari.
 3. **Penyederhanaan Selektor Uji Coba**: Quick switcher akun simulasi (Admin, Kaprodi, Dosen, Ketua Kelas, Mahasiswa) dirancang kompak dalam baris grid berprofil rendah dengan badge aktif, tidak mendominasi atau mengacaukan hierarki form login.
 
-### 2.4 Standar Mutlak Styling: Wajib Mengutamakan Tailwind CSS Saja (Tailwind-First Architecture)
+### 2.4 Standar Mutlak Styling: Wajib Menggunakan 100% Tailwind CSS Saja (Zero Raw CSS Mandate)
 
-Setiap pengembang maupun agen AI **WAJIB MENGUTAMAKAN TAILWIND CSS** dalam seluruh pembuatan antarmuka, tata letak, komponen, dan perbaikan tampilan di SADITA.ai:
-1. **Utamakan Kelas Utilitas Tailwind CSS**:
-   - Seluruh penyusunan layout (`flex`, `grid`, `col-span-*`), jarak spasial (`p-*`, `m-*`, `gap-*`), warna (`bg-*`, `text-*`, `border-*`), tipografi, radius, dan bayangan wajib mengutamakan utilitas Tailwind CSS.
-2. **Larangan Keras Menulis File CSS Murni Terpisah (*No Isolated Vanilla CSS*)**:
-   - Dilarang membuat file `.css` baru atau modul CSS terpisah untuk halaman/komponen jika kebutuhan styling tersebut dapat diselesaikan secara langsung menggunakan utilitas Tailwind CSS.
-   - Jangan menulis kode CSS murni (*raw/vanilla CSS*) yang berdiri sendiri di luar ekosistem Tailwind.
-3. **Pola `@apply` Terpusat di `globals.css`**:
-   - Apabila diperlukan kelas reusable khusus (misalnya styling tabel enterprise atau modal sistem), penulisan CSS pada `frontend/app/globals.css` **wajib mengutamakan direktif `@apply` dari utilitas Tailwind CSS** agar tetap terikat pada token institusional `@theme`.
+Setiap pengembang maupun agen AI **WAJIB HANYA MENGGUNAKAN TAILWIND CSS** dalam seluruh pembuatan antarmuka, tata letak, komponen, dialog modal, dan perbaikan tampilan di SADITA.ai:
+1. **Wajib Utilitas Bawaan Tailwind CSS (Utility-First in TSX)**:
+   - Seluruh penyusunan layout (`flex`, `grid`, `col-span-*`), jarak spasial (`p-*`, `m-*`, `gap-*`), warna (`bg-*`, `text-*`, `border-*`), tipografi, radius (`rounded-lg`, `rounded-md`), dan bayangan wajib langsung menggunakan kelas utilitas bawaan Tailwind CSS pada elemen JSX/TSX.
+2. **Larangan Mutlak CSS Murni (*Strict Ban on Pure/Vanilla CSS*)**:
+   - Dilarang keras menulis kode CSS murni (*raw/vanilla CSS*) dengan properti manual (seperti `position: fixed; inset: 0; background-color: rgba(...) !important;`) di dalam `frontend/app/globals.css`.
+   - Dilarang membuat file `.css` baru terpisah atau modul CSS terpisah (`.module.css`). Seluruh komponen dialog, alert, konfirmasi, dan modal wajib menggunakan kelas utilitas Tailwind langsung pada komponen TSX.
+3. **Penyederhanaan `globals.css` Terpusat pada `@theme` Tailwind v4**:
+   - Berkas `frontend/app/globals.css` hanya digunakan untuk inisialisasi Tailwind (`@import "tailwindcss";`), konfigurasi token institusional pada blok `@theme`, dan reset `@layer base`. Tidak boleh ada selektor komponen murni dengan aturan CSS vanilla manual.
 4. **Offline-First & Kemandirian Dependensi**:
    - Menggunakan engine `@tailwindcss/postcss` v4 yang bekerja mandiri secara offline bersama paket lokal `@fontsource/poppins`, tanpa bergantung pada CDN eksternal.
 

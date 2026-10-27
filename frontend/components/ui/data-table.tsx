@@ -443,20 +443,7 @@ export function DataTable<T extends { id?: string | number }>({
                       zIndex: 60,
                     }}
                   >
-                    {(bulkActions && bulkActions.length > 0
-                      ? bulkActions
-                      : [
-                        {
-                          key: "delete",
-                          label: "Delete selected",
-                          icon: <Trash2 size={13} color="#dc2626" />,
-                          danger: true,
-                          onClick: () => {
-                            alert(`Hapus ${selectedKeys.length} data terpilih`);
-                          },
-                        },
-                      ]
-                    ).map((action) => (
+                    {(bulkActions || []).map((action) => (
                       <button
                         key={action.key}
                         type="button"

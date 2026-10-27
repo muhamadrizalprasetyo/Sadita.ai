@@ -22,8 +22,16 @@ export function useLecturerClasses() {
   }, []);
 
   useEffect(() => {
-    void reload();
-  }, [reload]);
+    void academicApi.getClasses().then((res) => {
+      if (res.error) {
+        setError(res.error);
+        setClasses([]);
+      } else {
+        setClasses(res.data ?? []);
+      }
+      setLoading(false);
+    });
+  }, []);
 
   return { classes, loading, error, reload };
 }
