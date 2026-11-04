@@ -18,11 +18,15 @@ from app.models.credential import RfidCredential, FingerprintCredential
 from app.models.academic import (
     ClassType,
     EnrollmentStatus,
+    EnrollmentType,
+    KrsRequestType,
+    KrsRequestStatus,
     AcademicTerm,
     Course,
     ClassRoom,
     CourseClass,
     ClassEnrollment,
+    KrsRequest,
 )
 
 # Device model (linked to ClassRoom)
@@ -60,6 +64,9 @@ from app.models.lms import (
     CourseProgress,
     StudentGrade,
     GradeScale,
+    ClassGradeConfig,
+    AssignmentGroup,
+    AssignmentGroupMember,
 )
 from app.models.workflow import AuditLog, AttendanceRequest, AttendanceRequestStatus, ClassLeaderAssignment
 
@@ -79,11 +86,15 @@ __all__ = [
     # Academic
     "ClassType",
     "EnrollmentStatus",
+    "EnrollmentType",
+    "KrsRequestType",
+    "KrsRequestStatus",
     "AcademicTerm",
     "Course",
     "ClassRoom",
     "CourseClass",
     "ClassEnrollment",
+    "KrsRequest",
     # Device
     "SaditaDevice",
     "DeviceStatus",
@@ -114,6 +125,9 @@ __all__ = [
     "CourseProgress",
     "StudentGrade",
     "GradeScale",
+    "ClassGradeConfig",
+    "AssignmentGroup",
+    "AssignmentGroupMember",
     "AuditLog",
     "AttendanceRequest",
     "AttendanceRequestStatus",

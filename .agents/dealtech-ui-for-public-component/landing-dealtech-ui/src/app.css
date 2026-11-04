@@ -1,0 +1,670 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+  font-family: 'Inter', sans-serif;
+  color: #111111;
+  background: #ffffff;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+.dealtech-pricelist-slider {
+  position: relative;
+}
+
+.dealtech-cta-slider {
+  position: relative;
+}
+
+.dealtech-faq-slider {
+  position: relative;
+}
+
+.dealtech-contact-slider {
+  position: relative;
+}
+
+.dealtech-landing :is(
+  [class*="__eyebrow"],
+  .lp-eyebrow,
+  .section-compare-v1__badge,
+  .section-compare-v2__badge,
+  .section-compare-v3__badge,
+  .contact-v5__info-badge,
+  .review-v4__badge
+) {
+  border: 0 !important;
+  gap: 0 !important;
+  font-size: 0.75rem !important;
+  line-height: 1.2;
+  font-weight: 700 !important;
+  letter-spacing: 0.04em;
+  text-decoration: none !important;
+  text-transform: uppercase;
+}
+
+.dealtech-landing :is(
+  [class*="__eyebrow"],
+  .lp-eyebrow,
+  .section-compare-v1__badge,
+  .section-compare-v2__badge,
+  .section-compare-v3__badge,
+  .contact-v5__info-badge,
+  .review-v4__badge
+) > svg {
+  display: none;
+}
+
+.dealtech-landing :is(
+  [class*="__eyebrow"],
+  .lp-eyebrow,
+  .section-compare-v1__badge,
+  .section-compare-v2__badge,
+  .section-compare-v3__badge,
+  .contact-v5__info-badge,
+  .review-v4__badge
+)::before {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 15px;
+  display: inline-block;
+  margin-right: 7px;
+  vertical-align: -2px;
+  content: '';
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M12 16v-4M12 8h.01'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M12 16v-4M12 8h.01'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+.dealtech-contact-slider__arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 20;
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid rgba(1, 73, 139, 0.18);
+  border-radius: 999px;
+  background: #ffffff;
+  color: #01498b;
+  box-shadow: 0 8px 24px rgba(1, 73, 139, 0.14);
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.dealtech-contact-slider__arrow:hover {
+  background: #01498b;
+  color: #ffffff;
+  transform: translateY(-50%) scale(1.05);
+}
+
+.dealtech-contact-slider__arrow--left {
+  left: 18px;
+}
+
+.dealtech-contact-slider__arrow--right {
+  right: 18px;
+}
+
+.dealtech-faq-slider__arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 20;
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid rgba(1, 73, 139, 0.18);
+  border-radius: 999px;
+  background: #ffffff;
+  color: #01498b;
+  box-shadow: 0 8px 24px rgba(1, 73, 139, 0.14);
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.dealtech-faq-slider__arrow:hover {
+  background: #01498b;
+  color: #ffffff;
+  transform: translateY(-50%) scale(1.05);
+}
+
+.dealtech-faq-slider__arrow--left {
+  left: 18px;
+}
+
+.dealtech-faq-slider__arrow--right {
+  right: 18px;
+}
+
+.dealtech-cta-slider__arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 20;
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid rgba(1, 73, 139, 0.18);
+  border-radius: 999px;
+  background: #ffffff;
+  color: #01498b;
+  box-shadow: 0 8px 24px rgba(1, 73, 139, 0.14);
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.dealtech-cta-slider__arrow:hover {
+  background: #01498b;
+  color: #ffffff;
+  transform: translateY(-50%) scale(1.05);
+}
+
+.dealtech-cta-slider__arrow--left {
+  left: 18px;
+}
+
+.dealtech-cta-slider__arrow--right {
+  right: 18px;
+}
+
+.dealtech-pricelist-slider__arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 20;
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid rgba(1, 73, 139, 0.18);
+  border-radius: 999px;
+  background: #ffffff;
+  color: #01498b;
+  box-shadow: 0 8px 24px rgba(1, 73, 139, 0.14);
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+.dealtech-pricelist-slider__arrow--left {
+  left: 18px;
+}
+
+.dealtech-pricelist-slider__arrow--right {
+  right: 18px;
+}
+
+@media (max-width: 760px) {
+  .dealtech-contact-slider {
+    padding-bottom: 58px;
+  }
+
+  .dealtech-contact-slider__arrow {
+    top: auto;
+    bottom: 8px;
+    transform: none;
+  }
+
+  .dealtech-contact-slider__arrow:hover {
+    transform: scale(1.05);
+  }
+
+  .dealtech-contact-slider__arrow--left {
+    left: calc(50% - 46px);
+  }
+
+  .dealtech-contact-slider__arrow--right {
+    right: calc(50% - 46px);
+  }
+
+  .dealtech-pricelist-slider {
+    padding-bottom: 58px;
+  }
+
+  .dealtech-pricelist-slider__arrow {
+    top: auto;
+    bottom: 8px;
+    transform: none;
+  }
+
+  .dealtech-pricelist-slider__arrow--left {
+    left: calc(50% - 46px);
+  }
+
+  .dealtech-pricelist-slider__arrow--right {
+    right: calc(50% - 46px);
+  }
+
+  .dealtech-cta-slider {
+    padding-bottom: 58px;
+  }
+
+  .dealtech-cta-slider__arrow {
+    top: auto;
+    bottom: 8px;
+    transform: none;
+  }
+
+  .dealtech-cta-slider__arrow:hover {
+    transform: scale(1.05);
+  }
+
+  .dealtech-cta-slider__arrow--left {
+    left: calc(50% - 46px);
+  }
+
+  .dealtech-cta-slider__arrow--right {
+    right: calc(50% - 46px);
+  }
+
+  .dealtech-faq-slider {
+    padding-bottom: 58px;
+  }
+
+  .dealtech-faq-slider__arrow {
+    top: auto;
+    bottom: 8px;
+    transform: none;
+  }
+
+  .dealtech-faq-slider__arrow:hover {
+    transform: scale(1.05);
+  }
+
+  .dealtech-faq-slider__arrow--left {
+    left: calc(50% - 46px);
+  }
+
+  .dealtech-faq-slider__arrow--right {
+    right: calc(50% - 46px);
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: #ffffff;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+.dealtech-landing {
+  min-height: 100vh;
+  overflow-x: hidden;
+  overflow-x: clip;
+}
+
+.dealtech-hero-slider {
+  position: relative;
+}
+
+.dealtech-hero-slider__arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 10;
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(1, 73, 139, 0.18);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.94);
+  color: #01498b;
+  box-shadow: 0 8px 24px rgba(1, 58, 111, 0.14);
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.dealtech-hero-slider__arrow:hover {
+  background: #01498b;
+  color: #ffffff;
+  transform: translateY(-50%) scale(1.05);
+}
+
+.dealtech-hero-slider__arrow--left {
+  left: 12px;
+}
+
+.dealtech-hero-slider__arrow--right {
+  right: 12px;
+}
+
+.dealtech-feature-slider {
+  position: relative;
+}
+
+.dealtech-feature-slider__arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 10;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(1, 73, 139, 0.18);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.94);
+  color: #01498b;
+  box-shadow: 0 8px 24px rgba(1, 58, 111, 0.14);
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.dealtech-feature-slider__arrow:hover {
+  background: #01498b;
+  color: #ffffff;
+  transform: translateY(-50%) scale(1.05);
+}
+
+.dealtech-feature-slider__arrow--left {
+  left: 8px;
+}
+
+.dealtech-feature-slider__arrow--right {
+  right: 8px;
+}
+
+.dealtech-about-slider {
+  position: relative;
+}
+
+.dealtech-about-slider__arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 10;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(1, 73, 139, 0.18);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.94);
+  color: #01498b;
+  box-shadow: 0 8px 24px rgba(1, 58, 111, 0.14);
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.dealtech-about-slider__arrow:hover {
+  background: #01498b;
+  color: #ffffff;
+  transform: translateY(-50%) scale(1.05);
+}
+
+.dealtech-about-slider__arrow--left {
+  left: 8px;
+}
+
+.dealtech-about-slider__arrow--right {
+  right: 8px;
+}
+
+.dealtech-service-slider {
+  position: relative;
+}
+
+.dealtech-service-slider__arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 10;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(1, 73, 139, 0.18);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.94);
+  color: #01498b;
+  box-shadow: 0 8px 24px rgba(1, 58, 111, 0.1);
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.dealtech-service-slider__arrow:hover {
+  background: #01498b;
+  color: #ffffff;
+  transform: translateY(-50%) scale(1.05);
+}
+
+.dealtech-service-slider__arrow--left {
+  left: 8px;
+}
+
+.dealtech-service-slider__arrow--right {
+  right: 8px;
+}
+
+.dealtech-compare-slider {
+  position: relative;
+}
+
+.dealtech-compare-slider__arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 10;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(1, 73, 139, 0.18);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.94);
+  color: #01498b;
+  box-shadow: 0 8px 24px rgba(1, 58, 111, 0.14);
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.dealtech-compare-slider__arrow:hover {
+  background: #01498b;
+  color: #ffffff;
+  transform: translateY(-50%) scale(1.05);
+}
+
+.dealtech-compare-slider__arrow--left {
+  left: 8px;
+}
+
+.dealtech-compare-slider__arrow--right {
+  right: 8px;
+}
+
+.dealtech-review-slider {
+  position: relative;
+}
+
+.dealtech-review-slider__arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 10;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(1, 73, 139, 0.18);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.94);
+  color: #01498b;
+  box-shadow: 0 8px 24px rgba(1, 58, 111, 0.14);
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.dealtech-review-slider__arrow:hover {
+  background: #01498b;
+  color: #ffffff;
+  transform: translateY(-50%) scale(1.05);
+}
+
+.dealtech-review-slider__arrow--left {
+  left: 8px;
+}
+
+.dealtech-review-slider__arrow--right {
+  right: 8px;
+}
+
+@media (max-width: 640px) {
+  .dealtech-hero-slider__arrow {
+    top: auto;
+    bottom: 12px;
+    width: 40px;
+    height: 40px;
+    transform: none;
+  }
+
+  .dealtech-hero-slider__arrow:hover {
+    transform: scale(1.05);
+  }
+
+  .dealtech-hero-slider__arrow--left {
+    left: calc(50% - 48px);
+  }
+
+  .dealtech-hero-slider__arrow--right {
+    right: calc(50% - 48px);
+  }
+
+  .dealtech-feature-slider {
+    padding-bottom: 54px;
+  }
+
+  .dealtech-feature-slider__arrow {
+    top: auto;
+    bottom: 8px;
+    transform: none;
+  }
+
+  .dealtech-feature-slider__arrow:hover {
+    transform: scale(1.05);
+  }
+
+  .dealtech-feature-slider__arrow--left {
+    left: calc(50% - 46px);
+  }
+
+  .dealtech-feature-slider__arrow--right {
+    right: calc(50% - 46px);
+  }
+
+  .dealtech-about-slider {
+    padding-bottom: 54px;
+  }
+
+  .dealtech-about-slider__arrow {
+    top: auto;
+    bottom: 8px;
+    transform: none;
+  }
+
+  .dealtech-about-slider__arrow:hover {
+    transform: scale(1.05);
+  }
+
+  .dealtech-about-slider__arrow--left {
+    left: calc(50% - 46px);
+  }
+
+  .dealtech-about-slider__arrow--right {
+    right: calc(50% - 46px);
+  }
+
+  .dealtech-service-slider {
+    padding-bottom: 54px;
+  }
+
+  .dealtech-service-slider__arrow {
+    top: auto;
+    bottom: 8px;
+    transform: none;
+  }
+
+  .dealtech-service-slider__arrow:hover {
+    transform: scale(1.05);
+  }
+
+  .dealtech-service-slider__arrow--left {
+    left: calc(50% - 46px);
+  }
+
+  .dealtech-service-slider__arrow--right {
+    right: calc(50% - 46px);
+  }
+
+  .dealtech-compare-slider {
+    padding-bottom: 54px;
+  }
+
+  .dealtech-compare-slider__arrow {
+    top: auto;
+    bottom: 8px;
+    transform: none;
+  }
+
+  .dealtech-compare-slider__arrow:hover {
+    transform: scale(1.05);
+  }
+
+  .dealtech-compare-slider__arrow--left {
+    left: calc(50% - 46px);
+  }
+
+  .dealtech-compare-slider__arrow--right {
+    right: calc(50% - 46px);
+  }
+
+  .dealtech-review-slider {
+    padding-bottom: 54px;
+  }
+
+  .dealtech-review-slider__arrow {
+    top: auto;
+    bottom: 8px;
+    transform: none;
+  }
+
+  .dealtech-review-slider__arrow:hover {
+    transform: scale(1.05);
+  }
+
+  .dealtech-review-slider__arrow--left {
+    left: calc(50% - 46px);
+  }
+
+  .dealtech-review-slider__arrow--right {
+    right: calc(50% - 46px);
+  }
+}

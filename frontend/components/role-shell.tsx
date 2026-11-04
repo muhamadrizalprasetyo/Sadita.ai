@@ -149,7 +149,17 @@ export function RoleShell({ role, children }: { role: Role; children: ReactNode 
         clearStoredToken();
         router.replace("/login");
       } else if (result.data.role !== role) {
-        router.replace(homeFor(result.data.role));
+        // Allow MAHASISWA with active class leader assignment to access KETUA_KELAS routes
+        const isLeaderAuthorized =
+          role === "KETUA_KELAS" &&
+          result.data.role === "MAHASISWA" &&
+          Boolean(result.data.is_class_leader);
+
+        if (isLeaderAuthorized) {
+          setUser(result.data);
+        } else {
+          router.replace(homeFor(result.data.role));
+        }
       } else {
         setUser(result.data);
       }
@@ -167,7 +177,16 @@ export function RoleShell({ role, children }: { role: Role; children: ReactNode 
     );
   }
 
-  const items = navigation[role] || [];
+  const baseItems = navigation[role] || [];
+  // PO & Audit: integrate class leader verification menu directly into student portal when assigned
+  const items =
+    role === "MAHASISWA" && user.is_class_leader
+      ? [
+          ...baseItems.slice(0, 6),
+          { href: "/ketua-kelas/presensi", label: "Verifikasi Presensi (Ketua Kelas)", icon: CheckSquare },
+          ...baseItems.slice(6),
+        ]
+      : baseItems;
   const initials = user.full_name.split(" ").map((w: string) => w[0]).join("").slice(0, 2).toUpperCase();
 
   return (

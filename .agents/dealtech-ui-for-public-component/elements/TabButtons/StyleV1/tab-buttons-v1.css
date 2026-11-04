@@ -1,0 +1,80 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+.tab-buttons-v1 {
+  box-sizing: border-box;
+  width: min(100%, 360px);
+  min-height: 50px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px;
+  border: 1px solid rgba(1, 58, 111, 0.12);
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: 0 12px 30px rgba(0, 28, 55, 0.16);
+  font-family: 'Inter', sans-serif;
+}
+
+.tab-buttons-v1 *,
+.tab-buttons-v1 *::before,
+.tab-buttons-v1 *::after {
+  box-sizing: border-box;
+}
+
+.tab-buttons-v1__button {
+  min-width: 0;
+  height: 40px;
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #64748b;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.tab-buttons-v1__button:hover {
+  background: #f1f5f9;
+  color: #01498b;
+}
+
+.tab-buttons-v1__button--active,
+.tab-buttons-v1__button--active:hover {
+  background: #01498b;
+  color: #ffffff;
+}
+
+.tab-buttons-v1__button--active:hover {
+  background: #013a6f;
+  transform: translateY(-1px);
+}
+
+.tab-buttons-v1__button span {
+  padding: 3px 6px;
+  border-radius: 999px;
+  background: #e7f2ff;
+  color: #01498b;
+  font-size: 0.5625rem;
+  line-height: 1;
+}
+
+.tab-buttons-v1__button--active span {
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+}
+
+@media (max-width: 480px) {
+  .tab-buttons-v1__button {
+    padding: 0 14px;
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+}

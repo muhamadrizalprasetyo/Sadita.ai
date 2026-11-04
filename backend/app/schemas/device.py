@@ -24,6 +24,12 @@ class DeviceResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class DeviceUpdateRequest(BaseModel):
+    nama: Optional[str] = None
+    room_id: Optional[int] = None
+    keterangan: Optional[str] = None
+
+
 class DeviceEventResponse(BaseModel):
     id: int
     device_id: str

@@ -1,0 +1,277 @@
+/* Hero SectionV1 — berdiri sendiri, token diletakkan di section. */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+.home-hero-section {
+  --lp-primary: #01498b;
+  --lp-primary-dark: #013a6f;
+  --lp-primary-soft: rgba(1, 73, 139, 0.08);
+  --lp-primary-line: rgba(1, 73, 139, 0.22);
+  --lp-ink: #111111;
+  --lp-ink-soft: #1f2937;
+  --lp-muted: #4b5563;
+  --lp-line: #e5e7eb;
+  --lp-surface: #f6f8fb;
+
+  width: 100%;
+  background: #ffffff;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+}
+
+.home-hero-section,
+.home-hero-section *,
+.home-hero-section *::before,
+.home-hero-section *::after {
+  box-sizing: border-box;
+}
+
+/* Kontrol form tidak mewarisi font secara default */
+.home-hero-section button,
+.home-hero-section input,
+.home-hero-section select,
+.home-hero-section textarea {
+  font-family: inherit;
+}
+
+/* ── Animasi reveal ──────────────────────────────────────── */
+
+.sl-opacity-0 {
+  opacity: 0;
+}
+
+.sl-reveal {
+  will-change: opacity;
+}
+
+.sl-fade-in {
+  animation: slFadeInUp 0.5s ease forwards;
+}
+
+@keyframes slFadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sl-fade-in {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+/* ── Eyebrow ─────────────────────────────────────────────── */
+
+.lp-eyebrow {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 12px;
+  padding: 5px 13px;
+  border-radius: 999px;
+  background: var(--lp-primary-soft);
+  color: var(--lp-primary);
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* ── Hero ────────────────────────────────────────────────── */
+
+.home-hero {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 45px 0;
+  background: #ffffff;
+}
+
+.home-hero__content {
+  position: relative;
+  z-index: 1;
+  width: min(940px, calc(100% - 44px));
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.home-hero__title {
+  margin: 0;
+  color: var(--lp-ink);
+  font-size: clamp(1.5rem, 3.1vw, 2.25rem);
+  line-height: 1.24;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+}
+
+.home-hero__title-accent {
+  color: #ffffff;
+  background: var(--lp-primary);
+  padding: 2px 10px;
+  border-radius: 6px;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+.home-hero__description {
+  margin: 16px 0 0;
+  max-width: 720px;
+  color: var(--lp-muted);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+}
+
+.home-hero__actions {
+  margin-top: 26px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.home-hero__button {
+  position: relative;
+  min-width: 240px;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 50px;
+  border-radius: 999px;
+  padding: 0 24px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.home-hero__button:hover {
+  transform: translateY(-1px);
+}
+
+.home-hero__button--primary {
+  border: 1px solid var(--lp-primary);
+  background: var(--lp-primary);
+  color: #ffffff;
+}
+
+.home-hero__button--primary:hover {
+  background: var(--lp-primary-dark);
+  border-color: var(--lp-primary-dark);
+}
+
+.home-hero__button--secondary {
+  border: 1px solid var(--lp-primary);
+  background: #ffffff;
+  color: var(--lp-primary);
+}
+
+.home-hero__button--secondary:hover {
+  background: var(--lp-primary-soft);
+}
+
+.home-hero__trust {
+  margin: 22px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 22px;
+}
+
+.home-hero__trust li {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--lp-muted);
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.home-hero__trust svg {
+  color: #16a34a;
+  flex: 0 0 auto;
+}
+
+.home-hero__demo {
+  margin-top: clamp(28px, 4vw, 42px);
+  width: 100%;
+  max-width: 900px;
+  margin-inline: auto;
+}
+
+.home-hero__demo-title {
+  font-size: 0.875rem;
+  color: var(--lp-muted);
+  margin-bottom: 16px;
+}
+
+@media (max-width: 640px) {
+  .home-hero {
+    padding: 36px 0 32px;
+  }
+
+  .home-hero__content {
+    width: min(940px, calc(100% - 36px));
+  }
+  .home-hero__actions {
+    flex-direction: column;
+    width: 100%;
+  }
+  .home-hero__button {
+    width: 100%;
+    min-width: 0;
+  }
+  .home-hero__trust {
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+}
+
+/* ── Daftar gambar demo ──────────────────────────────────── */
+
+.home-hero__demo-list {
+  margin-top: 26px;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.home-hero__demo-list img {
+  display: block;
+  min-width: 0;
+  width: 100%;
+  height: auto;
+  border-radius: 14px;
+  border: 1px solid var(--lp-line);
+}
+
+@media (max-width: 900px) {
+  .home-hero__demo-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .home-hero {
+    padding-block: 36px 32px;
+    padding-inline: 2px;
+  }
+}

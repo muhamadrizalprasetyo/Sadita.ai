@@ -2,8 +2,12 @@
 SADITA — LMS API Endpoints
 /api/v1/lms
 """
+import csv
+import io
+from datetime import datetime, timedelta, timezone
 from typing import List, Optional
-from fastapi import APIRouter, HTTPException, Query, status
+from fastapi import APIRouter, HTTPException, Query, Request, status
+from fastapi.responses import StreamingResponse
 
 from app.core.deps import CurrentUser, CurrentUserID, DBSession, RequireLecturer, RequireStudent
 from app.repositories.lms_repo import LMSRepository
@@ -35,9 +39,15 @@ from app.schemas.lms import (
     GradeUpdateRequest,
     GradeResponse,
     GradeCalculateRequest,
+    AssignmentGroupCreateRequest,
+    AssignmentGroupResponse,
+    ClassGradeConfigRequest,
+    ClassGradeConfigResponse,
+    GradePublishRequest,
+    GradeRevisionRequest,
 )
 from app.services.lms_service import LMSService
-from app.services.authorization_service import audit, require_class_access
+from app.services.authorization_service import audit, require_class_access, require_own_student_data
 from app.services.grading_service import GradingService
 from app.models.user import UserRole
 from app.models.lms import AssignmentSubmission
@@ -56,7 +66,7 @@ router = APIRouter(prefix="/lms", tags=["LMS (Learning Management System)"])
     summary="Buat chapter/module baru",
     description="Dosen membuat chapter untuk mengelompokkan lessons.",
 )
-def create_chapter(req: ChapterCreateRequest, current: RequireLecturer, db: DBSession):
+def create_chapter(req: ChapterCreateRequest, current: RequireLecturer, db: DBSession, request: Request):
     require_class_access(db, current, req.class_id)
     from app.models.lms import CourseChapter
     chapter = CourseChapter(
@@ -69,7 +79,7 @@ def create_chapter(req: ChapterCreateRequest, current: RequireLecturer, db: DBSe
     db.add(chapter)
     db.commit()
     db.refresh(chapter)
-    audit(db, current.id, "CREATE_CHAPTER", "course_chapter", chapter.id, after={"class_id": req.class_id})
+    audit(db, current.id, "CREATE_CHAPTER", "course_chapter", chapter.id, after={"class_id": req.class_id}, request=request)
     db.commit()
     return ChapterResponse.model_validate(chapter)
 
@@ -100,14 +110,14 @@ def list_chapters(
 
 
 @router.delete("/chapters/{chapter_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_chapter(chapter_id: int, current: RequireLecturer, db: DBSession):
+def delete_chapter(chapter_id: int, current: RequireLecturer, db: DBSession, request: Request):
     from app.models.lms import CourseChapter
     chapter = db.get(CourseChapter, chapter_id)
     if not chapter:
         raise HTTPException(status_code=404, detail="Chapter tidak ditemukan")
     require_class_access(db, current, chapter.class_id)
     db.delete(chapter)
-    audit(db, current.id, "DELETE_CHAPTER", "course_chapter", chapter_id)
+    audit(db, current.id, "DELETE_CHAPTER", "course_chapter", chapter_id, request=request)
     db.commit()
 
 
@@ -122,7 +132,7 @@ def delete_chapter(chapter_id: int, current: RequireLecturer, db: DBSession):
     summary="Buat lesson/pertemuan baru",
     description="Dosen membuat lesson (dokumen, video, quiz, atau assignment).",
 )
-def create_lesson(req: LessonCreateRequest, current: RequireLecturer, db: DBSession):
+def create_lesson(req: LessonCreateRequest, current: RequireLecturer, db: DBSession, request: Request):
     require_class_access(db, current, req.class_id)
     from app.models.lms import CourseLesson
     lesson = CourseLesson(
@@ -143,7 +153,7 @@ def create_lesson(req: LessonCreateRequest, current: RequireLecturer, db: DBSess
     db.add(lesson)
     db.commit()
     db.refresh(lesson)
-    audit(db, current.id, "CREATE_LESSON", "course_lesson", lesson.id, after={"class_id": req.class_id})
+    audit(db, current.id, "CREATE_LESSON", "course_lesson", lesson.id, after={"class_id": req.class_id}, request=request)
     db.commit()
     return LessonResponse.model_validate(lesson)
 
@@ -167,14 +177,14 @@ def list_lessons(
 
 
 @router.delete("/lessons/{lesson_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_lesson(lesson_id: int, current: RequireLecturer, db: DBSession):
+def delete_lesson(lesson_id: int, current: RequireLecturer, db: DBSession, request: Request):
     from app.models.lms import CourseLesson
     lesson = db.get(CourseLesson, lesson_id)
     if not lesson:
         raise HTTPException(status_code=404, detail="Lesson tidak ditemukan")
     require_class_access(db, current, lesson.class_id)
     db.delete(lesson)
-    audit(db, current.id, "DELETE_LESSON", "course_lesson", lesson_id)
+    audit(db, current.id, "DELETE_LESSON", "course_lesson", lesson_id, request=request)
     db.commit()
 
 
@@ -189,7 +199,7 @@ def delete_lesson(lesson_id: int, current: RequireLecturer, db: DBSession):
     summary="Unggah / buat materi perkuliahan baru",
     description="Dosen mengunggah dokumen/link/catatan materi untuk kelas dan sesi tertentu.",
 )
-def create_material(req: MaterialCreateRequest, current: RequireLecturer, db: DBSession):
+def create_material(req: MaterialCreateRequest, current: RequireLecturer, db: DBSession, request: Request):
     require_class_access(db, current, req.class_id)
     material = LMSService.create_material(
         db,
@@ -200,8 +210,9 @@ def create_material(req: MaterialCreateRequest, current: RequireLecturer, db: DB
         description=req.description,
         resource_url=req.resource_url,
         content=req.content,
+        available_from=req.available_from,
     )
-    audit(db, current.id, "CREATE_MATERIAL", "course_material", material.id, after={"class_id": req.class_id}); db.commit()
+    audit(db, current.id, "CREATE_MATERIAL", "course_material", material.id, after={"class_id": req.class_id}, request=request); db.commit()
     return MaterialResponse.model_validate(material)
 
 
@@ -223,6 +234,14 @@ def list_materials(
     materials = LMSRepository.list_materials_for_class(
         db, class_id=class_id, session_id=session_id, limit=limit, offset=offset
     )
+    if current.role == UserRole.MAHASISWA:
+        now = datetime.now(timezone.utc)
+        materials = [
+            m for m in materials
+            if not m.available_from
+            or (m.available_from.tzinfo is None and m.available_from.replace(tzinfo=timezone.utc) <= now)
+            or (m.available_from.tzinfo and m.available_from <= now)
+        ]
     return [MaterialResponse.model_validate(m) for m in materials]
 
 
@@ -236,6 +255,14 @@ def get_material(material_id: int, current: CurrentUser, db: DBSession):
     if not material:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Materi tidak ditemukan")
     require_class_access(db, current, material.class_id)
+    if current.role == UserRole.MAHASISWA and material.available_from:
+        now = datetime.now(timezone.utc)
+        avail = material.available_from if material.available_from.tzinfo else material.available_from.replace(tzinfo=timezone.utc)
+        if avail > now:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Materi ini baru dapat diakses pada {avail.strftime('%Y-%m-%d %H:%M UTC')}",
+            )
     return MaterialResponse.model_validate(material)
 
 
@@ -244,13 +271,13 @@ def get_material(material_id: int, current: CurrentUser, db: DBSession):
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Hapus materi",
 )
-def delete_material(material_id: int, current: RequireLecturer, db: DBSession):
+def delete_material(material_id: int, current: RequireLecturer, db: DBSession, request: Request):
     material = LMSRepository.get_material_by_id(db, material_id)
     if material: require_class_access(db, current, material.class_id)
     success = LMSRepository.delete_material(db, material_id)
     if not success:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Materi tidak ditemukan")
-    audit(db, current.id, "DELETE_MATERIAL", "course_material", material_id); db.commit()
+    audit(db, current.id, "DELETE_MATERIAL", "course_material", material_id, request=request); db.commit()
 
 
 # ============================================================
@@ -264,7 +291,7 @@ def delete_material(material_id: int, current: RequireLecturer, db: DBSession):
     summary="Buat tugas baru",
     description="Dosen membuat penugasan dengan tenggat waktu (due date) dan bobot nilai.",
 )
-def create_assignment(req: AssignmentCreateRequest, current: RequireLecturer, db: DBSession):
+def create_assignment(req: AssignmentCreateRequest, current: RequireLecturer, db: DBSession, request: Request):
     require_class_access(db, current, req.class_id)
     assignment = LMSService.create_assignment(
         db,
@@ -276,8 +303,11 @@ def create_assignment(req: AssignmentCreateRequest, current: RequireLecturer, db
         max_score=req.max_score,
         allow_late=req.allow_late,
         is_published=req.is_published,
+        is_group=req.is_group,
+        group_size=req.group_size,
+        start_date=req.start_date,
     )
-    audit(db, current.id, "CREATE_ASSIGNMENT", "assignment", assignment.id, after={"class_id": req.class_id}); db.commit()
+    audit(db, current.id, "CREATE_ASSIGNMENT", "assignment", assignment.id, after={"class_id": req.class_id}, request=request); db.commit()
     return AssignmentResponse.model_validate(assignment)
 
 
@@ -339,13 +369,13 @@ def get_assignment_summary(assignment_id: int, current: CurrentUser, db: DBSessi
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Hapus tugas",
 )
-def delete_assignment(assignment_id: int, current: RequireLecturer, db: DBSession):
+def delete_assignment(assignment_id: int, current: RequireLecturer, db: DBSession, request: Request):
     assignment = LMSRepository.get_assignment_by_id(db, assignment_id)
     if assignment: require_class_access(db, current, assignment.class_id)
     success = LMSRepository.delete_assignment(db, assignment_id)
     if not success:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Tugas tidak ditemukan")
-    audit(db, current.id, "DELETE_ASSIGNMENT", "assignment", assignment_id); db.commit()
+    audit(db, current.id, "DELETE_ASSIGNMENT", "assignment", assignment_id, request=request); db.commit()
 
 
 # ============================================================
@@ -364,6 +394,7 @@ def submit_assignment(
     req: SubmissionCreateRequest,
     current: CurrentUser,
     db: DBSession,
+    request: Request,
 ):
     assignment = LMSRepository.get_assignment_by_id(db, assignment_id)
     if not assignment: raise HTTPException(status_code=404, detail="Tugas tidak ditemukan")
@@ -374,9 +405,106 @@ def submit_assignment(
         user_id=current.id,
         file_url=req.file_url,
         content=req.content,
+        group_id=req.group_id,
     )
-    audit(db, current.id, "SUBMIT_ASSIGNMENT", "assignment_submission", sub.id, after={"assignment_id": assignment_id}); db.commit()
+    audit(db, current.id, "SUBMIT_ASSIGNMENT", "assignment_submission", sub.id, after={"assignment_id": assignment_id}, request=request); db.commit()
     return SubmissionResponse.model_validate(sub)
+
+
+# ============================================================
+# ASSIGNMENT GROUPS
+# ============================================================
+
+@router.post(
+    "/assignments/{assignment_id}/groups",
+    response_model=AssignmentGroupResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Buat kelompok tugas (Dosen atau Ketua/Anggota Kelompok)",
+)
+def create_assignment_group(
+    assignment_id: int,
+    req: AssignmentGroupCreateRequest,
+    current: CurrentUser,
+    db: DBSession,
+    request: Request,
+):
+    assignment = LMSRepository.get_assignment_by_id(db, assignment_id)
+    if not assignment:
+        raise HTTPException(status_code=404, detail="Tugas tidak ditemukan")
+    require_class_access(db, current, assignment.class_id)
+
+    leader_id = None
+    if current.role == UserRole.MAHASISWA:
+        student = StudentRepository.get_by_user_id(db, current.id)
+        if not student:
+            raise HTTPException(status_code=403, detail="Profil mahasiswa tidak ditemukan")
+        leader_id = student.id
+    else:
+        # If lecturer/admin creates, leader is the first member or error
+        if not req.member_student_ids:
+            raise HTTPException(status_code=400, detail="Daftar anggota kelompok wajib diisi")
+        leader_id = req.member_student_ids[0]
+
+    group = LMSRepository.create_assignment_group(
+        db,
+        assignment_id=assignment_id,
+        name=req.name,
+        leader_id=leader_id,
+        member_student_ids=req.member_student_ids,
+    )
+    audit(db, current.id, "CREATE_ASSIGNMENT_GROUP", "assignment_group", group.id, request=request)
+    return AssignmentGroupResponse(
+        id=group.id,
+        assignment_id=group.assignment_id,
+        name=group.name,
+        leader_id=group.leader_id,
+        member_student_ids=[m.student_id for m in group.members],
+        created_at=group.created_at,
+    )
+
+
+@router.get(
+    "/assignments/{assignment_id}/groups",
+    response_model=List[AssignmentGroupResponse],
+    summary="Daftar kelompok tugas",
+)
+def list_assignment_groups(
+    assignment_id: int,
+    current: CurrentUser,
+    db: DBSession,
+):
+    assignment = LMSRepository.get_assignment_by_id(db, assignment_id)
+    if not assignment:
+        raise HTTPException(status_code=404, detail="Tugas tidak ditemukan")
+    require_class_access(db, current, assignment.class_id)
+    groups = LMSRepository.list_assignment_groups(db, assignment_id)
+    return [
+        AssignmentGroupResponse(
+            id=g.id,
+            assignment_id=g.assignment_id,
+            name=g.name,
+            leader_id=g.leader_id,
+            member_student_ids=[m.student_id for m in g.members],
+            created_at=g.created_at,
+        )
+        for g in groups
+    ]
+
+
+@router.get(
+    "/assignments/{assignment_id}/unsubmitted",
+    summary="Daftar mahasiswa yang belum mengumpulkan tugas (Dosen)",
+)
+def list_unsubmitted_students(
+    assignment_id: int,
+    current: RequireLecturer,
+    db: DBSession,
+):
+    assignment = LMSRepository.get_assignment_by_id(db, assignment_id)
+    if not assignment:
+        raise HTTPException(status_code=404, detail="Tugas tidak ditemukan")
+    require_class_access(db, current, assignment.class_id)
+    return LMSService.get_unsubmitted_students(db, assignment_id)
 
 
 @router.get(
@@ -430,6 +558,7 @@ def grade_submission(
     req: GradeSubmissionRequest,
     current: RequireLecturer,
     db: DBSession,
+    request: Request,
 ):
     submission = db.get(AssignmentSubmission, submission_id)
     if not submission: raise HTTPException(status_code=404, detail="Pengumpulan tidak ditemukan")
@@ -442,7 +571,17 @@ def grade_submission(
         feedback=req.feedback,
         grader_user_id=current.id,
     )
-    audit(db, current.id, "CREATE_GRADE", "assignment_submission", submission_id, after={"score": req.score}); db.commit()
+    audit(
+        db,
+        current.id,
+        "CREATE_GRADE",
+        "assignment_submission",
+        submission_id,
+        after={"score": req.score},
+        reason=req.feedback,
+        request=request,
+    )
+    db.commit()
     return SubmissionResponse.model_validate(graded)
 
 
@@ -476,7 +615,7 @@ def list_student_submissions(
     summary="Buat kuis baru",
     description="Dosen membuat kuis dengan passing score dan max attempts.",
 )
-def create_quiz(req: QuizCreateRequest, current: RequireLecturer, db: DBSession):
+def create_quiz(req: QuizCreateRequest, current: RequireLecturer, db: DBSession, request: Request):
     require_class_access(db, current, req.class_id)
     from app.models.lms import Quiz
     quiz = Quiz(
@@ -494,7 +633,7 @@ def create_quiz(req: QuizCreateRequest, current: RequireLecturer, db: DBSession)
     db.add(quiz)
     db.commit()
     db.refresh(quiz)
-    audit(db, current.id, "CREATE_QUIZ", "quiz", quiz.id, after={"class_id": req.class_id})
+    audit(db, current.id, "CREATE_QUIZ", "quiz", quiz.id, after={"class_id": req.class_id}, request=request)
     db.commit()
     return QuizResponse.model_validate(quiz)
 
@@ -516,21 +655,84 @@ def get_quiz_detail(quiz_id: int, current: CurrentUser, db: DBSession):
     require_class_access(db, current, quiz.class_id)
     
     resp = QuizDetailResponse.model_validate(quiz)
-    if current.role in (UserRole.MAHASISWA, UserRole.KETUA_KELAS):
+    if current.role == UserRole.MAHASISWA:
         for q in resp.questions:
+            q.explanation = None
             for opt in q.options:
                 opt.is_correct = False
     return resp
 
 
+@router.post(
+    "/quizzes/{quiz_id}/start",
+    response_model=QuizSubmissionResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Mulai sesi kuis (Server-side timer)",
+)
+def start_quiz_session(
+    quiz_id: int,
+    current: CurrentUser,
+    db: DBSession,
+    request: Request,
+):
+    from app.models.lms import Quiz, QuizSubmission
+    student = StudentRepository.get_by_user_id(db, current.id)
+    if not student:
+        raise HTTPException(status_code=404, detail="Profil mahasiswa tidak ditemukan")
+    quiz = db.get(Quiz, quiz_id)
+    if not quiz:
+        raise HTTPException(status_code=404, detail="Kuis tidak ditemukan")
+    require_class_access(db, current, quiz.class_id)
+
+    now = datetime.now(timezone.utc)
+    if quiz.start_time:
+        st = quiz.start_time if quiz.start_time.tzinfo else quiz.start_time.replace(tzinfo=timezone.utc)
+        if now < st:
+            raise HTTPException(status_code=400, detail="Kuis belum dibuka")
+    if quiz.end_time:
+        et = quiz.end_time if quiz.end_time.tzinfo else quiz.end_time.replace(tzinfo=timezone.utc)
+        if now > et:
+            raise HTTPException(status_code=400, detail="Kuis sudah ditutup")
+
+    existing_attempts = db.query(QuizSubmission).filter(
+        QuizSubmission.quiz_id == quiz_id,
+        QuizSubmission.student_id == student.id,
+    ).count()
+    if existing_attempts >= quiz.max_attempts:
+        raise HTTPException(status_code=400, detail="Maksimal percobaan tercapai")
+
+    server_deadline = None
+    if quiz.time_limit_minutes:
+        server_deadline = now + timedelta(minutes=quiz.time_limit_minutes)
+        if quiz.end_time:
+            et = quiz.end_time if quiz.end_time.tzinfo else quiz.end_time.replace(tzinfo=timezone.utc)
+            if et < server_deadline:
+                server_deadline = et
+
+    submission = QuizSubmission(
+        quiz_id=quiz_id,
+        student_id=student.id,
+        attempt_number=existing_attempts + 1,
+        started_at=now,
+        server_deadline=server_deadline,
+        score=0.0,
+        passed=False,
+    )
+    db.add(submission)
+    db.commit()
+    db.refresh(submission)
+    audit(db, current.id, "START_QUIZ", "quiz_submission", submission.id, request=request)
+    return QuizSubmissionResponse.model_validate(submission)
+
+
 @router.delete("/quizzes/{quiz_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Hapus kuis (Dosen)")
-def delete_quiz(quiz_id: int, current: RequireLecturer, db: DBSession):
+def delete_quiz(quiz_id: int, current: RequireLecturer, db: DBSession, request: Request):
     from app.models.lms import Quiz
     quiz = db.get(Quiz, quiz_id)
     if not quiz:
         raise HTTPException(status_code=404, detail="Kuis tidak ditemukan")
     require_class_access(db, current, quiz.class_id)
-    audit(db, current.id, "DELETE_QUIZ", "quiz", quiz.id, before={"title": quiz.title})
+    audit(db, current.id, "DELETE_QUIZ", "quiz", quiz.id, before={"title": quiz.title}, request=request)
     db.delete(quiz)
     db.commit()
     return None
@@ -544,7 +746,7 @@ def list_quiz_submissions(quiz_id: int, current: CurrentUser, db: DBSession):
         raise HTTPException(status_code=404, detail="Kuis tidak ditemukan")
     require_class_access(db, current, quiz.class_id)
     query = db.query(QuizSubmission).filter(QuizSubmission.quiz_id == quiz_id)
-    if current.role in (UserRole.MAHASISWA, UserRole.KETUA_KELAS):
+    if current.role == UserRole.MAHASISWA:
         student = StudentRepository.get_by_user_id(db, current.id)
         if not student:
             return []
@@ -559,7 +761,7 @@ def list_quiz_submissions(quiz_id: int, current: CurrentUser, db: DBSession):
     status_code=status.HTTP_201_CREATED,
     summary="Tambah pertanyaan kuis",
 )
-def create_quiz_question(quiz_id: int, req: QuizQuestionCreateRequest, current: RequireLecturer, db: DBSession):
+def create_quiz_question(quiz_id: int, req: QuizQuestionCreateRequest, current: RequireLecturer, db: DBSession, request: Request):
     from app.models.lms import Quiz, QuizQuestion
     quiz = db.get(Quiz, quiz_id)
     if not quiz:
@@ -576,7 +778,7 @@ def create_quiz_question(quiz_id: int, req: QuizQuestionCreateRequest, current: 
     db.add(question)
     db.commit()
     db.refresh(question)
-    audit(db, current.id, "CREATE_QUIZ_QUESTION", "quiz_question", question.id, after={"quiz_id": quiz_id})
+    audit(db, current.id, "CREATE_QUIZ_QUESTION", "quiz_question", question.id, after={"quiz_id": quiz_id}, request=request)
     db.commit()
     return QuizQuestionResponse.model_validate(question)
 
@@ -612,7 +814,7 @@ def create_quiz_option(question_id: int, req: QuizOptionCreateRequest, current: 
     status_code=status.HTTP_201_CREATED,
     summary="Submit jawaban kuis (Mahasiswa)",
 )
-def submit_quiz(quiz_id: int, req: QuizSubmissionCreateRequest, current: CurrentUser, db: DBSession):
+def submit_quiz(quiz_id: int, req: QuizSubmissionCreateRequest, current: CurrentUser, db: DBSession, request: Request):
     from app.models.lms import Quiz, QuizSubmission, QuizAnswer, QuizQuestion, QuizOption
     student = StudentRepository.get_by_user_id(db, current.id)
     if not student:
@@ -622,24 +824,49 @@ def submit_quiz(quiz_id: int, req: QuizSubmissionCreateRequest, current: Current
         raise HTTPException(status_code=404, detail="Kuis tidak ditemukan")
     require_class_access(db, current, quiz.class_id)
     
-    # Check attempts
-    existing_attempts = db.query(QuizSubmission).filter(
+    # Check existing active or uncompleted attempt
+    active_sub = db.query(QuizSubmission).filter(
         QuizSubmission.quiz_id == quiz_id,
-        QuizSubmission.student_id == student.id
-    ).count()
-    if existing_attempts >= quiz.max_attempts:
-        raise HTTPException(status_code=400, detail="Maksimal percobaan tercapai")
-    
-    submission = QuizSubmission(
-        quiz_id=quiz_id,
-        student_id=student.id,
-        attempt_number=existing_attempts + 1,
-        score=0.0,
-        passed=False,
-    )
-    db.add(submission)
-    db.commit()
-    db.refresh(submission)
+        QuizSubmission.student_id == student.id,
+        QuizSubmission.submitted_at.is_(None),
+    ).order_by(QuizSubmission.id.desc()).first()
+
+    now = datetime.now(timezone.utc)
+    is_auto = False
+
+    if active_sub:
+        submission = active_sub
+        if submission.server_deadline:
+            dl = submission.server_deadline if submission.server_deadline.tzinfo else submission.server_deadline.replace(tzinfo=timezone.utc)
+            if now > dl + timedelta(seconds=30):
+                is_auto = True
+    else:
+        existing_attempts = db.query(QuizSubmission).filter(
+            QuizSubmission.quiz_id == quiz_id,
+            QuizSubmission.student_id == student.id
+        ).count()
+        if existing_attempts >= quiz.max_attempts:
+            raise HTTPException(status_code=400, detail="Maksimal percobaan tercapai")
+
+        server_deadline = None
+        if quiz.time_limit_minutes:
+            server_deadline = now + timedelta(minutes=quiz.time_limit_minutes)
+
+        submission = QuizSubmission(
+            quiz_id=quiz_id,
+            student_id=student.id,
+            attempt_number=existing_attempts + 1,
+            started_at=now,
+            server_deadline=server_deadline,
+            score=0.0,
+            passed=False,
+        )
+        db.add(submission)
+        db.commit()
+        db.refresh(submission)
+
+    submission.submitted_at = now
+    submission.is_auto_submitted = is_auto
     
     total_points = 0
     earned_points = 0
@@ -675,7 +902,7 @@ def submit_quiz(quiz_id: int, req: QuizSubmissionCreateRequest, current: Current
     db.commit()
     db.refresh(submission)
     
-    audit(db, current.id, "SUBMIT_QUIZ", "quiz_submission", submission.id, after={"score": submission.score})
+    audit(db, current.id, "SUBMIT_QUIZ", "quiz_submission", submission.id, after={"score": submission.score}, request=request)
     db.commit()
     return QuizSubmissionResponse.model_validate(submission)
 
@@ -785,16 +1012,94 @@ def get_class_grades(class_id: int, current: CurrentUser, db: DBSession):
 
 
 @router.get(
+    "/classes/{class_id}/grade-config",
+    response_model=ClassGradeConfigResponse,
+    summary="Konfigurasi bobot penilaian kelas",
+)
+def get_class_grade_config(class_id: int, current: CurrentUser, db: DBSession):
+    require_class_access(db, current, class_id)
+    config = GradingService.get_or_create_config(db, class_id)
+    return ClassGradeConfigResponse.model_validate(config)
+
+
+@router.put(
+    "/classes/{class_id}/grade-config",
+    response_model=ClassGradeConfigResponse,
+    summary="Ubah konfigurasi bobot penilaian kelas (Dosen/Admin)",
+)
+def update_class_grade_config(
+    class_id: int,
+    req: ClassGradeConfigRequest,
+    current: CurrentUser,
+    db: DBSession,
+    request: Request,
+):
+    require_class_access(db, current, class_id)
+    if current.role not in [UserRole.ADMIN, UserRole.DOSEN]:
+        raise HTTPException(status_code=403, detail="Hanya dosen dan admin yang dapat mengubah bobot nilai")
+
+    config = GradingService.update_config(
+        db,
+        class_id,
+        uts_weight=req.uts_weight,
+        uas_weight=req.uas_weight,
+        aktif_weight=req.aktif_weight,
+        tugas_weight=req.tugas_weight,
+        absen_weight=req.absen_weight,
+        default_aktif_score=req.default_aktif_score,
+    )
+    audit(db, current.id, "UPDATE_GRADE_CONFIG", "class_grade_config", config.id,
+          after={"uts": req.uts_weight, "uas": req.uas_weight, "aktif": req.aktif_weight, "tugas": req.tugas_weight, "absen": req.absen_weight},
+          request=request)
+    db.commit()
+    return ClassGradeConfigResponse.model_validate(config)
+
+
+@router.post(
+    "/classes/{class_id}/grades/publish",
+    response_model=ClassGradeConfigResponse,
+    summary="Publikasikan atau batalkan publikasi nilai kelas",
+)
+def publish_class_grades(
+    class_id: int,
+    req: GradePublishRequest,
+    current: CurrentUser,
+    db: DBSession,
+    request: Request,
+):
+    require_class_access(db, current, class_id)
+    if current.role not in [UserRole.ADMIN, UserRole.DOSEN]:
+        raise HTTPException(status_code=403, detail="Hanya dosen dan admin yang dapat mempublikasikan nilai")
+
+    config = GradingService.publish_class_grades(db, class_id, current.id, is_published=req.is_published)
+    action = "PUBLISH_GRADES" if req.is_published else "UNPUBLISH_GRADES"
+    audit(db, current.id, action, "course_class", class_id, after={"is_published": req.is_published}, request=request)
+    db.commit()
+    return ClassGradeConfigResponse.model_validate(config)
+
+
+@router.get(
     "/classes/{class_id}/students/{student_id}/grade",
     response_model=Optional[GradeResponse],
     summary="Nilai mahasiswa spesifik",
 )
 def get_student_grade(class_id: int, student_id: int, current: CurrentUser, db: DBSession):
     require_class_access(db, current, class_id)
+    if current.role == UserRole.MAHASISWA:
+        require_own_student_data(db, current, student_id)
+
     grade = GradingService.get_student_grade(db, class_id, student_id)
-    if grade:
-        return GradeResponse.model_validate(grade)
-    return None
+    if not grade:
+        return None
+
+    # BR-ROLE-008: Mahasiswa hanya boleh melihat nilai yang sudah dipublikasikan
+    if current.role == UserRole.MAHASISWA and not grade.is_published:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Nilai untuk mata kuliah ini belum dipublikasikan oleh dosen",
+        )
+
+    return GradeResponse.model_validate(grade)
 
 
 @router.put(
@@ -808,16 +1113,51 @@ def update_grade(
     req: GradeUpdateRequest,
     current: CurrentUser,
     db: DBSession,
+    request: Request,
 ):
     require_class_access(db, current, class_id)
     if current.role not in [UserRole.ADMIN, UserRole.DOSEN]:
         raise HTTPException(status_code=403, detail="Hanya dosen dan admin")
-    
+
     grade = GradingService.update_component_score(
         db, class_id, student_id, req.component, req.score, current.id
     )
-    audit(db, current.id, f"UPDATE_GRADE_{req.component.upper()}", "student_grade", grade.id, 
-          after={"component": req.component, "score": req.score})
+    audit(db, current.id, f"UPDATE_GRADE_{req.component.upper()}", "student_grade", grade.id,
+          after={"component": req.component, "score": req.score}, request=request)
+    db.commit()
+    return GradeResponse.model_validate(grade)
+
+
+@router.put(
+    "/classes/{class_id}/students/{student_id}/grade/revise",
+    response_model=GradeResponse,
+    summary="Revisi nilai setelah publikasi (Dosen/Admin dengan alasan)",
+)
+def revise_grade(
+    class_id: int,
+    student_id: int,
+    req: GradeRevisionRequest,
+    current: CurrentUser,
+    db: DBSession,
+    request: Request,
+):
+    require_class_access(db, current, class_id)
+    if current.role not in [UserRole.ADMIN, UserRole.DOSEN]:
+        raise HTTPException(status_code=403, detail="Hanya dosen dan admin")
+
+    grade = GradingService.update_component_score(
+        db, class_id, student_id, req.component, req.score, current.id, reason=req.reason
+    )
+    audit(
+        db,
+        current.id,
+        f"REVISE_GRADE_{req.component.upper()}",
+        "student_grade",
+        grade.id,
+        after={"component": req.component, "score": req.score},
+        reason=req.reason,
+        request=request,
+    )
     db.commit()
     return GradeResponse.model_validate(grade)
 
@@ -832,13 +1172,78 @@ def calculate_class_grades(
     req: GradeCalculateRequest,
     current: CurrentUser,
     db: DBSession,
+    request: Request,
 ):
     require_class_access(db, current, class_id)
     if current.role not in [UserRole.ADMIN, UserRole.DOSEN]:
         raise HTTPException(status_code=403, detail="Hanya dosen dan admin")
-    
+
     grades = GradingService.calculate_all_for_class(db, class_id, current.id)
     audit(db, current.id, "CALCULATE_CLASS_GRADES", "course_class", class_id,
-          after={"recalculate_attendance": req.recalculate_attendance})
+          after={"recalculate_attendance": req.recalculate_attendance}, request=request)
     db.commit()
     return [GradeResponse.model_validate(g) for g in grades]
+
+
+@router.get(
+    "/classes/{class_id}/grades/export",
+    summary="Ekspor rekapitulasi nilai kelas ke format CSV (Dosen/Admin/Kaprodi)",
+)
+def export_class_grades(
+    class_id: int,
+    current: CurrentUser,
+    db: DBSession,
+):
+    require_class_access(db, current, class_id)
+    if current.role not in [UserRole.ADMIN, UserRole.DOSEN, UserRole.KAPRODI]:
+        raise HTTPException(status_code=403, detail="Akses ditolak")
+
+    grades = GradingService.get_class_grades(db, class_id)
+    config = GradingService.get_or_create_config(db, class_id)
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow([
+        "ID Mahasiswa",
+        "NIM",
+        "Nama Mahasiswa",
+        f"Absensi ({int(config.absen_weight * 100)}%)",
+        f"Tugas ({int(config.tugas_weight * 100)}%)",
+        f"Aktivitas ({int(config.aktif_weight * 100)}%)",
+        "Label Aktivitas",
+        f"UTS ({int(config.uts_weight * 100)}%)",
+        f"UAS ({int(config.uas_weight * 100)}%)",
+        "Nilai Akhir",
+        "Huruf Mutu",
+        "Status Publikasi",
+    ])
+
+    for g in grades:
+        student = g.student
+        nim = student.nim if student else ""
+        name = student.user.full_name if student and student.user else ""
+        aktif_label = "DEFAULT (80)" if g.is_default_aktif else "INPUT DOSEN"
+        pub_status = "PUBLISHED" if g.is_published else "DRAFT"
+
+        writer.writerow([
+            g.student_id,
+            nim,
+            name,
+            f"{g.absen_score or 0:.1f}",
+            f"{g.tugas_score or 0:.1f}",
+            f"{g.aktif_score or 0:.1f}",
+            aktif_label,
+            f"{g.uts_score or 0:.1f}",
+            f"{g.uas_score or 0:.1f}",
+            f"{g.final_score or 0:.2f}",
+            g.grade_scale.value if g.grade_scale else "-",
+            pub_status,
+        ])
+
+    output.seek(0)
+    filename = f"rekap_nilai_kelas_{class_id}.csv"
+    return StreamingResponse(
+        iter([output.getvalue()]),
+        media_type="text/csv",
+        headers={"Content-Disposition": f"attachment; filename={filename}"},
+    )

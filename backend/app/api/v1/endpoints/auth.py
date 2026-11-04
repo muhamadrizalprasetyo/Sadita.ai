@@ -1,7 +1,8 @@
 from fastapi import APIRouter, HTTPException, status
 
-from app.core.deps import CurrentUser, DBSession
+from app.core.deps import CurrentUser, DBSession, RequireAdmin
 from app.core.security import hash_password, verify_password
+from app.models.user import UserRole
 from app.schemas.auth import LoginRequest, RefreshTokenRequest, RegisterRequest, TokenResponse
 from app.schemas.user import ChangePasswordRequest, UserResponse
 from app.services.auth_service import AuthService
@@ -24,10 +25,10 @@ def login(req: LoginRequest, db: DBSession) -> TokenResponse:
     "/register",
     response_model=UserResponse,
     status_code=status.HTTP_201_CREATED,
-    summary="Pendaftaran pengguna baru",
-    description="Mendaftarkan pengguna baru dengan profil mahasiswa atau dosen.",
+    summary="Pendaftaran pengguna baru (Admin only)",
+    description="Mendaftarkan pengguna baru dengan profil mahasiswa atau dosen. Hanya dapat diakses oleh Admin.",
 )
-def register(req: RegisterRequest, db: DBSession) -> UserResponse:
+def register(req: RegisterRequest, db: DBSession, admin: RequireAdmin) -> UserResponse:
     user = AuthService.register(db, req)
     return UserResponse.model_validate(user)
 
@@ -48,8 +49,19 @@ def refresh(req: RefreshTokenRequest, db: DBSession) -> TokenResponse:
     summary="Profil pengguna yang sedang login",
     description="Mengembalikan data akun, peran (role), dan profil akademik (mahasiswa/dosen).",
 )
-def get_me(current_user: CurrentUser) -> UserResponse:
-    return UserResponse.model_validate(current_user)
+def get_me(current_user: CurrentUser, db: DBSession) -> UserResponse:
+    res = UserResponse.model_validate(current_user)
+    if current_user.role == UserRole.MAHASISWA and current_user.student_profile:
+        from app.models.workflow import ClassLeaderAssignment
+        from sqlalchemy import select
+        assignment = db.scalar(
+            select(ClassLeaderAssignment).where(
+                ClassLeaderAssignment.student_id == current_user.student_profile.id,
+                ClassLeaderAssignment.is_active.is_(True),
+            )
+        )
+        res.is_class_leader = assignment is not None
+    return res
 
 
 @router.post(

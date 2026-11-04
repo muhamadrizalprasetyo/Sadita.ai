@@ -35,3 +35,19 @@ def test_student_cannot_read_device_inventory() -> None:
         headers={"Authorization": f"Bearer {response.json()['access_token']}"},
     )
     assert result.status_code == 403
+
+
+def test_admin_can_update_device_and_generates_audit_log() -> None:
+    headers = _admin_headers()
+    update_res = client.put(
+        "/api/v1/devices/SADITA-ESP32-LAB-01",
+        headers=headers,
+        json={"nama": "SADITA Terminal Lab IoT Updated", "keterangan": "Relocated for testing"},
+    )
+    assert update_res.status_code == 200
+    assert update_res.json()["nama"] == "SADITA Terminal Lab IoT Updated"
+
+    audit_res = client.get("/api/v1/audit-logs", headers=headers)
+    assert audit_res.status_code == 200
+    logs = audit_res.json()["items"]
+    assert any(log["action"] == "UPDATE_DEVICE" and log["entity"] == "device" for log in logs)

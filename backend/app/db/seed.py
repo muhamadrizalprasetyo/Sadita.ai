@@ -295,7 +295,7 @@ def seed_database():
                 email="ketua@mhs.unipi.ac.id",
                 password_hash=_HASH_KETUA,
                 full_name="Ketua Kelas (Dev Account)",
-                role=UserRole.KETUA_KELAS,
+                role=UserRole.MAHASISWA,
                 is_active=True,
             )
             db.add(ketua_user)

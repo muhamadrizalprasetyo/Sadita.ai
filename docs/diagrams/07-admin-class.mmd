@@ -1,0 +1,115 @@
+%% SADITA.ai — Class Diagram Admin Domain
+
+classDiagram
+    direction TB
+
+    class AdminController {
+        +manageUsers()
+        +manageAcademicData()
+        +manageDevices()
+        +viewDashboard()
+        +viewAuditLog()
+    }
+
+    class User {
+        +int id
+        +String email
+        +String password_hash
+        +String full_name
+        +UserRole role
+        +bool is_active
+        +datetime created_at
+        +datetime updated_at
+    }
+
+    class ProgramStudi {
+        +int id
+        +String kode
+        +String nama
+        +String jenjang
+        +bool is_active
+    }
+
+    class AcademicTerm {
+        +int id
+        +String nama
+        +bool is_active
+        +date tanggal_mulai
+        +date tanggal_selesai
+    }
+
+    class Course {
+        +int id
+        +int prodi_id
+        +String kode
+        +String nama
+        +int sks
+    }
+
+    class CourseClass {
+        +int id
+        +int course_id
+        +int term_id
+        +int lecturer_id
+        +int room_id
+        +String kode_kelas
+        +ClassType class_type
+    }
+
+    class ClassRoom {
+        +int id
+        +String kode
+        +String nama
+        +int kapasitas
+    }
+
+    class ClassEnrollment {
+        +int id
+        +int class_id
+        +int student_id
+        +EnrollmentStatus status
+    }
+
+    class SaditaDevice {
+        +int id
+        +String device_id
+        +String nama
+        +DeviceStatus status
+        +String firmware_version
+    }
+
+    class AuditLog {
+        +int id
+        +int actor_id
+        +String action
+        +String entity
+        +int entity_id
+        +dict before
+        +dict after
+        +datetime created_at
+    }
+
+    class ClassLeaderAssignment {
+        +int id
+        +int class_id
+        +int student_id
+        +int assigned_by
+        +bool is_active
+    }
+
+    AdminController --> User : CRUD
+    AdminController --> ProgramStudi : CRUD
+    AdminController --> AcademicTerm : CRUD
+    AdminController --> Course : CRUD
+    AdminController --> CourseClass : CRUD
+    AdminController --> ClassRoom : CRUD
+    AdminController --> ClassEnrollment : CRUD
+    AdminController --> SaditaDevice : CRUD
+    AdminController --> AuditLog : Read
+    AdminController --> ClassLeaderAssignment : Create/Update
+
+    ProgramStudi "1" --> "*" Course : contains
+    Course "1" --> "*" CourseClass : offers
+    AcademicTerm "1" --> "*" CourseClass : contains
+    ClassRoom "1" --> "*" SaditaDevice : hosts
+    CourseClass "1" --> "*" ClassEnrollment : has

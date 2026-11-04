@@ -1,0 +1,393 @@
+%% SADITA.ai — Class Diagram Global
+%% Seluruh 30+ entitas dengan relasinya
+
+classDiagram
+    direction TB
+
+    class User {
+        +int id
+        +String email
+        +String password_hash
+        +String full_name
+        +UserRole role
+        +bool is_active
+        +datetime created_at
+        +datetime updated_at
+    }
+
+    class UserRole {
+        &lt;&lt;enumeration&gt;&gt;
+        ADMIN
+        KAPRODI
+        DOSEN
+        KETUA_KELAS
+        MAHASISWA
+    }
+
+    class ProgramStudi {
+        +int id
+        +String kode
+        +String nama
+        +String jenjang
+        +bool is_active
+        +String deskripsi
+    }
+
+    class StudentProfile {
+        +int id
+        +int user_id
+        +int prodi_id
+        +String nim
+        +int angkatan
+        +int academic_cohort
+        +ClassType class_type
+        +KtmStatus ktm_status
+        +String phone
+        +bool is_active
+        +full_name() String
+        +active_rfid() RfidCredential
+        +active_fingerprint() FingerprintCredential
+    }
+
+    class LecturerProfile {
+        +int id
+        +int user_id
+        +int prodi_id
+        +String nidn
+        +String gelar_depan
+        +String gelar_belakang
+        +String phone
+        +bool is_active
+        +full_name() String
+    }
+
+    class AcademicTerm {
+        +int id
+        +String nama
+        +bool is_active
+        +date tanggal_mulai
+        +date tanggal_selesai
+    }
+
+    class Course {
+        +int id
+        +int prodi_id
+        +String kode
+        +String nama
+        +int sks
+        +int semester_ke
+        +String deskripsi
+        +bool is_active
+    }
+
+    class ClassRoom {
+        +int id
+        +String kode
+        +String nama
+        +int kapasitas
+        +String gedung
+        +int lantai
+        +bool is_active
+    }
+
+    class CourseClass {
+        +int id
+        +int course_id
+        +int term_id
+        +int lecturer_id
+        +int room_id
+        +String kode_kelas
+        +ClassType class_type
+        +int hari
+        +time jam_mulai
+        +time jam_selesai
+        +int batas_terlambat_menit
+        +int total_pertemuan
+        +bool is_active
+    }
+
+    class ClassEnrollment {
+        +int id
+        +int class_id
+        +int student_id
+        +EnrollmentStatus status
+        +EnrollmentType enrollment_type
+        +datetime enrolled_at
+    }
+
+    class CourseChapter {
+        +int id
+        +int class_id
+        +String title
+        +String description
+        +int chapter_number
+        +bool is_published
+    }
+
+    class CourseLesson {
+        +int id
+        +int chapter_id
+        +int class_id
+        +int session_id
+        +String title
+        +LessonType lesson_type
+        +int lesson_number
+        +String content
+        +bool is_published
+    }
+
+    class CourseMaterial {
+        +int id
+        +int lesson_id
+        +int class_id
+        +String title
+        +MaterialType material_type
+        +String resource_url
+        +String content
+    }
+
+    class Assignment {
+        +int id
+        +int lesson_id
+        +int class_id
+        +String title
+        +String description
+        +datetime due_date
+        +float max_score
+        +bool allow_late
+        +bool is_published
+    }
+
+    class AssignmentSubmission {
+        +int id
+        +int assignment_id
+        +int student_id
+        +String file_url
+        +String content
+        +SubmissionStatus status
+        +float score
+        +String feedback
+        +int graded_by
+    }
+
+    class Quiz {
+        +int id
+        +int lesson_id
+        +int class_id
+        +String title
+        +float passing_score
+        +int max_attempts
+        +int time_limit_minutes
+        +bool shuffle_questions
+        +bool is_published
+    }
+
+    class QuizQuestion {
+        +int id
+        +int quiz_id
+        +String question_text
+        +QuizQuestionType question_type
+        +float points
+        +int question_number
+    }
+
+    class QuizOption {
+        +int id
+        +int question_id
+        +String option_text
+        +bool is_correct
+        +int option_number
+    }
+
+    class QuizSubmission {
+        +int id
+        +int quiz_id
+        +int student_id
+        +int attempt_number
+        +float score
+        +bool passed
+        +datetime started_at
+        +datetime submitted_at
+    }
+
+    class QuizAnswer {
+        +int id
+        +int submission_id
+        +int question_id
+        +int selected_option_id
+        +String text_answer
+        +bool is_correct
+        +float points_earned
+    }
+
+    class StudentGrade {
+        +int id
+        +int class_id
+        +int student_id
+        +float uts_score
+        +float uas_score
+        +float aktif_score
+        +float tugas_score
+        +float absen_score
+        +float final_score
+        +GradeScale grade_scale
+        +calculate_final_score() float
+        +determine_grade_scale() GradeScale
+    }
+
+    class AttendanceSession {
+        +int id
+        +int class_id
+        +int pertemuan_ke
+        +date tanggal
+        +String topik
+        +SessionStatus status
+        +datetime dibuka_pada
+        +datetime ditutup_pada
+    }
+
+    class AttendanceRecord {
+        +int id
+        +int session_id
+        +int student_id
+        +AttendanceStatus status
+        +AttendanceMethod method
+        +datetime check_in_time
+        +String catatan
+    }
+
+    class AttendanceEvent {
+        +int id
+        +String device_id
+        +int session_id
+        +int student_id
+        +AttendanceEventType event_type
+        +String rfid_uid
+        +int fingerprint_slot
+        +String event_uuid
+        +bool berhasil
+        +String pesan
+    }
+
+    class SaditaDevice {
+        +int id
+        +String device_id
+        +String nama
+        +int room_id
+        +DeviceStatus status
+        +String firmware_version
+        +String mac_address
+        +datetime last_seen_at
+    }
+
+    class RfidCredential {
+        +int id
+        +int student_id
+        +String uid
+        +bool is_active
+        +datetime registered_at
+    }
+
+    class FingerprintCredential {
+        +int id
+        +int student_id
+        +String device_id
+        +int template_slot
+        +String finger_label
+        +bool is_active
+    }
+
+    class ClassLeaderAssignment {
+        +int id
+        +int class_id
+        +int student_id
+        +int assigned_by
+        +bool is_active
+    }
+
+    class KrsRequest {
+        +int id
+        +int student_id
+        +int class_id
+        +KrsRequestType request_type
+        +KrsRequestStatus status
+        +String alasan
+    }
+
+    class AttendanceRequest {
+        +int id
+        +int session_id
+        +int student_id
+        +AttendanceRequestStatus status
+    }
+
+    class AuditLog {
+        +int id
+        +int actor_id
+        +String action
+        +String entity
+        +int entity_id
+        +dict before
+        +dict after
+    }
+
+    class LessonProgress {
+        +int id
+        +int lesson_id
+        +int student_id
+        +bool is_completed
+        +float progress_percentage
+    }
+
+    class CourseProgress {
+        +int id
+        +int class_id
+        +int student_id
+        +int total_lessons
+        +int completed_lessons
+        +float progress_percentage
+    }
+
+    %% Relationships
+    User "1" --> "1" UserRole : has
+    User "1" --> "0..1" StudentProfile : has
+    User "1" --> "0..1" LecturerProfile : has
+
+    ProgramStudi "1" --> "*" Course : has
+    ProgramStudi "1" --> "*" StudentProfile : has
+    ProgramStudi "1" --> "*" LecturerProfile : has
+
+    Course "1" --> "*" CourseClass : offers
+    AcademicTerm "1" --> "*" CourseClass : contains
+    LecturerProfile "1" --> "*" CourseClass : teaches
+    ClassRoom "1" --> "*" CourseClass : hosts
+    ClassRoom "1" --> "*" SaditaDevice : has
+
+    CourseClass "1" --> "*" ClassEnrollment : has
+    CourseClass "1" --> "*" AttendanceSession : has
+    CourseClass "1" --> "*" CourseChapter : has
+    StudentProfile "1" --> "*" ClassEnrollment : enrolls
+
+    CourseChapter "1" --> "*" CourseLesson : contains
+    CourseLesson "1" --> "*" CourseMaterial : has
+    CourseClass "1" --> "*" Assignment : has
+    Assignment "1" --> "*" AssignmentSubmission : has
+    StudentProfile "1" --> "*" AssignmentSubmission : submits
+
+    CourseClass "1" --> "*" Quiz : has
+    Quiz "1" --> "*" QuizQuestion : has
+    QuizQuestion "1" --> "*" QuizOption : has
+    Quiz "1" --> "*" QuizSubmission : has
+    QuizSubmission "1" --> "*" QuizAnswer : has
+
+    AttendanceSession "1" --> "*" AttendanceRecord : has
+    AttendanceSession "1" --> "*" AttendanceEvent : logs
+    StudentProfile "1" --> "*" AttendanceRecord : has
+    SaditaDevice "1" --> "*" AttendanceEvent : generates
+
+    StudentProfile "1" --> "*" RfidCredential : has
+    StudentProfile "1" --> "*" FingerprintCredential : has
+    StudentProfile "1" --> "*" KrsRequest : submits
+
+    CourseClass "1" --> "0..1" ClassLeaderAssignment : has
+    CourseClass "1" --> "*" StudentGrade : has

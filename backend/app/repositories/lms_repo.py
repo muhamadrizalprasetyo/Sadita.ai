@@ -12,6 +12,8 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.models.lms import (
     Assignment,
+    AssignmentGroup,
+    AssignmentGroupMember,
     AssignmentSubmission,
     CourseMaterial,
     MaterialType,
@@ -36,6 +38,7 @@ class LMSRepository:
         description: Optional[str] = None,
         resource_url: Optional[str] = None,
         content: Optional[str] = None,
+        available_from: Optional[datetime] = None,
     ) -> CourseMaterial:
         material = CourseMaterial(
             class_id=class_id,
@@ -45,6 +48,7 @@ class LMSRepository:
             description=description.strip() if description else None,
             resource_url=resource_url.strip() if resource_url else None,
             content=content,
+            available_from=available_from,
         )
         db.add(material)
         db.commit()
@@ -106,6 +110,9 @@ class LMSRepository:
         max_score: float = 100.0,
         allow_late: bool = True,
         is_published: bool = True,
+        is_group: bool = False,
+        group_size: int = 1,
+        start_date: Optional[datetime] = None,
     ) -> Assignment:
         assignment = Assignment(
             class_id=class_id,
@@ -116,6 +123,9 @@ class LMSRepository:
             max_score=max_score,
             allow_late=allow_late,
             is_published=is_published,
+            is_group=is_group,
+            group_size=group_size,
+            start_date=start_date,
         )
         db.add(assignment)
         db.commit()
@@ -177,6 +187,7 @@ class LMSRepository:
         file_url: Optional[str] = None,
         content: Optional[str] = None,
         submitted_at: Optional[datetime] = None,
+        group_id: Optional[int] = None,
     ) -> AssignmentSubmission:
         sub = db.scalar(
             select(AssignmentSubmission).where(
@@ -190,6 +201,8 @@ class LMSRepository:
             sub.content = content
             sub.submitted_at = now
             sub.status = status
+            if group_id is not None:
+                sub.group_id = group_id
         else:
             sub = AssignmentSubmission(
                 assignment_id=assignment_id,
@@ -198,6 +211,7 @@ class LMSRepository:
                 content=content,
                 submitted_at=now,
                 status=status,
+                group_id=group_id,
             )
             db.add(sub)
         db.commit()
@@ -278,3 +292,61 @@ class LMSRepository:
         if class_id:
             stmt = stmt.join(Assignment).where(Assignment.class_id == class_id)
         return list(db.scalars(stmt).unique().all())
+
+    # ------------------------------------------------------------------
+    # Assignment Groups
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def create_assignment_group(
+        db: Session,
+        *,
+        assignment_id: int,
+        name: str,
+        leader_id: int,
+        member_student_ids: List[int],
+    ) -> AssignmentGroup:
+        group = AssignmentGroup(
+            assignment_id=assignment_id,
+            name=name.strip(),
+            leader_id=leader_id,
+        )
+        db.add(group)
+        db.flush()
+
+        # Add leader to members if not present
+        all_members = set(member_student_ids)
+        all_members.add(leader_id)
+
+        for s_id in all_members:
+            db.add(AssignmentGroupMember(group_id=group.id, student_id=s_id))
+
+        db.commit()
+        db.refresh(group)
+        return group
+
+    @staticmethod
+    def list_assignment_groups(db: Session, assignment_id: int) -> List[AssignmentGroup]:
+        return list(
+            db.scalars(
+                select(AssignmentGroup)
+                .options(
+                    joinedload(AssignmentGroup.leader),
+                    joinedload(AssignmentGroup.members),
+                )
+                .where(AssignmentGroup.assignment_id == assignment_id)
+            ).unique().all()
+        )
+
+    @staticmethod
+    def get_student_assignment_group(
+        db: Session, assignment_id: int, student_id: int
+    ) -> Optional[AssignmentGroup]:
+        return db.scalar(
+            select(AssignmentGroup)
+            .join(AssignmentGroupMember, AssignmentGroup.id == AssignmentGroupMember.group_id)
+            .where(
+                AssignmentGroup.assignment_id == assignment_id,
+                AssignmentGroupMember.student_id == student_id,
+            )
+        )

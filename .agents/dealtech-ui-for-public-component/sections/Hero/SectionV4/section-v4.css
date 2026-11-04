@@ -1,0 +1,348 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+.hero-v4 {
+  --hero-v4-primary: #01498b;
+  --hero-v4-primary-dark: #013a6f;
+  --hero-v4-primary-soft: rgba(1, 73, 139, 0.08);
+  --hero-v4-ink: #111111;
+  --hero-v4-muted: #4b5563;
+
+  box-sizing: border-box;
+  width: 100%;
+  background: #ffffff;
+  font-family: 'Inter', sans-serif;
+}
+
+.hero-v4 *,
+.hero-v4 *::before,
+.hero-v4 *::after {
+  box-sizing: border-box;
+}
+
+.hero-v4__shell {
+  width: min(1160px, calc(100% - 44px));
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  align-items: center;
+  gap: clamp(36px, 5vw, 72px);
+  padding: 45px 0;
+}
+
+.hero-v4__content {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.hero-v4__eyebrow {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 12px;
+  padding: 5px 13px;
+  border-radius: 999px;
+  background: var(--hero-v4-primary-soft);
+  color: var(--hero-v4-primary);
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.hero-v4__title {
+  margin: 0;
+  color: var(--hero-v4-ink);
+  font-size: clamp(1.5rem, 3.1vw, 2.25rem);
+  line-height: 1.24;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+}
+
+.hero-v4__title-accent {
+  color: #ffffff;
+  background: var(--hero-v4-primary);
+  padding: 2px 10px;
+  border-radius: 6px;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+.hero-v4__description {
+  margin: 16px 0 0;
+  max-width: 620px;
+  color: var(--hero-v4-muted);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+}
+
+.hero-v4__actions {
+  margin-top: 26px;
+}
+
+.hero-v4__button {
+  min-width: 240px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 50px;
+  border: 1px solid var(--hero-v4-primary);
+  border-radius: 999px;
+  padding: 0 24px;
+  background: var(--hero-v4-primary);
+  color: #ffffff;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.hero-v4__button:hover {
+  border-color: var(--hero-v4-primary-dark);
+  background: var(--hero-v4-primary-dark);
+  transform: translateY(-1px);
+}
+
+.hero-v4__stats {
+  position: relative;
+  min-width: 0;
+  height: clamp(350px, 36vw, 430px);
+  overflow: hidden;
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(1, 73, 139, 0.2), transparent 38%),
+    linear-gradient(135deg, #eef7ff 0%, #f5f9fd 52%, #eaf4fc 100%);
+}
+
+.hero-v4__stats::before,
+.hero-v4__stats::after {
+  position: absolute;
+  content: '';
+  border: 1px solid rgba(1, 73, 139, 0.12);
+  border-radius: 50%;
+}
+
+.hero-v4__stats::before {
+  width: 270px;
+  height: 270px;
+  top: -140px;
+  right: -60px;
+}
+
+.hero-v4__stats::after {
+  width: 360px;
+  height: 360px;
+  top: -185px;
+  right: -105px;
+}
+
+.hero-v4__stats-copy {
+  position: absolute;
+  top: 54px;
+  left: 34px;
+  z-index: 1;
+  width: 46%;
+  color: #14152f;
+}
+
+.hero-v4__stats-copy strong,
+.hero-v4__stats-copy span {
+  display: block;
+  font-size: clamp(1.45rem, 2.5vw, 2.15rem);
+  line-height: 1.1;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+.hero-v4__stats-copy p {
+  margin: 5px 0 0;
+  color: #646782;
+  font-size: 0.8rem;
+  line-height: 1.55;
+}
+
+.hero-v4__stat {
+  position: absolute;
+  z-index: 2;
+  width: 112px;
+  min-height: 112px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border: 1px solid rgba(104, 91, 180, 0.1);
+  border-radius: 14px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 16px 40px rgba(1, 58, 111, 0.1);
+  backdrop-filter: blur(8px);
+}
+
+.hero-v4__stat strong {
+  color: var(--hero-v4-primary);
+  font-size: 1.35rem;
+  line-height: 1;
+  font-weight: 800;
+}
+
+.hero-v4__stat span {
+  margin-top: 4px;
+  color: #555872;
+  font-size: 0.7rem;
+  line-height: 1.35;
+  font-weight: 600;
+}
+
+.hero-v4__stat--retention {
+  left: 40%;
+  bottom: 30px;
+}
+
+.hero-v4__stat--teams {
+  top: 42%;
+  left: 62%;
+  transform: translateY(-50%);
+}
+
+.hero-v4__stat--teams,
+.hero-v4__stat--uptime {
+  border-color: var(--hero-v4-primary);
+  background: var(--hero-v4-primary);
+}
+
+.hero-v4__stat--teams strong,
+.hero-v4__stat--teams span,
+.hero-v4__stat--uptime strong,
+.hero-v4__stat--uptime span {
+  color: #ffffff;
+}
+
+.hero-v4__stat--users {
+  top: 30px;
+  right: 24px;
+}
+
+.hero-v4__stat--uptime {
+  right: 24px;
+  bottom: 30px;
+}
+
+.hero-v4__hidden {
+  opacity: 0;
+}
+
+.hero-v4__reveal {
+  will-change: opacity;
+}
+
+.hero-v4__visible {
+  animation: heroV4FadeIn 0.5s ease forwards;
+}
+
+@keyframes heroV4FadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 900px) {
+  .hero-v4__shell {
+    grid-template-columns: 1fr;
+    gap: 36px;
+    padding: 45px 0;
+  }
+
+  .hero-v4__title {
+    max-width: 720px;
+  }
+
+  .hero-v4__stats {
+    width: 100%;
+    height: 410px;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero-v4__shell {
+    width: min(calc(100% - 36px), 1160px);
+    padding: 36px 0 32px;
+  }
+
+  .hero-v4__actions,
+  .hero-v4__button {
+    width: 100%;
+  }
+
+  .hero-v4__button {
+    min-width: 0;
+  }
+
+  .hero-v4__stats {
+    height: 390px;
+    border-radius: 18px;
+  }
+
+  .hero-v4__stats-copy {
+    top: 30px;
+    left: 24px;
+  }
+
+  .hero-v4__stats-copy p {
+    display: none;
+  }
+
+  .hero-v4__stats-copy strong,
+  .hero-v4__stats-copy span,
+  .hero-v4__stat strong {
+    font-weight: 700;
+  }
+
+  .hero-v4__stat {
+    width: 100px;
+    min-height: 100px;
+    padding: 13px;
+  }
+
+  .hero-v4__stat--retention {
+    left: 24px;
+    bottom: 24px;
+  }
+
+  .hero-v4__stat--teams {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .hero-v4__stat--users {
+    top: 24px;
+    right: 20px;
+  }
+
+  .hero-v4__stat--uptime {
+    right: 20px;
+    bottom: 24px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-v4__visible {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero-v4__shell {
+    padding-block: 36px 32px;
+    padding-inline: 2px;
+  }
+}

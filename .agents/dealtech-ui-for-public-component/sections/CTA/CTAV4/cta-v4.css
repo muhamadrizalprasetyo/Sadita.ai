@@ -1,0 +1,355 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+.cta-v4 {
+  --cta-v4-primary: #01498b;
+  --cta-v4-primary-dark: #013a6f;
+
+  box-sizing: border-box;
+  width: 100%;
+  padding: 0;
+  background: #ffffff;
+  font-family: 'Inter', sans-serif;
+}
+
+.cta-v4 *,
+.cta-v4 *::before,
+.cta-v4 *::after {
+  box-sizing: border-box;
+}
+
+.cta-v4__eyebrow {
+  text-decoration: none;
+  width: max-content;
+  display: flex;
+  align-items: center;
+  margin: 0 0 12px;
+  padding: 5px 13px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  font-size: 0.75rem;
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.cta-v4__surface {
+  position: relative;
+  width: 100%;
+  margin: 0 auto;
+  overflow: hidden;
+  border-radius: 44px;
+  background: var(--cta-v4-primary);
+  box-shadow:
+    0 12px 0 rgba(1, 73, 139, 0.1),
+    0 -12px 0 rgba(1, 73, 139, 0.1);
+}
+
+.cta-v4__surface::before {
+  position: absolute;
+  inset: 0;
+  content: '';
+  background:
+    radial-gradient(circle at 82% 22%, rgba(255, 255, 255, 0.14), transparent 24%),
+    radial-gradient(circle at 70% 92%, rgba(0, 28, 55, 0.24), transparent 32%);
+  pointer-events: none;
+}
+
+.cta-v4__shell {
+  position: relative;
+  z-index: 1;
+  width: min(1160px, calc(100% - 44px));
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(340px, 0.75fr);
+  align-items: center;
+  gap: clamp(34px, 5vw, 70px);
+  padding: 45px 0;
+}
+
+.cta-v4__content {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.cta-v4__title {
+  max-width: 670px;
+  margin: 0;
+  color: #ffffff;
+  font-size: clamp(1.5rem, 3.1vw, 2rem);
+  line-height: 1.28;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.cta-v4__title-accent {
+  padding: 2px 10px;
+  border-radius: 6px;
+  background: #ffffff;
+  color: var(--cta-v4-primary);
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+.cta-v4__description {
+  max-width: 620px;
+  margin: 9px 0 0;
+  color: rgba(255, 255, 255, 0.76);
+  font-size: 0.9375rem;
+  line-height: 1.6;
+}
+
+.cta-v4__actions {
+  margin-top: 26px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.cta-v4__button {
+  min-width: 210px;
+  height: 50px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 24px;
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.cta-v4__button:hover {
+  transform: translateY(-1px);
+}
+
+.cta-v4__button--primary {
+  border: 1px solid #ffffff;
+  background: #ffffff;
+  color: var(--cta-v4-primary);
+}
+
+.cta-v4__button--primary:hover {
+  background: #eef7ff;
+}
+
+.cta-v4__button--secondary {
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  background: transparent;
+  color: #ffffff;
+}
+
+.cta-v4__button--secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.cta-v4__visual {
+  position: relative;
+  min-width: 0;
+  min-height: 270px;
+}
+
+.cta-v4__stat {
+  position: absolute;
+  width: 132px;
+  min-height: 108px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 15px;
+  border: 1px solid rgba(1, 73, 139, 0.12);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 18px 42px rgba(0, 28, 55, 0.1);
+  backdrop-filter: blur(8px);
+}
+
+.cta-v4__stat strong {
+  color: var(--cta-v4-primary);
+  font-size: 1.4rem;
+  line-height: 1;
+  font-weight: 700;
+}
+
+.cta-v4__stat span {
+  margin-top: 5px;
+  color: #53697c;
+  font-size: 0.72rem;
+  line-height: 1.35;
+  font-weight: 600;
+}
+
+.cta-v4__stat--retention {
+  top: 12px;
+  left: 4px;
+}
+
+.cta-v4__stat--components {
+  top: 132px;
+  left: 114px;
+}
+
+.cta-v4__stat--users {
+  top: 0;
+  right: 0;
+}
+
+.cta-v4__stat--uptime {
+  right: 18px;
+  bottom: 0;
+}
+
+.cta-v4__stat--components,
+.cta-v4__stat--uptime {
+  border-color: rgba(255, 255, 255, 0.22);
+  background: #0f2f4d;
+}
+
+.cta-v4__stat--components strong,
+.cta-v4__stat--components span,
+.cta-v4__stat--uptime strong,
+.cta-v4__stat--uptime span {
+  color: #ffffff;
+}
+
+.cta-v4__hidden {
+  opacity: 0;
+}
+
+.cta-v4__reveal {
+  will-change: opacity;
+}
+
+.cta-v4__visible {
+  animation: ctaV4FadeIn 0.5s ease forwards;
+}
+
+.cta-v4__visual.cta-v4__visible {
+  animation-name: ctaV4StatsIn;
+}
+
+@keyframes ctaV4FadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes ctaV4StatsIn {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 900px) {
+  .cta-v4__surface {
+    border-radius: 34px;
+  }
+
+  .cta-v4__shell {
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 0.7fr);
+    gap: 24px;
+  }
+
+  .cta-v4__stat {
+    width: 118px;
+    min-height: 100px;
+    padding: 13px;
+  }
+
+  .cta-v4__stat--components {
+    left: 92px;
+  }
+}
+
+@media (max-width: 700px) {
+  .cta-v4__surface {
+    border-radius: 26px;
+    box-shadow:
+      0 8px 0 rgba(1, 73, 139, 0.1),
+      0 -8px 0 rgba(1, 73, 139, 0.1);
+  }
+
+  .cta-v4__shell {
+    width: min(calc(100% - 36px), 1160px);
+    grid-template-columns: 1fr;
+    gap: 30px;
+    padding: 45px 0;
+  }
+
+  .cta-v4__content {
+    align-items: center;
+    text-align: center;
+  }
+
+  .cta-v4__visual {
+    width: min(100%, 360px);
+    min-height: 280px;
+    margin: 0 auto;
+  }
+
+  .cta-v4__actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .cta-v4__button {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 420px) {
+  .cta-v4__stat {
+    width: 108px;
+    min-height: 94px;
+    padding: 12px;
+  }
+
+  .cta-v4__stat--retention {
+    left: 0;
+  }
+
+  .cta-v4__stat--components {
+    left: calc(50% - 54px);
+  }
+
+  .cta-v4__stat--users {
+    right: 0;
+  }
+
+  .cta-v4__stat--uptime {
+    right: 8px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cta-v4__visible {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+@media (max-width: 640px) {
+  .cta-v4__shell {
+    padding-block: 36px 32px;
+    padding-inline: 2px;
+  }
+}

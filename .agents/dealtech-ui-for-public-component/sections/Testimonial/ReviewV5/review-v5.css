@@ -1,0 +1,246 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+.review-v5 {
+  --review-v5-primary: #01498b;
+  --review-v5-ink: #111111;
+  --review-v5-muted: #4b5563;
+
+  box-sizing: border-box;
+  width: 100%;
+  padding: 45px 0;
+  overflow: hidden;
+  background: #ffffff;
+  font-family: 'Inter', sans-serif;
+  opacity: 0;
+  will-change: opacity, transform;
+}
+
+.review-v5 *,
+.review-v5 *::before,
+.review-v5 *::after {
+  box-sizing: border-box;
+}
+
+.review-v5__eyebrow {
+  text-decoration: none;
+  width: max-content;
+  display: flex;
+  align-items: center;
+  margin: 0 auto 12px;
+  padding: 5px 13px;
+  border: 1px solid rgba(1, 73, 139, 0.14);
+  border-radius: 999px;
+  background: rgba(1, 73, 139, 0.08);
+  color: var(--review-v5-primary);
+  font-size: 0.75rem;
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.review-v5--visible {
+  animation: reviewV5FadeIn 0.5s ease forwards;
+}
+
+@keyframes reviewV5FadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.review-v5__shell {
+  width: min(1040px, calc(100% - 44px));
+  margin: 0 auto;
+}
+
+.review-v5__header {
+  max-width: 650px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.review-v5__header h2 {
+  margin: 0;
+  color: var(--review-v5-ink);
+  font-size: clamp(1.5rem, 3.1vw, 2rem);
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+}
+
+.review-v5__header h2 span {
+  display: block;
+  color: var(--review-v5-primary);
+}
+
+.review-v5__header p {
+  max-width: 520px;
+  margin: 12px auto 0;
+  color: var(--review-v5-muted);
+  font-size: 0.875rem;
+  line-height: 1.65;
+}
+
+.review-v5__masonry {
+  margin-top: clamp(30px, 4vw, 46px);
+  columns: 3;
+  column-gap: 12px;
+}
+
+.review-v5__card {
+  width: 100%;
+  display: inline-block;
+  break-inside: avoid;
+  margin: 0 0 12px;
+  padding: 18px;
+  border: 1px solid #dfe6ee;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.review-v5__author {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.review-v5__avatar {
+  flex: 0 0 auto;
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--review-v5-primary);
+  color: #ffffff;
+  font-size: 0.625rem;
+  font-weight: 700;
+}
+
+.review-v5__avatar--2 {
+  background: #1261a6;
+}
+
+.review-v5__avatar--3 {
+  background: #2574b8;
+}
+
+.review-v5__identity {
+  min-width: 0;
+  flex: 1;
+}
+
+.review-v5__identity strong,
+.review-v5__identity small {
+  display: block;
+}
+
+.review-v5__identity strong {
+  overflow: hidden;
+  color: var(--review-v5-ink);
+  font-size: 0.8125rem;
+  line-height: 1.3;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.review-v5__identity small {
+  margin-top: 2px;
+  overflow: hidden;
+  color: var(--review-v5-muted);
+  font-size: 0.625rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.review-v5__platform {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #e7f2ff;
+  color: var(--review-v5-primary);
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.review-v5__card > p {
+  margin: 16px 0;
+  color: var(--review-v5-muted);
+  font-size: 0.875rem;
+  line-height: 1.65;
+}
+
+.review-v5__meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--review-v5-muted);
+  font-size: 0.6rem;
+}
+
+.review-v5__meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.review-v5__meta span svg {
+  color: var(--review-v5-primary);
+}
+
+.review-v5__meta time {
+  margin-left: auto;
+}
+
+@media (max-width: 780px) {
+  .review-v5__masonry {
+    columns: 2;
+  }
+}
+
+@media (max-width: 520px) {
+  .review-v5 {
+    padding: 36px 0 32px;
+  }
+
+  .review-v5__shell {
+    width: min(100% - 28px, 1040px);
+  }
+
+  .review-v5__header h2 {
+    font-size: 1.5rem;
+  }
+
+  .review-v5__masonry {
+    columns: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .review-v5 {
+    opacity: 1;
+    transform: none;
+  }
+
+  .review-v5--visible {
+    animation: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .review-v5 {
+    padding-block: 36px 32px;
+    padding-inline: 2px;
+  }
+}

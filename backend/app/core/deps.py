@@ -100,8 +100,8 @@ RequireAdmin = Annotated[User, Depends(require_roles(UserRole.ADMIN))]
 RequireLecturer = Annotated[User, Depends(require_roles(UserRole.ADMIN, UserRole.DOSEN))]
 RequireStudent = Annotated[User, Depends(require_roles(UserRole.ADMIN, UserRole.MAHASISWA))]
 RequireKaprodi = Annotated[User, Depends(require_roles(UserRole.ADMIN, UserRole.KAPRODI))]
-RequireAcademicStaff = Annotated[User, Depends(require_roles(UserRole.ADMIN, UserRole.KAPRODI, UserRole.DOSEN, UserRole.KETUA_KELAS))]
-RequireKetuaKelas = Annotated[User, Depends(require_roles(UserRole.ADMIN, UserRole.KETUA_KELAS, UserRole.MAHASISWA))]
+RequireAcademicStaff = Annotated[User, Depends(require_roles(UserRole.ADMIN, UserRole.KAPRODI, UserRole.DOSEN))]
+RequireKetuaKelas = Annotated[User, Depends(require_roles(UserRole.ADMIN, UserRole.MAHASISWA))]
 RequireAny = Annotated[User, Depends(require_roles(
-    UserRole.ADMIN, UserRole.KAPRODI, UserRole.DOSEN, UserRole.KETUA_KELAS, UserRole.MAHASISWA
+    UserRole.ADMIN, UserRole.KAPRODI, UserRole.DOSEN, UserRole.MAHASISWA
 ))]

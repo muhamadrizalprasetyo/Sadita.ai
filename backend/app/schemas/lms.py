@@ -96,6 +96,7 @@ class MaterialCreateRequest(BaseModel):
     description: Optional[str] = None
     resource_url: Optional[str] = Field(None, description="URL dokumen/Google Drive/GitHub/video")
     content: Optional[str] = Field(None, description="Isi teks langsung (Markdown)")
+    available_from: Optional[datetime] = Field(None, description="Tanggal dan waktu mulai materi dapat diakses (opsional)")
 
 
 class MaterialResponse(BaseModel):
@@ -109,6 +110,7 @@ class MaterialResponse(BaseModel):
     resource_url: Optional[str]
     content: Optional[str]
     file_size: Optional[int]
+    available_from: Optional[datetime] = None
     created_at: datetime
     updated_at: datetime
 
@@ -131,6 +133,9 @@ class AssignmentCreateRequest(BaseModel):
     show_answer: bool = False
     answer: Optional[str] = None
     is_published: bool = True
+    is_group: bool = False
+    group_size: int = Field(1, ge=1, le=10)
+    start_date: Optional[datetime] = None
 
 
 class AssignmentResponse(BaseModel):
@@ -146,6 +151,9 @@ class AssignmentResponse(BaseModel):
     allow_late: bool
     show_answer: bool
     is_published: bool
+    is_group: bool = False
+    group_size: int = 1
+    start_date: Optional[datetime] = None
     created_at: datetime
     updated_at: datetime
     submission_count: Optional[int] = 0
@@ -159,6 +167,23 @@ class AssignmentResponse(BaseModel):
 class SubmissionCreateRequest(BaseModel):
     file_url: Optional[str] = Field(None, description="URL lampiran file/repo tugas")
     content: Optional[str] = Field(None, description="Catatan teks/laporan tugas")
+    group_id: Optional[int] = Field(None, description="ID kelompok jika tugas kelompok")
+
+
+class AssignmentGroupCreateRequest(BaseModel):
+    name: str = Field(..., min_length=2, max_length=100)
+    member_student_ids: List[int] = Field(default_factory=list, description="Daftar ID mahasiswa anggota")
+
+
+class AssignmentGroupResponse(BaseModel):
+    id: int
+    assignment_id: int
+    name: str
+    leader_id: int
+    member_student_ids: List[int] = []
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 class GradeSubmissionRequest(BaseModel):
@@ -178,6 +203,7 @@ class SubmissionResponse(BaseModel):
     feedback: Optional[str]
     graded_by: Optional[int]
     graded_at: Optional[datetime]
+    group_id: Optional[int] = None
     student: Optional[StudentProfileResponse] = None
 
     model_config = ConfigDict(from_attributes=True)
@@ -201,6 +227,9 @@ class QuizCreateRequest(BaseModel):
     time_limit_minutes: Optional[int] = None
     shuffle_questions: bool = False
     is_published: bool = False
+    start_time: Optional[datetime] = None
+    end_time: Optional[datetime] = None
+    show_answer_after_deadline: bool = False
 
 
 class QuizResponse(BaseModel):
@@ -215,6 +244,9 @@ class QuizResponse(BaseModel):
     time_limit_minutes: Optional[int]
     shuffle_questions: bool
     is_published: bool
+    start_time: Optional[datetime] = None
+    end_time: Optional[datetime] = None
+    show_answer_after_deadline: bool = False
     created_at: datetime
     updated_at: datetime
     question_count: Optional[int] = 0
@@ -286,6 +318,8 @@ class QuizSubmissionResponse(BaseModel):
     passed: bool
     started_at: datetime
     submitted_at: Optional[datetime]
+    server_deadline: Optional[datetime] = None
+    is_auto_submitted: bool = False
     answers: List["QuizAnswerResponse"] = []
 
     model_config = ConfigDict(from_attributes=True)
@@ -353,9 +387,50 @@ class GradeResponse(BaseModel):
     grade_scale: Optional[GradeScale]
     calculated_at: Optional[datetime]
     notes: Optional[str]
+    is_default_aktif: bool = True
+    is_published: bool = False
+    revision_reason: Optional[str] = None
+    student: Optional[StudentProfileResponse] = None
 
     model_config = ConfigDict(from_attributes=True)
 
 
 class GradeCalculateRequest(BaseModel):
     recalculate_attendance: bool = False
+
+
+class ClassGradeConfigRequest(BaseModel):
+    uts_weight: float = Field(0.30, ge=0.0, le=1.0)
+    uas_weight: float = Field(0.35, ge=0.0, le=1.0)
+    aktif_weight: float = Field(0.10, ge=0.0, le=1.0)
+    tugas_weight: float = Field(0.15, ge=0.0, le=1.0)
+    absen_weight: float = Field(0.10, ge=0.0, le=1.0)
+    default_aktif_score: float = Field(80.0, ge=0.0, le=100.0)
+
+
+class ClassGradeConfigResponse(BaseModel):
+    id: int
+    class_id: int
+    uts_weight: float
+    uas_weight: float
+    aktif_weight: float
+    tugas_weight: float
+    absen_weight: float
+    default_aktif_score: float
+    is_published: bool
+    published_at: Optional[datetime]
+    published_by: Optional[int]
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class GradePublishRequest(BaseModel):
+    is_published: bool = True
+
+
+class GradeRevisionRequest(BaseModel):
+    component: str = Field(..., pattern="^(uts|uas|aktif|tugas|absen)$")
+    score: float = Field(..., ge=0.0, le=100.0)
+    reason: str = Field(..., min_length=5, description="Alasan revisi nilai wajib diisi untuk audit trail")

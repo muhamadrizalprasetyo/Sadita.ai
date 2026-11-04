@@ -102,6 +102,14 @@ class AttendanceSession(Base):
     ditutup_pada: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
+    # Waktu jadwal resmi (dari jam_mulai kelas pada tanggal sesi ini)
+    scheduled_start_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    # Keterlambatan pembukaan sesi dalam menit (jika dibuka terlambat)
+    delay_minutes: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    # Alasan keterlambatan (wajib jika delay > 10 menit, lihat DEC-08)
+    delay_reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     # Catatan dosen untuk sesi ini
     catatan: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 

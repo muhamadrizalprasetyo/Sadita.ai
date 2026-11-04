@@ -298,7 +298,7 @@ def seed_schedule():
                     email=s_data["email"],
                     password_hash=DEFAULT_MHS_PWD,
                     full_name=s_data["name"],
-                    role=UserRole.KETUA_KELAS if "ketua" in s_data["email"] else UserRole.MAHASISWA,
+                    role=UserRole.MAHASISWA,
                     is_active=True,
                 )
                 db.add(u)

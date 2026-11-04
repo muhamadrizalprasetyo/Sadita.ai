@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from datetime import date, time
 from typing import List, Optional
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session, joinedload
 
 from app.models.academic import (
@@ -123,6 +123,7 @@ class AcademicRepository:
         end_time: time,
         class_type: Optional[ClassType] = None,
         is_active: bool = True,
+        kuota_maksimal: int = 40,
     ) -> CourseClass:
         course_class = CourseClass(
             kode_kelas=name.strip(),
@@ -135,6 +136,7 @@ class AcademicRepository:
             jam_mulai=start_time,
             jam_selesai=end_time,
             is_active=is_active,
+            kuota_maksimal=kuota_maksimal,
         )
         db.add(course_class)
         db.commit()
@@ -209,7 +211,7 @@ class AcademicRepository:
         student_id: int,
         status: str = "AKTIF",
     ) -> ClassEnrollment:
-        from app.models.academic import EnrollmentStatus
+        from app.models.academic import EnrollmentStatus, CourseClass
 
         status_enum = EnrollmentStatus.AKTIF
         if isinstance(status, str):
@@ -224,6 +226,39 @@ class AcademicRepository:
                 status_enum = EnrollmentStatus.LULUS
         elif isinstance(status, EnrollmentStatus):
             status_enum = status
+
+        # BR-ENR-002: Quota check — validate academic class quota (PO-02) and room capacity
+        if status_enum == EnrollmentStatus.AKTIF:
+            course_class = db.get(CourseClass, class_id)
+            if course_class:
+                from fastapi import HTTPException, status as http_status
+                active_count = db.scalar(
+                    select(func.count(ClassEnrollment.id)).where(
+                        ClassEnrollment.class_id == class_id,
+                        ClassEnrollment.status == EnrollmentStatus.AKTIF,
+                    )
+                ) or 0
+
+                # 1. Academic class quota check (mandatory, even for online classes without room)
+                max_quota = getattr(course_class, "kuota_maksimal", 40) or 40
+                if active_count >= max_quota:
+                    raise HTTPException(
+                        status_code=http_status.HTTP_400_BAD_REQUEST,
+                        detail=(
+                            f"Kuota akademik kelas sudah penuh ({active_count}/{max_quota} mahasiswa). "
+                            f"Tidak dapat menambah enrollment baru."
+                        ),
+                    )
+
+                # 2. Room physical capacity check (additional validation if room is assigned)
+                if course_class.room and active_count >= course_class.room.kapasitas:
+                    raise HTTPException(
+                        status_code=http_status.HTTP_400_BAD_REQUEST,
+                        detail=(
+                            f"Kapasitas ruangan sudah penuh ({active_count}/{course_class.room.kapasitas} kursi). "
+                            f"Tidak dapat menambah enrollment baru."
+                        ),
+                    )
 
         enrollment = ClassEnrollment(
             class_id=class_id,

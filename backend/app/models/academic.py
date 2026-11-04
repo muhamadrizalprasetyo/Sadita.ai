@@ -61,7 +61,10 @@ class KrsRequestType(str, enum.Enum):
 
 
 class KrsRequestStatus(str, enum.Enum):
+    DRAFT = "DRAFT"
+    SUBMITTED = "SUBMITTED"
     PENDING_APPROVAL = "PENDING_APPROVAL"
+    UNDER_REVIEW = "UNDER_REVIEW"
     APPROVED = "APPROVED"
     REJECTED = "REJECTED"
     CANCELLED = "CANCELLED"
@@ -311,6 +314,8 @@ class CourseClass(Base):
     batas_terlambat_menit: Mapped[int] = mapped_column(Integer, default=15, nullable=False)
     # Total pertemuan semester ini
     total_pertemuan: Mapped[int] = mapped_column(Integer, default=16, nullable=False)
+    # Kuota akademik maksimal kelas (PO-02 decoupled from room capacity)
+    kuota_maksimal: Mapped[int] = mapped_column(Integer, default=40, nullable=False)
 
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
@@ -346,6 +351,10 @@ class CourseClass(Base):
             kwargs["jam_mulai"] = kwargs.pop("start_time")
         if "end_time" in kwargs and "jam_selesai" not in kwargs:
             kwargs["jam_selesai"] = kwargs.pop("end_time")
+        if "quota" in kwargs and "kuota_maksimal" not in kwargs:
+            kwargs["kuota_maksimal"] = kwargs.pop("quota")
+        if "capacity" in kwargs and "kuota_maksimal" not in kwargs:
+            kwargs["kuota_maksimal"] = kwargs.pop("capacity")
         super().__init__(**kwargs)
 
     @staticmethod

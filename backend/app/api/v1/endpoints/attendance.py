@@ -5,7 +5,7 @@ SADITA — Attendance API Endpoints
 from datetime import date
 from typing import Annotated, List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 
 from app.core.deps import CurrentUser, DBSession, RequireLecturer, get_current_user_optional
 from app.models.attendance import AttendanceStatus
@@ -94,7 +94,7 @@ def list_sessions(
         "Mengirim perintah ke perangkat SADITA melalui MQTT."
     ),
 )
-def open_session(session_id: int, req: SessionOpenRequest, current: RequireLecturer, db: DBSession):
+def open_session(session_id: int, req: SessionOpenRequest, current: RequireLecturer, db: DBSession, request: Request):
     from app.mqtt.client import mqtt_client
     from app.schemas.attendance import SessionOpenCommand
     from app.repositories.attendance_repo import AttendanceRepository as AR
@@ -102,7 +102,7 @@ def open_session(session_id: int, req: SessionOpenRequest, current: RequireLectu
     existing = AttendanceRepository.get_session_by_id(db, session_id)
     if not existing: raise HTTPException(status_code=404, detail="Sesi tidak ditemukan")
     require_class_access(db, current, existing.class_id)
-    session = AttendanceService.open_session(db, session_id)
+    session = AttendanceService.open_session(db, session_id, delay_reason=req.delay_reason)
 
     # Update topic if provided
     if req.topic:
@@ -115,6 +115,17 @@ def open_session(session_id: int, req: SessionOpenRequest, current: RequireLectu
             db.commit()
             db.refresh(raw_session)
             session = AR.get_session_by_id(db, session_id)
+
+    audit(
+        db,
+        current.id,
+        "OPEN_SESSION",
+        "attendance_session",
+        session.id,
+        after={"delay_minutes": session.delay_minutes, "delay_reason": session.delay_reason},
+        request=request,
+    )
+    db.commit()
 
     # Publish MQTT command to all devices attached to this class
     from app.repositories.academic_repo import AcademicRepository
@@ -137,7 +148,7 @@ def open_session(session_id: int, req: SessionOpenRequest, current: RequireLectu
     summary="Tutup sesi absensi (CLOSED)",
     description="Menutup sesi absensi. Mahasiswa yang belum hadir tetap tercatat ALFA.",
 )
-def close_session(session_id: int, current: RequireLecturer, db: DBSession):
+def close_session(session_id: int, current: RequireLecturer, db: DBSession, request: Request):
     from app.mqtt.client import mqtt_client
     from app.schemas.attendance import SessionCloseCommand
 
@@ -145,6 +156,9 @@ def close_session(session_id: int, current: RequireLecturer, db: DBSession):
     if not existing: raise HTTPException(status_code=404, detail="Sesi tidak ditemukan")
     require_class_access(db, current, existing.class_id)
     session = AttendanceService.close_session(db, session_id)
+
+    audit(db, current.id, "CLOSE_SESSION", "attendance_session", session.id, request=request)
+    db.commit()
 
     # Publish close command
     cmd = SessionCloseCommand(session_id=session.id)
@@ -201,7 +215,7 @@ def get_session_summary(
     summary="Update kehadiran manual oleh Dosen",
     description="Dosen mengubah status kehadiran mahasiswa secara manual (IZIN, SAKIT, HADIR, dsb).",
 )
-def manual_update(session_id: int, req: ManualUpdateRequest, current: RequireLecturer, db: DBSession):
+def manual_update(session_id: int, req: ManualUpdateRequest, current: RequireLecturer, db: DBSession, request: Request):
     session = AttendanceRepository.get_session_by_id(db, session_id)
     if not session: raise HTTPException(status_code=404, detail="Sesi tidak ditemukan")
     require_class_access(db, current, session.class_id)
@@ -215,7 +229,18 @@ def manual_update(session_id: int, req: ManualUpdateRequest, current: RequireLec
         new_status=req.status,
         notes=req.notes,
     )
-    audit(db, current.id, "MANUAL_ATTENDANCE_CORRECTION", "attendance_record", record.id, before=before, after={"status": record.status.value, "reason": req.notes}); db.commit()
+    audit(
+        db,
+        current.id,
+        "MANUAL_ATTENDANCE_CORRECTION",
+        "attendance_record",
+        record.id,
+        before=before,
+        after={"status": record.status.value, "reason": req.notes},
+        reason=req.notes,
+        request=request,
+    )
+    db.commit()
     return AttendanceRecordResponse.model_validate(record)
 
 
@@ -240,6 +265,26 @@ def get_student_history(
         db, student_id=student_id, class_id=class_id
     )
     return [AttendanceRecordResponse.model_validate(r) for r in records]
+
+
+@router.get(
+    "/students/{student_id}/classes/{class_id}/summary",
+    summary="Ringkasan kehadiran mahasiswa dan status syarat UAS (PO-01)",
+    description="Menampilkan persentase kehadiran mahasiswa dan status peringatan (soft warning) batas minimal 75%.",
+)
+def get_student_class_attendance_summary(
+    student_id: int,
+    class_id: int,
+    db: DBSession,
+    current: Annotated[User | None, Depends(get_current_user_optional)] = None,
+):
+    if current is not None and current.role == UserRole.MAHASISWA:
+        own = StudentRepository.get_by_user_id(db, current.id)
+        if not own or own.id != student_id:
+            raise HTTPException(status_code=403, detail="Tidak dapat melihat data mahasiswa lain")
+    if current is not None:
+        require_class_access(db, current, class_id)
+    return AttendanceService.calculate_student_attendance_summary(db, student_id, class_id)
 
 
 # ============================================================

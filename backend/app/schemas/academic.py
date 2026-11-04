@@ -85,6 +85,7 @@ class CourseClassBase(BaseModel):
     end_time: time
     is_active: bool = True
     class_type: Optional[str] = "REGULER_PAGI"
+    kuota_maksimal: Optional[int] = Field(default=40, ge=1, description="Kuota akademik maksimal kelas")
 
 
 class CourseClassCreate(CourseClassBase):
@@ -101,11 +102,13 @@ class CourseClassUpdate(BaseModel):
     start_time: Optional[time] = None
     end_time: Optional[time] = None
     is_active: Optional[bool] = None
+    kuota_maksimal: Optional[int] = Field(None, ge=1)
 
 
 class CourseClassResponse(CourseClassBase):
     id: int
     created_at: datetime
+    kuota_maksimal: int = 40
     course: Optional[CourseResponse] = None
     term: Optional[AcademicTermResponse] = None
     lecturer: Optional[LecturerProfileResponse] = None
@@ -146,6 +149,7 @@ class KrsRequestCreate(BaseModel):
     class_id: int
     request_type: KrsRequestType
     alasan: Optional[str] = Field(None, max_length=500)
+    is_draft: Optional[bool] = Field(default=False, description="Simpan sebagai DRAFT atau langsung ajukan")
 
 
 class KrsRequestReview(BaseModel):

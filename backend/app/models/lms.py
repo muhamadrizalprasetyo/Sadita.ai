@@ -28,6 +28,7 @@ if TYPE_CHECKING:
     from app.models.attendance import AttendanceSession
     from app.models.lecturer import LecturerProfile
     from app.models.student import StudentProfile
+    from app.models.user import User
 
 
 class GradeScale(str, enum.Enum):
@@ -65,6 +66,9 @@ class QuizQuestionType(str, enum.Enum):
     SINGLE_CHOICE = "SINGLE_CHOICE"
     MULTIPLE_CHOICE = "MULTIPLE_CHOICE"
     TEXT = "TEXT"
+    TRUE_FALSE = "TRUE_FALSE"
+    SHORT_ANSWER = "SHORT_ANSWER"
+    ESSAY = "ESSAY"
 
 
 class CourseChapter(Base):
@@ -214,6 +218,7 @@ class CourseMaterial(Base):
     resource_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
     content: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # Markdown/text content
     file_size: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    available_from: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -268,6 +273,9 @@ class Assignment(Base):
     show_answer: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     answer: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # Model jawaban untuk type TEXT
     is_published: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    is_group: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    group_size: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
+    start_date: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -287,6 +295,11 @@ class Assignment(Base):
     session: Mapped[Optional["AttendanceSession"]] = relationship("AttendanceSession")
     submissions: Mapped[List["AssignmentSubmission"]] = relationship(
         "AssignmentSubmission",
+        back_populates="assignment",
+        cascade="all, delete-orphan",
+    )
+    groups: Mapped[List["AssignmentGroup"]] = relationship(
+        "AssignmentGroup",
         back_populates="assignment",
         cascade="all, delete-orphan",
     )
@@ -338,14 +351,74 @@ class AssignmentSubmission(Base):
         nullable=True,
     )
     graded_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    group_id: Mapped[Optional[int]] = mapped_column(
+        Integer,
+        ForeignKey("assignment_groups.id", ondelete="SET NULL"),
+        nullable=True,
+    )
 
     # Relationships
     assignment: Mapped["Assignment"] = relationship("Assignment", back_populates="submissions")
     student: Mapped["StudentProfile"] = relationship("StudentProfile")
     grader: Mapped[Optional["LecturerProfile"]] = relationship("LecturerProfile")
+    group: Mapped[Optional["AssignmentGroup"]] = relationship("AssignmentGroup")
 
     def __repr__(self) -> str:
         return f"<AssignmentSubmission id={self.id} assignment_id={self.assignment_id} student_id={self.student_id} score={self.score}>"
+
+
+class AssignmentGroup(Base):
+    """Kelompok mahasiswa untuk tugas group."""
+    __tablename__ = "assignment_groups"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    assignment_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("assignments.id", ondelete="CASCADE"), nullable=False
+    )
+    name: Mapped[str] = mapped_column(String(100), nullable=False)
+    leader_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("student_profiles.id", ondelete="CASCADE"), nullable=False
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        nullable=False,
+    )
+
+    # Relationships
+    assignment: Mapped["Assignment"] = relationship("Assignment", back_populates="groups")
+    leader: Mapped["StudentProfile"] = relationship("StudentProfile")
+    members: Mapped[List["AssignmentGroupMember"]] = relationship(
+        "AssignmentGroupMember",
+        back_populates="group",
+        cascade="all, delete-orphan",
+    )
+
+    def __repr__(self) -> str:
+        return f"<AssignmentGroup id={self.id} assignment_id={self.assignment_id} name='{self.name}'>"
+
+
+class AssignmentGroupMember(Base):
+    """Anggota dalam kelompok tugas."""
+    __tablename__ = "assignment_group_members"
+    __table_args__ = (
+        UniqueConstraint("group_id", "student_id", name="uq_assignment_group_member"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    group_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("assignment_groups.id", ondelete="CASCADE"), nullable=False
+    )
+    student_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("student_profiles.id", ondelete="CASCADE"), nullable=False
+    )
+
+    # Relationships
+    group: Mapped["AssignmentGroup"] = relationship("AssignmentGroup", back_populates="members")
+    student: Mapped["StudentProfile"] = relationship("StudentProfile")
+
+    def __repr__(self) -> str:
+        return f"<AssignmentGroupMember id={self.id} group_id={self.group_id} student_id={self.student_id}>"
 
 
 class Quiz(Base):
@@ -378,6 +451,9 @@ class Quiz(Base):
     time_limit_minutes: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     shuffle_questions: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     is_published: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    start_time: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    end_time: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    show_answer_after_deadline: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -501,6 +577,8 @@ class QuizSubmission(Base):
         nullable=False,
     )
     submitted_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    server_deadline: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    is_auto_submitted: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 
     # Relationships
     quiz: Mapped["Quiz"] = relationship("Quiz", back_populates="submissions")
@@ -677,6 +755,10 @@ class StudentGrade(Base):
         nullable=True,
     )
     notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    is_default_aktif: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    is_published: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    revision_reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    revision_requested_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # Relationships
     course_class: Mapped["CourseClass"] = relationship("CourseClass")
@@ -718,3 +800,53 @@ class StudentGrade(Base):
 
     def __repr__(self) -> str:
         return f"<StudentGrade id={self.id} class_id={self.class_id} student_id={self.student_id} final={self.final_score}>"
+
+
+class ClassGradeConfig(Base):
+    """
+    Konfigurasi bobot komponen nilai per kelas.
+    UTS + UAS + Aktif + Tugas + Absen wajib = 1.0 (100%).
+    """
+    __tablename__ = "class_grade_configs"
+    __table_args__ = (
+        UniqueConstraint("class_id", name="uq_class_grade_config_class_id"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    class_id: Mapped[int] = mapped_column(
+        Integer,
+        ForeignKey("course_classes.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    uts_weight: Mapped[float] = mapped_column(Float, default=0.30, nullable=False)
+    uas_weight: Mapped[float] = mapped_column(Float, default=0.35, nullable=False)
+    aktif_weight: Mapped[float] = mapped_column(Float, default=0.10, nullable=False)
+    tugas_weight: Mapped[float] = mapped_column(Float, default=0.15, nullable=False)
+    absen_weight: Mapped[float] = mapped_column(Float, default=0.10, nullable=False)
+    default_aktif_score: Mapped[float] = mapped_column(Float, default=80.0, nullable=False)
+    is_published: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    published_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    published_by: Mapped[Optional[int]] = mapped_column(
+        Integer,
+        ForeignKey("users.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        nullable=False,
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+        nullable=False,
+    )
+
+    # Relationships
+    course_class: Mapped["CourseClass"] = relationship("CourseClass")
+    publisher: Mapped[Optional["User"]] = relationship("User")
+
+    def __repr__(self) -> str:
+        return f"<ClassGradeConfig id={self.id} class_id={self.class_id} published={self.is_published}>"

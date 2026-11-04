@@ -43,6 +43,7 @@ class LMSService:
         description: Optional[str] = None,
         resource_url: Optional[str] = None,
         content: Optional[str] = None,
+        available_from: Optional[datetime] = None,
     ) -> CourseMaterial:
         course_class = AcademicRepository.get_class_by_id(db, class_id)
         if not course_class:
@@ -68,6 +69,7 @@ class LMSService:
             description=description,
             resource_url=resource_url,
             content=content,
+            available_from=available_from,
         )
         logger.info("Material created: id=%d class_id=%d title='%s'", material.id, class_id, title)
         return material
@@ -88,6 +90,9 @@ class LMSService:
         max_score: float = 100.0,
         allow_late: bool = True,
         is_published: bool = True,
+        is_group: bool = False,
+        group_size: int = 1,
+        start_date: Optional[datetime] = None,
     ) -> Assignment:
         course_class = AcademicRepository.get_class_by_id(db, class_id)
         if not course_class:
@@ -114,6 +119,9 @@ class LMSService:
             max_score=max_score,
             allow_late=allow_late,
             is_published=is_published,
+            is_group=is_group,
+            group_size=group_size,
+            start_date=start_date,
         )
         logger.info("Assignment created: id=%d class_id=%d title='%s'", assignment.id, class_id, title)
         return assignment
@@ -131,6 +139,7 @@ class LMSService:
         file_url: Optional[str] = None,
         content: Optional[str] = None,
         submitted_at: Optional[datetime] = None,
+        group_id: Optional[int] = None,
     ) -> AssignmentSubmission:
         assignment = LMSRepository.get_assignment_by_id(db, assignment_id)
         if not assignment:
@@ -179,6 +188,15 @@ class LMSService:
 
         submission_status = SubmissionStatus.LATE if is_late else SubmissionStatus.SUBMITTED
 
+        # If this is a group assignment, resolve and validate group membership
+        resolved_group_id = group_id
+        if assignment.is_group:
+            user_group = LMSRepository.get_student_assignment_group(db, assignment.id, student.id)
+            if user_group:
+                resolved_group_id = user_group.id
+            elif group_id:
+                resolved_group_id = group_id
+
         sub = LMSRepository.upsert_submission(
             db,
             assignment_id=assignment.id,
@@ -187,12 +205,14 @@ class LMSService:
             file_url=file_url,
             content=content,
             submitted_at=now,
+            group_id=resolved_group_id,
         )
         logger.info(
-            "Assignment submitted: assignment_id=%d student_id=%d status=%s",
+            "Assignment submitted: assignment_id=%d student_id=%d status=%s group_id=%s",
             assignment.id,
             student.id,
             submission_status,
+            resolved_group_id,
         )
         return sub
 
@@ -274,3 +294,41 @@ class LMSService:
             "highest_score": max(scores) if scores else None,
             "lowest_score": min(scores) if scores else None,
         }
+
+    @staticmethod
+    def get_unsubmitted_students(db: Session, assignment_id: int) -> List[dict]:
+        """Return list of enrolled students who have not yet submitted this assignment."""
+        assignment = LMSRepository.get_assignment_by_id(db, assignment_id)
+        if not assignment:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Tugas tidak ditemukan")
+
+        enrollments = AcademicRepository.get_enrollments(db, assignment.class_id)
+        submissions = LMSRepository.list_submissions_for_assignment(db, assignment_id, limit=500)
+        submitted_student_ids = {s.student_id for s in submissions}
+
+        # If group assignment, also consider members of groups that submitted
+        if assignment.is_group:
+            submitted_group_ids = {s.group_id for s in submissions if s.group_id}
+            if submitted_group_ids:
+                from app.models.lms import AssignmentGroupMember
+                from sqlalchemy import select
+                group_member_ids = set(
+                    db.scalars(
+                        select(AssignmentGroupMember.student_id).where(
+                            AssignmentGroupMember.group_id.in_(submitted_group_ids)
+                        )
+                    ).all()
+                )
+                submitted_student_ids.update(group_member_ids)
+
+        unsubmitted = []
+        for enr in enrollments:
+            student = enr.student
+            if student and student.id not in submitted_student_ids:
+                unsubmitted.append({
+                    "student_id": student.id,
+                    "nim": student.nim,
+                    "full_name": student.user.full_name if student.user else f"Mahasiswa #{student.id}",
+                    "email": student.user.email if student.user else None,
+                })
+        return unsubmitted

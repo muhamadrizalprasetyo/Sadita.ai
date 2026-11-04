@@ -94,12 +94,26 @@ class AttendanceRepository:
         return session
 
     @staticmethod
-    def open_session(db: Session, session_id: int) -> Optional[AttendanceSession]:
+    def open_session(
+        db: Session,
+        session_id: int,
+        *,
+        opened_at: Optional[datetime] = None,
+        scheduled_start_at: Optional[datetime] = None,
+        delay_minutes: Optional[int] = None,
+        delay_reason: Optional[str] = None,
+    ) -> Optional[AttendanceSession]:
         session = db.get(AttendanceSession, session_id)
         if not session:
             return None
         session.status = SessionStatus.OPEN
-        session.dibuka_pada = datetime.now(timezone.utc)
+        session.dibuka_pada = opened_at or datetime.now(timezone.utc)
+        if scheduled_start_at is not None:
+            session.scheduled_start_at = scheduled_start_at
+        if delay_minutes is not None:
+            session.delay_minutes = delay_minutes
+        if delay_reason is not None:
+            session.delay_reason = delay_reason
         db.commit()
         db.refresh(session)
         return session

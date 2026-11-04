@@ -1,0 +1,129 @@
+%% SADITA.ai — Use Case Diagram Global
+%% Menampilkan seluruh interaksi 5 role dengan sistem
+
+graph TB
+    subgraph SADITA_AI["🎓 SADITA.ai — Sistem Akademik Terintegrasi"]
+        direction TB
+
+        subgraph AUTH["🔐 Autentikasi & Akses"]
+            UC_LOGIN["Login"]
+            UC_LOGOUT["Logout"]
+            UC_VIEW_PROFILE["Lihat Profil"]
+        end
+
+        subgraph AKADEMIK["📚 Pengelolaan Akademik"]
+            UC_KELOLA_PRODI["Kelola Program Studi"]
+            UC_KELOLA_TERM["Kelola Semester"]
+            UC_KELOLA_MK["Kelola Mata Kuliah"]
+            UC_KELOLA_KELAS["Kelola Kelas"]
+            UC_KELOLA_ROOM["Kelola Ruangan"]
+            UC_KELOLA_ENROLLMENT["Kelola Enrollment"]
+            UC_LIHAT_JADWAL["Lihat Jadwal"]
+            UC_KRS_REQUEST["Ajukan KRS Tambah/Ulang"]
+            UC_APPROVE_KRS["Setujui/Tolak KRS"]
+        end
+
+        subgraph LMS["📖 Learning Management System"]
+            UC_KELOLA_CHAPTER["Kelola Chapter"]
+            UC_KELOLA_LESSON["Kelola Lesson"]
+            UC_KELOLA_MATERI["Kelola Materi"]
+            UC_KELOLA_TUGAS["Kelola Tugas"]
+            UC_SUBMIT_TUGAS["Kumpulkan Tugas"]
+            UC_GRADING["Nilai Submission"]
+            UC_KELOLA_KUIS["Kelola Kuis"]
+            UC_KERJAKAN_KUIS["Kerjakan Kuis"]
+            UC_LIHAT_NILAI["Lihat Nilai/KHS"]
+            UC_LIHAT_MATERI["Akses Materi"]
+            UC_LIHAT_PROGRESS["Lihat Progress"]
+        end
+
+        subgraph PRESENSI["📋 Presensi & IoT"]
+            UC_BUKA_SESI["Buka Sesi Presensi"]
+            UC_TUTUP_SESI["Tutup Sesi Presensi"]
+            UC_TAP_RFID["Tap RFID/KTM"]
+            UC_LIHAT_PRESENSI["Lihat Riwayat Presensi"]
+            UC_MONITOR_PRESENSI["Monitor Presensi Kelas"]
+            UC_KELOLA_DEVICE["Kelola Perangkat IoT"]
+            UC_REQ_PRESENSI["Ajukan Presensi Online"]
+            UC_VERIFY_PRESENSI["Verifikasi Presensi"]
+        end
+
+        subgraph MANAGEMENT["⚙️ Manajemen Sistem"]
+            UC_KELOLA_USER["Kelola Akun Pengguna"]
+            UC_ASSIGN_KETUA["Tugaskan Ketua Kelas"]
+            UC_AUDIT_LOG["Lihat Audit Log"]
+            UC_LIHAT_DOSEN["Lihat Data Dosen"]
+            UC_LIHAT_MHS["Lihat Data Mahasiswa"]
+        end
+    end
+
+    ADMIN["🛡️ Admin"]
+    KAPRODI["👨‍🏫 Kaprodi"]
+    DOSEN["👩‍🏫 Dosen"]
+    KETUA["🎖️ Ketua Kelas"]
+    MHS["🎒 Mahasiswa"]
+    DEVICE["📡 ESP32/IoT"]
+
+    %% Auth — semua user
+    ADMIN --> UC_LOGIN
+    KAPRODI --> UC_LOGIN
+    DOSEN --> UC_LOGIN
+    KETUA --> UC_LOGIN
+    MHS --> UC_LOGIN
+    ADMIN --> UC_LOGOUT
+    KAPRODI --> UC_LOGOUT
+    DOSEN --> UC_LOGOUT
+    KETUA --> UC_LOGOUT
+    MHS --> UC_LOGOUT
+    ADMIN --> UC_VIEW_PROFILE
+    KAPRODI --> UC_VIEW_PROFILE
+    DOSEN --> UC_VIEW_PROFILE
+    KETUA --> UC_VIEW_PROFILE
+    MHS --> UC_VIEW_PROFILE
+
+    %% Akademik
+    ADMIN --> UC_KELOLA_PRODI
+    ADMIN --> UC_KELOLA_TERM
+    ADMIN --> UC_KELOLA_MK
+    ADMIN --> UC_KELOLA_KELAS
+    ADMIN --> UC_KELOLA_ROOM
+    ADMIN --> UC_KELOLA_ENROLLMENT
+    DOSEN --> UC_APPROVE_KRS
+    MHS --> UC_KRS_REQUEST
+    MHS --> UC_LIHAT_JADWAL
+    DOSEN --> UC_LIHAT_JADWAL
+    KETUA --> UC_LIHAT_JADWAL
+
+    %% LMS
+    DOSEN --> UC_KELOLA_CHAPTER
+    DOSEN --> UC_KELOLA_LESSON
+    DOSEN --> UC_KELOLA_MATERI
+    DOSEN --> UC_KELOLA_TUGAS
+    DOSEN --> UC_KELOLA_KUIS
+    DOSEN --> UC_GRADING
+    MHS --> UC_SUBMIT_TUGAS
+    MHS --> UC_KERJAKAN_KUIS
+    MHS --> UC_LIHAT_NILAI
+    MHS --> UC_LIHAT_MATERI
+    MHS --> UC_LIHAT_PROGRESS
+    KETUA --> UC_LIHAT_MATERI
+
+    %% Presensi
+    DOSEN --> UC_BUKA_SESI
+    DOSEN --> UC_TUTUP_SESI
+    DOSEN --> UC_MONITOR_PRESENSI
+    DOSEN --> UC_VERIFY_PRESENSI
+    KETUA --> UC_MONITOR_PRESENSI
+    KETUA --> UC_REQ_PRESENSI
+    MHS --> UC_TAP_RFID
+    MHS --> UC_LIHAT_PRESENSI
+    ADMIN --> UC_KELOLA_DEVICE
+    DEVICE --> UC_TAP_RFID
+
+    %% Management
+    ADMIN --> UC_KELOLA_USER
+    ADMIN --> UC_ASSIGN_KETUA
+    ADMIN --> UC_AUDIT_LOG
+    KAPRODI --> UC_LIHAT_DOSEN
+    KAPRODI --> UC_LIHAT_MHS
+    KAPRODI --> UC_MONITOR_PRESENSI

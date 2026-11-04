@@ -1,0 +1,66 @@
+%% SADITA.ai — Sequence Diagram Admin: Setup Akademik & Perangkat
+
+sequenceDiagram
+    autonumber
+    participant ADM as 🛡️ Admin
+    participant FE as 🌐 Frontend
+    participant BE as ⚙️ Backend
+    participant DB as 🗄️ Database
+    participant AUDIT as 📝 AuditLog
+
+    Note over ADM, DB: ── Login & Setup Program Studi ──
+    ADM->>FE: Masukkan email & password
+    FE->>BE: POST /api/v1/auth/login
+    BE->>DB: SELECT user WHERE email = ?
+    DB-->>BE: User(role=ADMIN)
+    BE-->>FE: {token, user, redirect: "/admin/dashboard"}
+    FE-->>ADM: Dashboard Admin
+
+    ADM->>FE: Buat Program Studi baru
+    FE->>BE: POST /api/v1/academic/prodi
+    BE->>DB: INSERT INTO program_studi
+    BE->>AUDIT: Log(action="CREATE", entity="ProgramStudi")
+    DB-->>BE: ProgramStudi created
+    BE-->>FE: 201 Created
+
+    Note over ADM, DB: ── Setup Semester & Mata Kuliah ──
+    ADM->>FE: Buat Semester Ganjil 2026/2027
+    FE->>BE: POST /api/v1/academic/terms
+    BE->>DB: INSERT INTO academic_terms
+    BE-->>FE: AcademicTerm created
+
+    ADM->>FE: Buat Mata Kuliah (IF201 - Basis Data)
+    FE->>BE: POST /api/v1/academic/courses
+    BE->>DB: INSERT INTO courses (prodi_id, kode, nama, sks)
+    BE-->>FE: Course created
+
+    Note over ADM, DB: ── Setup Kelas & Enrollment ──
+    ADM->>FE: Buat Kelas TI-2024-IF201-PAGI-A
+    FE->>BE: POST /api/v1/academic/classes
+    BE->>DB: INSERT INTO course_classes
+    BE-->>FE: CourseClass created
+
+    ADM->>FE: Daftarkan 30 mahasiswa ke kelas
+    FE->>BE: POST /api/v1/academic/classes/{id}/enroll
+    BE->>DB: INSERT INTO class_enrollments (batch)
+    BE-->>FE: Enrollment success (30 students)
+
+    ADM->>FE: Tugaskan Ketua Kelas
+    FE->>BE: POST /api/v1/workflow/class-leaders
+    BE->>DB: INSERT INTO class_leader_assignments
+    BE->>AUDIT: Log(action="ASSIGN_LEADER")
+    BE-->>FE: Leader assigned
+
+    Note over ADM, DB: ── Setup Perangkat IoT ──
+    ADM->>FE: Daftarkan ESP32 ke Ruangan R301
+    FE->>BE: POST /api/v1/devices
+    BE->>DB: INSERT INTO sadita_devices
+    BE->>AUDIT: Log(action="REGISTER_DEVICE")
+    BE-->>FE: Device registered
+
+    ADM->>FE: Lihat Audit Log
+    FE->>BE: GET /api/v1/audit/logs?limit=50
+    BE->>DB: SELECT * FROM audit_logs ORDER BY created_at DESC
+    DB-->>BE: List AuditLog entries
+    BE-->>FE: Audit log data
+    FE-->>ADM: Tabel log aktivitas

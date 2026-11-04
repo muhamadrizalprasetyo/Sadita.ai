@@ -21,7 +21,6 @@ class UserRole(str, enum.Enum):
     ADMIN = "ADMIN"
     KAPRODI = "KAPRODI"
     DOSEN = "DOSEN"
-    KETUA_KELAS = "KETUA_KELAS"
     MAHASISWA = "MAHASISWA"
 
 

@@ -1,0 +1,81 @@
+%% SADITA.ai — Flowchart Global
+%% Alur end-to-end seluruh role dalam 1 diagram
+
+flowchart TD
+    START(["🚀 Mulai"]) --> LOGIN["Buka Halaman Login"]
+    LOGIN --> INPUT_CRED["Input Email & Password"]
+    INPUT_CRED --> VALIDATE{"Kredensial Valid?"}
+    VALIDATE -->|Tidak| ERROR_LOGIN["❌ Tampilkan Error Login"]
+    ERROR_LOGIN --> INPUT_CRED
+    VALIDATE -->|Ya| CHECK_ROLE{"Cek Role User"}
+
+    CHECK_ROLE -->|ADMIN| ADMIN_DASH["📊 Dashboard Admin"]
+    CHECK_ROLE -->|KAPRODI| KAPRODI_DASH["📊 Dashboard Kaprodi"]
+    CHECK_ROLE -->|DOSEN| DOSEN_DASH["📊 Dashboard Dosen"]
+    CHECK_ROLE -->|KETUA_KELAS| KETUA_DASH["📊 Dashboard Ketua Kelas"]
+    CHECK_ROLE -->|MAHASISWA| MHS_DASH["📊 Dashboard Mahasiswa"]
+
+    %% Admin Flow
+    ADMIN_DASH --> ADM_CHOICE{"Pilih Menu"}
+    ADM_CHOICE -->|Kelola User| ADM_USER["CRUD Pengguna"]
+    ADM_CHOICE -->|Akademik| ADM_AKAD["Setup Prodi/Semester/MK/Kelas"]
+    ADM_CHOICE -->|Perangkat| ADM_DEVICE["Daftar/Monitor Device IoT"]
+    ADM_CHOICE -->|Presensi| ADM_PRESENSI["Monitor Presensi Global"]
+    ADM_CHOICE -->|LMS| ADM_LMS["Monitor LMS"]
+    ADM_CHOICE -->|Audit| ADM_AUDIT["Lihat Audit Log"]
+    ADM_USER --> ADM_SAVE_USER["Simpan ke Database"]
+    ADM_AKAD --> ADM_SAVE_AKAD["Simpan Data Akademik"]
+    ADM_SAVE_AKAD --> ENROLL{"Enrollment Mahasiswa?"}
+    ENROLL -->|Ya| ADM_ENROLL["Daftarkan Mahasiswa ke Kelas"]
+    ENROLL -->|Tidak| ADM_DONE["✅ Setup Selesai"]
+    ADM_ENROLL --> ASSIGN_KETUA{"Tugaskan Ketua Kelas?"}
+    ASSIGN_KETUA -->|Ya| ADM_ASSIGN["Insert ClassLeaderAssignment"]
+    ASSIGN_KETUA -->|Tidak| ADM_DONE
+    ADM_ASSIGN --> ADM_DONE
+
+    %% Kaprodi Flow
+    KAPRODI_DASH --> KPD_CHOICE{"Pilih Menu"}
+    KPD_CHOICE -->|Dosen| KPD_DOSEN["Lihat Data Dosen Prodi"]
+    KPD_CHOICE -->|Mahasiswa| KPD_MHS["Lihat Data Mahasiswa Prodi"]
+    KPD_CHOICE -->|Kurikulum| KPD_KURIK["Lihat Mata Kuliah Prodi"]
+    KPD_CHOICE -->|Presensi| KPD_PRESENSI["Monitor Presensi Prodi"]
+    KPD_DOSEN --> KPD_DETAIL["Lihat Detail & Kelas Diampu"]
+    KPD_MHS --> KPD_MHS_DETAIL["Lihat Detail & Enrollment"]
+    KPD_PRESENSI --> KPD_REKAP["Rekap Kehadiran per Kelas"]
+
+    %% Dosen Flow
+    DOSEN_DASH --> DSN_CHOICE{"Pilih Menu"}
+    DSN_CHOICE -->|Kelas| DSN_KELAS["Lihat Kelas Diampu"]
+    DSN_CHOICE -->|Materi| DSN_MATERI["Kelola Chapter/Lesson/Materi"]
+    DSN_CHOICE -->|Tugas| DSN_TUGAS["Buat & Kelola Tugas"]
+    DSN_CHOICE -->|Kuis| DSN_KUIS["Buat & Kelola Kuis"]
+    DSN_CHOICE -->|Presensi| DSN_PRESENSI["Buka/Monitor/Tutup Sesi"]
+    DSN_CHOICE -->|Nilai| DSN_NILAI["Input Nilai Akhir"]
+    DSN_TUGAS --> DSN_GRADING["Lihat & Nilai Submission"]
+    DSN_PRESENSI --> DSN_OPEN["Buka Sesi → MQTT → Device"]
+    DSN_OPEN --> DSN_MONITOR["Monitor Real-time"]
+    DSN_MONITOR --> DSN_CLOSE["Tutup Sesi"]
+
+    %% Ketua Kelas Flow
+    KETUA_DASH --> KTK_CHOICE{"Pilih Menu"}
+    KTK_CHOICE -->|Rekan| KTK_REKAN["Lihat Daftar Rekan"]
+    KTK_CHOICE -->|Presensi| KTK_PRESENSI["Monitor Presensi Kelas"]
+    KTK_CHOICE -->|Materi| KTK_MATERI["Akses Materi"]
+    KTK_CHOICE -->|Jadwal| KTK_JADWAL["Lihat Jadwal"]
+    KTK_PRESENSI --> KTK_REQ{"Ajukan Presensi Online?"}
+    KTK_REQ -->|Ya| KTK_SUBMIT["Submit AttendanceRequest"]
+    KTK_REQ -->|Tidak| KTK_VIEW["Lihat Rekap"]
+
+    %% Mahasiswa Flow
+    MHS_DASH --> MHS_CHOICE{"Pilih Menu"}
+    MHS_CHOICE -->|Mata Kuliah| MHS_MK["Lihat Mata Kuliah"]
+    MHS_CHOICE -->|Materi| MHS_MATERI["Akses Materi Pembelajaran"]
+    MHS_CHOICE -->|Tugas| MHS_TUGAS["Lihat & Kumpulkan Tugas"]
+    MHS_CHOICE -->|Kuis| MHS_KUIS["Kerjakan Kuis"]
+    MHS_CHOICE -->|Presensi| MHS_PRESENSI["Tap RFID / Lihat Riwayat"]
+    MHS_CHOICE -->|Nilai| MHS_NILAI["Lihat KHS"]
+    MHS_CHOICE -->|KRS| MHS_KRS["Ajukan KRS Tambah/Ulang"]
+    MHS_CHOICE -->|Jadwal| MHS_JADWAL["Lihat Jadwal"]
+    MHS_TUGAS --> MHS_SUBMIT_TUGAS["Upload & Submit"]
+    MHS_KUIS --> MHS_QUIZ_START["Mulai Kuis → Jawab → Submit"]
+    MHS_QUIZ_START --> MHS_QUIZ_RESULT["Lihat Hasil Kuis"]

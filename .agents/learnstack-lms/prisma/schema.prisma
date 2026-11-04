@@ -1,0 +1,693 @@
+generator client {
+  provider      = "prisma-client"
+  output        = "../lib/generated/prisma"
+  binaryTargets = ["native", "linux-musl", "rhel-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model academic_terms {
+  id              Int              @id @default(autoincrement())
+  nama            String           @unique @db.VarChar(100)
+  is_active       Boolean
+  tanggal_mulai   DateTime         @db.Date
+  tanggal_selesai DateTime         @db.Date
+  course_classes  course_classes[]
+
+  @@index([id], map: "ix_academic_terms_id")
+}
+
+model alembic_version {
+  version_num String @id(map: "alembic_version_pkc") @db.VarChar(32)
+}
+
+model assignment_submissions {
+  id                Int                    @id @default(autoincrement())
+  assignment_id     Int
+  student_id        Int
+  file_url          String?                @db.VarChar(500)
+  content           String?
+  submitted_at      DateTime               @db.Timestamptz(6)
+  status            submission_status_enum
+  score             Float?
+  feedback          String?
+  graded_by         Int?
+  graded_at         DateTime?              @db.Timestamptz(6)
+  assignments       assignments            @relation(fields: [assignment_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  lecturer_profiles lecturer_profiles?     @relation(fields: [graded_by], references: [id], onUpdate: NoAction)
+  student_profiles  student_profiles       @relation(fields: [student_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([assignment_id, student_id], map: "uq_assignment_student_submission")
+  @@index([id], map: "ix_assignment_submissions_id")
+}
+
+model assignments {
+  id                     Int                      @id @default(autoincrement())
+  class_id               Int
+  session_id             Int?
+  title                  String                   @db.VarChar(200)
+  description            String?
+  due_date               DateTime                 @db.Timestamptz(6)
+  max_score              Float
+  allow_late             Boolean
+  created_at             DateTime                 @db.Timestamptz(6)
+  lesson_id              Int?
+  assignment_type        String                   @db.VarChar(50)
+  show_answer            Boolean
+  answer                 String?
+  is_published           Boolean
+  updated_at             DateTime                 @db.Timestamptz(6)
+  assignment_submissions assignment_submissions[]
+  course_classes         course_classes           @relation(fields: [class_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  course_lessons         course_lessons?          @relation(fields: [lesson_id], references: [id], onUpdate: NoAction)
+  attendance_sessions    attendance_sessions?     @relation(fields: [session_id], references: [id], onUpdate: NoAction)
+
+  @@index([id], map: "ix_assignments_id")
+}
+
+model attendance_events {
+  id                     Int                        @id @default(autoincrement())
+  device_id              String                     @db.VarChar(100)
+  device_db_id           Int?
+  session_id             Int?
+  student_id             Int?
+  event_type             attendance_event_type_enum
+  rfid_uid               String?                    @db.VarChar(32)
+  fingerprint_slot       Int?
+  fingerprint_confidence Float?
+  event_uuid             String?                    @unique(map: "ix_attendance_events_event_uuid") @db.VarChar(64)
+  berhasil               Boolean
+  pesan                  String?
+  device_timestamp       DateTime?                  @db.Timestamptz(6)
+  received_at            DateTime                   @db.Timestamptz(6)
+  sadita_devices         sadita_devices?            @relation(fields: [device_db_id], references: [id], onUpdate: NoAction)
+  attendance_sessions    attendance_sessions?       @relation(fields: [session_id], references: [id], onUpdate: NoAction)
+  student_profiles       student_profiles?          @relation(fields: [student_id], references: [id], onUpdate: NoAction)
+
+  @@index([device_id], map: "ix_attendance_events_device_id")
+  @@index([id], map: "ix_attendance_events_id")
+  @@index([received_at], map: "ix_attendance_events_received_at")
+}
+
+model attendance_records {
+  id                  Int                     @id @default(autoincrement())
+  session_id          Int
+  student_id          Int
+  status              attendance_status_enum
+  method              attendance_method_enum?
+  check_in_time       DateTime?               @db.Timestamptz(6)
+  catatan             String?
+  dioverride_oleh     Int?
+  dioverride_pada     DateTime?               @db.Timestamptz(6)
+  users               users?                  @relation(fields: [dioverride_oleh], references: [id], onUpdate: NoAction)
+  attendance_sessions attendance_sessions     @relation(fields: [session_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  student_profiles    student_profiles        @relation(fields: [student_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([session_id, student_id], map: "uq_session_student_attendance")
+  @@index([id], map: "ix_attendance_records_id")
+}
+
+model attendance_requests {
+  id                                           Int                            @id @default(autoincrement())
+  session_id                                   Int
+  student_id                                   Int
+  status                                       attendance_request_status_enum
+  submitted_at                                 DateTime                       @db.Timestamptz(6)
+  verified_by                                  Int?
+  verified_at                                  DateTime?                      @db.Timestamptz(6)
+  approved_by                                  Int?
+  approved_at                                  DateTime?                      @db.Timestamptz(6)
+  rejection_reason                             String?
+  users_attendance_requests_approved_byTousers users?                         @relation("attendance_requests_approved_byTousers", fields: [approved_by], references: [id], onUpdate: NoAction)
+  attendance_sessions                          attendance_sessions            @relation(fields: [session_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  student_profiles                             student_profiles               @relation(fields: [student_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users_attendance_requests_verified_byTousers users?                         @relation("attendance_requests_verified_byTousers", fields: [verified_by], references: [id], onUpdate: NoAction)
+
+  @@index([session_id], map: "ix_attendance_requests_session_id")
+  @@index([student_id], map: "ix_attendance_requests_student_id")
+}
+
+model attendance_sessions {
+  id                  Int                   @id @default(autoincrement())
+  class_id            Int
+  pertemuan_ke        Int
+  tanggal             DateTime              @db.Date
+  topik               String?               @db.VarChar(255)
+  status              session_status_enum
+  dibuka_pada         DateTime?             @db.Timestamptz(6)
+  ditutup_pada        DateTime?             @db.Timestamptz(6)
+  catatan             String?
+  assignments         assignments[]
+  attendance_events   attendance_events[]
+  attendance_records  attendance_records[]
+  attendance_requests attendance_requests[]
+  course_classes      course_classes        @relation(fields: [class_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  course_lessons      course_lessons[]
+  course_materials    course_materials[]
+  quizzes             quizzes[]
+
+  @@unique([class_id, pertemuan_ke], map: "uq_class_session_number")
+  @@index([id], map: "ix_attendance_sessions_id")
+}
+
+model audit_logs {
+  id         Int      @id @default(autoincrement())
+  actor_id   Int?
+  action     String   @db.VarChar(80)
+  entity     String   @db.VarChar(80)
+  entity_id  Int?
+  before     Json?    @db.Json
+  after      Json?    @db.Json
+  created_at DateTime @db.Timestamptz(6)
+  users      users?   @relation(fields: [actor_id], references: [id], onUpdate: NoAction)
+
+  @@index([action], map: "ix_audit_logs_action")
+  @@index([actor_id], map: "ix_audit_logs_actor_id")
+  @@index([created_at], map: "ix_audit_logs_created_at")
+}
+
+model class_enrollments {
+  id               Int                    @id @default(autoincrement())
+  class_id         Int
+  student_id       Int
+  status           enrollment_status_enum
+  enrolled_at      DateTime               @db.Timestamptz(6)
+  course_classes   course_classes         @relation(fields: [class_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  student_profiles student_profiles       @relation(fields: [student_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([class_id, student_id], map: "uq_class_student_enrollment")
+  @@index([id], map: "ix_class_enrollments_id")
+}
+
+model class_leader_assignments {
+  id               Int              @id @default(autoincrement())
+  class_id         Int
+  student_id       Int
+  assigned_at      DateTime         @db.Timestamptz(6)
+  assigned_by      Int
+  is_active        Boolean
+  users            users            @relation(fields: [assigned_by], references: [id], onUpdate: NoAction)
+  course_classes   course_classes   @relation(fields: [class_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  student_profiles student_profiles @relation(fields: [student_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([class_id], map: "ix_class_leader_assignments_class_id")
+  @@index([student_id], map: "ix_class_leader_assignments_student_id")
+}
+
+model class_rooms {
+  id             Int              @id @default(autoincrement())
+  kode           String           @unique(map: "ix_class_rooms_kode") @db.VarChar(30)
+  nama           String           @db.VarChar(150)
+  kapasitas      Int
+  gedung         String?          @db.VarChar(100)
+  lantai         Int?
+  is_active      Boolean
+  course_classes course_classes[]
+  sadita_devices sadita_devices[]
+
+  @@index([id], map: "ix_class_rooms_id")
+}
+
+model course_chapters {
+  id             Int              @id @default(autoincrement())
+  class_id       Int
+  title          String           @db.VarChar(200)
+  description    String?
+  chapter_number Int
+  is_published   Boolean
+  created_at     DateTime         @db.Timestamptz(6)
+  updated_at     DateTime         @db.Timestamptz(6)
+  course_classes course_classes   @relation(fields: [class_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  course_lessons course_lessons[]
+
+  @@index([id], map: "ix_course_chapters_id")
+}
+
+model course_classes {
+  id                       Int                        @id @default(autoincrement())
+  course_id                Int
+  term_id                  Int
+  lecturer_id              Int
+  room_id                  Int?
+  kode_kelas               String                     @db.VarChar(50)
+  class_type               class_type_enum
+  hari                     Int
+  jam_mulai                DateTime                   @db.Time(6)
+  jam_selesai              DateTime                   @db.Time(6)
+  batas_terlambat_menit    Int
+  total_pertemuan          Int
+  is_active                Boolean
+  created_at               DateTime                   @db.Timestamptz(6)
+  assignments              assignments[]
+  attendance_sessions      attendance_sessions[]
+  class_enrollments        class_enrollments[]
+  class_leader_assignments class_leader_assignments[]
+  course_chapters          course_chapters[]
+  courses                  courses                    @relation(fields: [course_id], references: [id], onUpdate: NoAction)
+  lecturer_profiles        lecturer_profiles          @relation(fields: [lecturer_id], references: [id], onUpdate: NoAction)
+  class_rooms              class_rooms?               @relation(fields: [room_id], references: [id], onUpdate: NoAction)
+  academic_terms           academic_terms             @relation(fields: [term_id], references: [id], onUpdate: NoAction)
+  course_lessons           course_lessons[]
+  course_materials         course_materials[]
+  course_progress          course_progress[]
+  quizzes                  quizzes[]
+  student_grades           student_grades[]
+
+  @@index([id], map: "ix_course_classes_id")
+}
+
+model course_lessons {
+  id                  Int                  @id @default(autoincrement())
+  chapter_id          Int?
+  class_id            Int
+  session_id          Int?
+  title               String               @db.VarChar(200)
+  description         String?
+  lesson_type         lesson_type_enum
+  lesson_number       Int
+  content             String?
+  video_url           String?              @db.VarChar(500)
+  resource_url        String?              @db.VarChar(500)
+  duration_minutes    Int?
+  is_published        Boolean
+  allow_comments      Boolean
+  created_at          DateTime             @db.Timestamptz(6)
+  updated_at          DateTime             @db.Timestamptz(6)
+  assignments         assignments[]
+  course_chapters     course_chapters?     @relation(fields: [chapter_id], references: [id], onUpdate: NoAction)
+  course_classes      course_classes       @relation(fields: [class_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  attendance_sessions attendance_sessions? @relation(fields: [session_id], references: [id], onUpdate: NoAction)
+  course_materials    course_materials[]
+  lesson_progress     lesson_progress[]
+  quizzes             quizzes[]
+
+  @@index([id], map: "ix_course_lessons_id")
+}
+
+model course_materials {
+  id                  Int                  @id @default(autoincrement())
+  class_id            Int
+  session_id          Int?
+  title               String               @db.VarChar(200)
+  description         String?
+  material_type       material_type_enum
+  resource_url        String?              @db.VarChar(500)
+  content             String?
+  created_at          DateTime             @db.Timestamptz(6)
+  updated_at          DateTime             @db.Timestamptz(6)
+  lesson_id           Int?
+  file_size           Int?
+  course_classes      course_classes       @relation(fields: [class_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  course_lessons      course_lessons?      @relation(fields: [lesson_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  attendance_sessions attendance_sessions? @relation(fields: [session_id], references: [id], onUpdate: NoAction)
+
+  @@index([id], map: "ix_course_materials_id")
+}
+
+model course_progress {
+  id                  Int              @id @default(autoincrement())
+  class_id            Int
+  student_id          Int
+  total_lessons       Int
+  completed_lessons   Int
+  progress_percentage Float
+  started_at          DateTime         @db.Timestamptz(6)
+  last_activity_at    DateTime         @db.Timestamptz(6)
+  course_classes      course_classes   @relation(fields: [class_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  student_profiles    student_profiles @relation(fields: [student_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([class_id, student_id], map: "uq_class_student_progress")
+  @@index([id], map: "ix_course_progress_id")
+}
+
+model courses {
+  id             Int              @id @default(autoincrement())
+  prodi_id       Int
+  kode           String           @unique(map: "ix_courses_kode") @db.VarChar(30)
+  nama           String           @db.VarChar(200)
+  sks            Int
+  semester_ke    Int?
+  deskripsi      String?
+  is_active      Boolean
+  course_classes course_classes[]
+  program_studi  program_studi    @relation(fields: [prodi_id], references: [id], onUpdate: NoAction)
+
+  @@index([id], map: "ix_courses_id")
+}
+
+model fingerprint_credentials {
+  id               Int              @id @default(autoincrement())
+  student_id       Int
+  device_id        String           @db.VarChar(100)
+  template_slot    Int
+  finger_label     String?          @db.VarChar(50)
+  is_active        Boolean
+  keterangan       String?
+  enrolled_at      DateTime         @db.Timestamptz(6)
+  deactivated_at   DateTime?        @db.Timestamptz(6)
+  student_profiles student_profiles @relation(fields: [student_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([device_id], map: "ix_fingerprint_credentials_device_id")
+  @@index([id], map: "ix_fingerprint_credentials_id")
+}
+
+model lecturer_profiles {
+  id                     Int                      @id @default(autoincrement())
+  user_id                Int                      @unique
+  prodi_id               Int?
+  nidn                   String                   @unique(map: "ix_lecturer_profiles_nidn") @db.VarChar(30)
+  gelar_depan            String?                  @db.VarChar(50)
+  gelar_belakang         String?                  @db.VarChar(50)
+  phone                  String?                  @db.VarChar(30)
+  is_active              Boolean
+  created_at             DateTime                 @db.Timestamptz(6)
+  updated_at             DateTime                 @db.Timestamptz(6)
+  assignment_submissions assignment_submissions[]
+  course_classes         course_classes[]
+  program_studi          program_studi?           @relation(fields: [prodi_id], references: [id], onUpdate: NoAction)
+  users                  users                    @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([id], map: "ix_lecturer_profiles_id")
+}
+
+model lesson_progress {
+  id                  Int              @id @default(autoincrement())
+  lesson_id           Int
+  student_id          Int
+  is_completed        Boolean
+  progress_percentage Float
+  started_at          DateTime         @db.Timestamptz(6)
+  completed_at        DateTime?        @db.Timestamptz(6)
+  time_spent_seconds  Int
+  course_lessons      course_lessons   @relation(fields: [lesson_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  student_profiles    student_profiles @relation(fields: [student_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([lesson_id, student_id], map: "uq_lesson_student_progress")
+  @@index([id], map: "ix_lesson_progress_id")
+}
+
+model program_studi {
+  id                Int                 @id @default(autoincrement())
+  kode              String              @unique(map: "ix_program_studi_kode") @db.VarChar(20)
+  nama              String              @db.VarChar(150)
+  jenjang           String              @db.VarChar(10)
+  is_active         Boolean
+  deskripsi         String?
+  courses           courses[]
+  lecturer_profiles lecturer_profiles[]
+  student_profiles  student_profiles[]
+
+  @@index([id], map: "ix_program_studi_id")
+}
+
+model quiz_answers {
+  id                 Int              @id @default(autoincrement())
+  submission_id      Int
+  question_id        Int
+  selected_option_id Int?
+  text_answer        String?
+  is_correct         Boolean
+  points_earned      Float
+  quiz_questions     quiz_questions   @relation(fields: [question_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  quiz_options       quiz_options?    @relation(fields: [selected_option_id], references: [id], onUpdate: NoAction)
+  quiz_submissions   quiz_submissions @relation(fields: [submission_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([id], map: "ix_quiz_answers_id")
+}
+
+model quiz_options {
+  id             Int            @id @default(autoincrement())
+  question_id    Int
+  option_text    String         @db.VarChar(500)
+  is_correct     Boolean
+  option_number  Int
+  quiz_answers   quiz_answers[]
+  quiz_questions quiz_questions @relation(fields: [question_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([id], map: "ix_quiz_options_id")
+}
+
+model quiz_questions {
+  id              Int                     @id @default(autoincrement())
+  quiz_id         Int
+  question_text   String
+  question_type   quiz_question_type_enum
+  points          Float
+  question_number Int
+  explanation     String?
+  created_at      DateTime                @db.Timestamptz(6)
+  quiz_answers    quiz_answers[]
+  quiz_options    quiz_options[]
+  quizzes         quizzes                 @relation(fields: [quiz_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([id], map: "ix_quiz_questions_id")
+}
+
+model quiz_submissions {
+  id               Int              @id @default(autoincrement())
+  quiz_id          Int
+  student_id       Int
+  attempt_number   Int
+  score            Float
+  passed           Boolean
+  started_at       DateTime         @db.Timestamptz(6)
+  submitted_at     DateTime?        @db.Timestamptz(6)
+  quiz_answers     quiz_answers[]
+  quizzes          quizzes          @relation(fields: [quiz_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  student_profiles student_profiles @relation(fields: [student_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([id], map: "ix_quiz_submissions_id")
+}
+
+model quizzes {
+  id                  Int                  @id @default(autoincrement())
+  lesson_id           Int?
+  class_id            Int
+  session_id          Int?
+  title               String               @db.VarChar(200)
+  description         String?
+  passing_score       Float
+  max_attempts        Int
+  time_limit_minutes  Int?
+  shuffle_questions   Boolean
+  is_published        Boolean
+  created_at          DateTime             @db.Timestamptz(6)
+  updated_at          DateTime             @db.Timestamptz(6)
+  quiz_questions      quiz_questions[]
+  quiz_submissions    quiz_submissions[]
+  course_classes      course_classes       @relation(fields: [class_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  course_lessons      course_lessons?      @relation(fields: [lesson_id], references: [id], onUpdate: NoAction)
+  attendance_sessions attendance_sessions? @relation(fields: [session_id], references: [id], onUpdate: NoAction)
+
+  @@index([id], map: "ix_quizzes_id")
+}
+
+model rfid_credentials {
+  id               Int              @id @default(autoincrement())
+  student_id       Int
+  uid              String           @unique(map: "ix_rfid_credentials_uid") @db.VarChar(32)
+  is_active        Boolean
+  keterangan       String?
+  registered_at    DateTime         @db.Timestamptz(6)
+  deactivated_at   DateTime?        @db.Timestamptz(6)
+  student_profiles student_profiles @relation(fields: [student_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([id], map: "ix_rfid_credentials_id")
+}
+
+model sadita_devices {
+  id                Int                 @id @default(autoincrement())
+  device_id         String              @unique(map: "ix_sadita_devices_device_id") @db.VarChar(100)
+  nama              String              @db.VarChar(200)
+  room_id           Int?
+  status            device_status_enum
+  firmware_version  String?             @db.VarChar(30)
+  mac_address       String?             @unique @db.VarChar(20)
+  ip_address        String?             @db.VarChar(50)
+  last_seen_at      DateTime?           @db.Timestamptz(6)
+  keterangan        String?
+  registered_at     DateTime            @db.Timestamptz(6)
+  updated_at        DateTime            @db.Timestamptz(6)
+  attendance_events attendance_events[]
+  class_rooms       class_rooms?        @relation(fields: [room_id], references: [id], onUpdate: NoAction)
+
+  @@index([id], map: "ix_sadita_devices_id")
+}
+
+model student_grades {
+  id               Int               @id @default(autoincrement())
+  class_id         Int
+  student_id       Int
+  uts_score        Float?
+  uas_score        Float?
+  aktif_score      Float?
+  tugas_score      Float?
+  absen_score      Float?
+  final_score      Float?
+  grade_scale      grade_scale_enum?
+  calculated_at    DateTime?         @db.Timestamptz(6)
+  calculated_by    Int?
+  notes            String?
+  users            users?            @relation(fields: [calculated_by], references: [id], onUpdate: NoAction)
+  course_classes   course_classes    @relation(fields: [class_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  student_profiles student_profiles  @relation(fields: [student_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([class_id, student_id], map: "uq_class_student_grade")
+  @@index([id], map: "ix_student_grades_id")
+}
+
+model student_profiles {
+  id                       Int                        @id @default(autoincrement())
+  user_id                  Int                        @unique
+  prodi_id                 Int
+  nim                      String                     @unique(map: "ix_student_profiles_nim") @db.VarChar(30)
+  angkatan                 Int
+  ktm_status               ktm_status_enum
+  phone                    String?                    @db.VarChar(30)
+  is_active                Boolean
+  created_at               DateTime                   @db.Timestamptz(6)
+  updated_at               DateTime                   @db.Timestamptz(6)
+  assignment_submissions   assignment_submissions[]
+  attendance_events        attendance_events[]
+  attendance_records       attendance_records[]
+  attendance_requests      attendance_requests[]
+  class_enrollments        class_enrollments[]
+  class_leader_assignments class_leader_assignments[]
+  course_progress          course_progress[]
+  fingerprint_credentials  fingerprint_credentials[]
+  lesson_progress          lesson_progress[]
+  quiz_submissions         quiz_submissions[]
+  rfid_credentials         rfid_credentials[]
+  student_grades           student_grades[]
+  program_studi            program_studi              @relation(fields: [prodi_id], references: [id], onUpdate: NoAction)
+  users                    users                      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([id], map: "ix_student_profiles_id")
+}
+
+model users {
+  id                                                         Int                        @id @default(autoincrement())
+  email                                                      String                     @unique(map: "ix_users_email") @db.VarChar(255)
+  password_hash                                              String                     @db.VarChar(255)
+  full_name                                                  String                     @db.VarChar(255)
+  role                                                       user_role_enum
+  is_active                                                  Boolean
+  created_at                                                 DateTime                   @db.Timestamptz(6)
+  updated_at                                                 DateTime                   @db.Timestamptz(6)
+  attendance_records                                         attendance_records[]
+  attendance_requests_attendance_requests_approved_byTousers attendance_requests[]      @relation("attendance_requests_approved_byTousers")
+  attendance_requests_attendance_requests_verified_byTousers attendance_requests[]      @relation("attendance_requests_verified_byTousers")
+  audit_logs                                                 audit_logs[]
+  class_leader_assignments                                   class_leader_assignments[]
+  lecturer_profiles                                          lecturer_profiles?
+  student_grades                                             student_grades[]
+  student_profiles                                           student_profiles?
+
+  @@index([id], map: "ix_users_id")
+}
+
+enum attendance_event_type_enum {
+  RFID_SCAN
+  FINGERPRINT_MATCH
+  FINGERPRINT_FAIL
+  RFID_UNKNOWN
+  ATTENDANCE_RECORDED
+  DEVICE_HEARTBEAT
+}
+
+enum attendance_method_enum {
+  RFID_FINGERPRINT
+  FINGERPRINT_ONLY
+  MANUAL_DOSEN
+  MANUAL_ADMIN
+}
+
+enum attendance_request_status_enum {
+  PENDING
+  VERIFIED
+  APPROVED
+  REJECTED
+}
+
+enum attendance_status_enum {
+  HADIR
+  TERLAMBAT
+  IZIN
+  SAKIT
+  ALFA
+}
+
+enum class_type_enum {
+  REGULER_PAGI
+  REGULER_MALAM
+  SHIFT
+}
+
+enum device_status_enum {
+  ACTIVE
+  INACTIVE
+  MAINTENANCE
+  OFFLINE
+}
+
+enum enrollment_status_enum {
+  AKTIF
+  DROP
+  CUTI
+  LULUS
+}
+
+enum grade_scale_enum {
+  A
+  B
+  C
+  D
+  E
+}
+
+enum ktm_status_enum {
+  BELUM_MEMILIKI_KTM
+  KTM_TERDAFTAR
+  KTM_HILANG
+  KTM_TIDAK_DIBAWA
+}
+
+enum lesson_type_enum {
+  DOCUMENT
+  VIDEO
+  QUIZ
+  ASSIGNMENT
+  EXERCISE
+}
+
+enum material_type_enum {
+  DOCUMENT
+  LINK
+  TEXT
+}
+
+enum quiz_question_type_enum {
+  SINGLE_CHOICE
+  MULTIPLE_CHOICE
+  TEXT
+}
+
+enum session_status_enum {
+  SCHEDULED
+  OPEN
+  CLOSED
+}
+
+enum submission_status_enum {
+  SUBMITTED
+  LATE
+  GRADED
+}
+
+enum user_role_enum {
+  ADMIN
+  DOSEN
+  MAHASISWA
+}

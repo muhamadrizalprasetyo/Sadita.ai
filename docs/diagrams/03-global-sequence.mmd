@@ -1,0 +1,151 @@
+%% SADITA.ai — Sequence Diagram Global
+%% Alur lengkap dari setup hingga penilaian
+
+sequenceDiagram
+    autonumber
+    participant ADM as 🛡️ Admin
+    participant KPD as 👨‍🏫 Kaprodi
+    participant DSN as 👩‍🏫 Dosen
+    participant KTK as 🎖️ Ketua Kelas
+    participant MHS as 🎒 Mahasiswa
+    participant FE as 🌐 Frontend
+    participant BE as ⚙️ Backend API
+    participant DB as 🗄️ PostgreSQL
+    participant MQTT as 📡 MQTT Broker
+    participant ESP as 📟 ESP32 Device
+
+    Note over ADM, DB: ═══ FASE 1: SETUP SISTEM (Admin) ═══
+
+    ADM->>FE: Login sebagai Admin
+    FE->>BE: POST /api/v1/auth/login
+    BE->>DB: Validasi kredensial
+    DB-->>BE: User data + role ADMIN
+    BE-->>FE: JWT Token
+    FE-->>ADM: Redirect → /admin/dashboard
+
+    ADM->>FE: Kelola Program Studi, Semester, Mata Kuliah
+    FE->>BE: POST /api/v1/academic/terms
+    BE->>DB: Insert AcademicTerm
+    ADM->>FE: Buat Kelas Perkuliahan
+    FE->>BE: POST /api/v1/academic/classes
+    BE->>DB: Insert CourseClass (dengan Dosen & Jadwal)
+    ADM->>FE: Daftarkan Mahasiswa ke Kelas
+    FE->>BE: POST /api/v1/academic/classes/{id}/enroll
+    BE->>DB: Insert ClassEnrollment
+    ADM->>FE: Tugaskan Ketua Kelas
+    FE->>BE: POST /api/v1/workflow/class-leaders
+    BE->>DB: Insert ClassLeaderAssignment
+    ADM->>FE: Daftarkan Perangkat IoT
+    FE->>BE: POST /api/v1/devices
+    BE->>DB: Insert SaditaDevice
+
+    Note over KPD, DB: ═══ FASE 2: MONITORING PRODI (Kaprodi) ═══
+
+    KPD->>FE: Login sebagai Kaprodi
+    FE->>BE: POST /api/v1/auth/login
+    BE-->>FE: JWT Token (role KAPRODI)
+    FE-->>KPD: Redirect → /kaprodi/dashboard
+    KPD->>FE: Lihat data dosen & mahasiswa prodi
+    FE->>BE: GET /api/v1/students (filtered by prodi)
+    BE->>DB: Query StudentProfile WHERE prodi_id = X
+    DB-->>BE: List mahasiswa prodi
+    BE-->>FE: Data mahasiswa
+    KPD->>FE: Monitor presensi prodi
+    FE->>BE: GET /api/v1/attendance/sessions
+    BE-->>FE: Ringkasan presensi
+
+    Note over DSN, DB: ═══ FASE 3: PERSIAPAN PEMBELAJARAN (Dosen) ═══
+
+    DSN->>FE: Login sebagai Dosen
+    FE->>BE: POST /api/v1/auth/login
+    BE-->>FE: JWT Token (role DOSEN)
+    FE-->>DSN: Redirect → /dosen/dashboard
+
+    DSN->>FE: Buat Chapter & Lesson
+    FE->>BE: POST /api/v1/lms/classes/{id}/chapters
+    BE->>DB: Insert CourseChapter
+    DSN->>FE: Upload Materi
+    FE->>BE: POST /api/v1/lms/materials
+    BE->>DB: Insert CourseMaterial
+    DSN->>FE: Buat Tugas
+    FE->>BE: POST /api/v1/lms/assignments
+    BE->>DB: Insert Assignment (dengan due_date)
+    DSN->>FE: Buat Kuis
+    FE->>BE: POST /api/v1/lms/quizzes
+    BE->>DB: Insert Quiz + QuizQuestion + QuizOption
+
+    Note over DSN, ESP: ═══ FASE 4: SESI PRESENSI ═══
+
+    DSN->>FE: Buka Sesi Presensi Pertemuan ke-N
+    FE->>BE: POST /api/v1/attendance/sessions
+    BE->>DB: Insert AttendanceSession (OPEN)
+    BE->>MQTT: Publish session info ke device
+
+    MHS->>ESP: Tap KTM (RFID)
+    ESP->>MQTT: Publish tap event (UID + device_id)
+    MQTT->>BE: Subscribe & receive tap
+    BE->>DB: Lookup RfidCredential by UID
+    BE->>DB: Validate enrollment + session status
+    BE->>DB: Insert AttendanceRecord (HADIR/TERLAMBAT)
+    BE->>DB: Insert AttendanceEvent (audit trail)
+    BE->>MQTT: Publish feedback (OK/REJECT)
+    MQTT->>ESP: Tampilkan feedback di LCD
+    ESP-->>MHS: LCD: "Presensi Berhasil ✅"
+
+    DSN->>FE: Tutup Sesi Presensi
+    FE->>BE: PATCH /api/v1/attendance/sessions/{id}/close
+    BE->>DB: Update session status → CLOSED
+
+    Note over KTK, DB: ═══ FASE 5: MONITORING KETUA KELAS ═══
+
+    KTK->>FE: Login sebagai Ketua Kelas
+    FE-->>KTK: Redirect → /ketua-kelas/dashboard
+    KTK->>FE: Lihat daftar rekan & presensi kelas
+    FE->>BE: GET /api/v1/attendance/sessions/{id}/records
+    BE->>DB: Query records WHERE class_id = assigned_class
+    BE-->>FE: Data presensi kelas
+    KTK->>FE: Ajukan presensi online (jika diizinkan)
+    FE->>BE: POST /api/v1/workflow/attendance-requests
+    BE->>DB: Insert AttendanceRequest (PENDING)
+
+    Note over MHS, DB: ═══ FASE 6: AKTIVITAS PEMBELAJARAN (Mahasiswa) ═══
+
+    MHS->>FE: Login sebagai Mahasiswa
+    FE-->>MHS: Redirect → /mahasiswa/dashboard
+    MHS->>FE: Akses Materi Pembelajaran
+    FE->>BE: GET /api/v1/lms/classes/{id}/materials
+    BE->>DB: Query CourseMaterial WHERE class_id IN enrolled
+    BE-->>FE: List materi
+    MHS->>FE: Kumpulkan Tugas
+    FE->>BE: POST /api/v1/lms/assignments/{id}/submit
+    BE->>DB: Insert AssignmentSubmission
+    MHS->>FE: Kerjakan Kuis
+    FE->>BE: POST /api/v1/lms/quizzes/{id}/submit
+    BE->>DB: Grade answers server-side
+    BE->>DB: Insert QuizSubmission + QuizAnswer
+
+    Note over DSN, DB: ═══ FASE 7: PENILAIAN (Dosen) ═══
+
+    DSN->>FE: Lihat & Nilai Submission
+    FE->>BE: GET /api/v1/lms/assignments/{id}/submissions
+    BE-->>FE: List submissions
+    DSN->>FE: Berikan Nilai & Feedback
+    FE->>BE: PATCH /api/v1/lms/submissions/{id}/grade
+    BE->>DB: Update AssignmentSubmission (score, feedback)
+    DSN->>FE: Input Nilai Akhir
+    FE->>BE: POST /api/v1/lms/grades
+    BE->>DB: Upsert StudentGrade (UTS, UAS, Tugas, Absen, Aktif)
+    BE->>DB: Calculate final_score & grade_scale
+
+    MHS->>FE: Lihat Nilai/KHS
+    FE->>BE: GET /api/v1/lms/grades/my
+    BE->>DB: Query StudentGrade WHERE student_id = current
+    BE-->>FE: Data KHS
+    FE-->>MHS: Tampilkan Nilai
+
+    Note over ADM, DB: ═══ FASE 8: AUDIT & MONITORING ═══
+
+    ADM->>FE: Lihat Audit Log
+    FE->>BE: GET /api/v1/audit/logs
+    BE->>DB: Query AuditLog
+    BE-->>FE: Log aktivitas sistem

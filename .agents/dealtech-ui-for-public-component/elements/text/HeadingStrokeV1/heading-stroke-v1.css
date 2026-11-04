@@ -1,0 +1,31 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+.heading-stroke-v1 {
+  --heading-stroke-v1-primary: #01498b;
+  --heading-stroke-v1-ink: #111111;
+
+  box-sizing: border-box;
+  margin: 0;
+  color: var(--heading-stroke-v1-ink);
+  font-family: 'Inter', sans-serif;
+  font-size: clamp(1.85rem, 3.6vw, 2.7rem);
+  line-height: 1.24;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  text-align: center;
+}
+
+.heading-stroke-v1__accent {
+  color: #ffffff;
+  background: var(--heading-stroke-v1-primary);
+  padding: 2px 10px;
+  border-radius: 6px;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+@media (min-width: 901px) {
+  .heading-stroke-v1 {
+    font-size: clamp(2.15rem, 4vw, 3.05rem);
+  }
+}

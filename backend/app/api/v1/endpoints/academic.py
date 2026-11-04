@@ -235,7 +235,7 @@ def list_classes(
         if current.role == UserRole.DOSEN:
             lecturer = LecturerRepository.get_by_user_id(db, current.id)
             classes = [item for item in classes if lecturer and item.lecturer_id == lecturer.id]
-        elif current.role in (UserRole.MAHASISWA, UserRole.KETUA_KELAS):
+        elif current.role == UserRole.MAHASISWA:
             student = StudentRepository.get_by_user_id(db, current.id)
             enrolled_ids = {item.class_id for item in db.scalars(select(ClassEnrollment).where(ClassEnrollment.student_id == student.id, ClassEnrollment.status == EnrollmentStatus.AKTIF)).all()} if student else set()
             classes = [item for item in classes if item.id in enrolled_ids]
@@ -269,6 +269,7 @@ def create_class(req: CourseClassCreate, _: RequireAdmin, db: DBSession) -> Cour
         start_time=req.start_time,
         end_time=req.end_time,
         is_active=req.is_active,
+        kuota_maksimal=req.kuota_maksimal or 40,
     )
     # Reload with relationships
     return CourseClassResponse.model_validate(AcademicRepository.get_class_by_id(db, course_class.id))
@@ -321,6 +322,9 @@ def enroll_student(
             enrolled_at=enrollment.enrolled_at,
             student=student,
         )
+    except HTTPException:
+        db.rollback()
+        raise
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Mahasiswa sudah terdaftar di kelas ini")
@@ -419,6 +423,12 @@ def list_available_classes_for_krs(
     status_code=status.HTTP_201_CREATED,
     summary="Ajukan permohonan KRS Tambah SKS atau Mengulang Mata Kuliah",
 )
+@router.post(
+    "/krs/requests",
+    response_model=KrsRequestResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Ajukan permohonan KRS Tambah SKS atau Mengulang Mata Kuliah (alias)",
+)
 def submit_krs_request(
     req: KrsRequestCreate,
     current: CurrentUser,
@@ -495,12 +505,27 @@ def submit_krs_request(
                         detail=f"Jadwal bentrok dengan mata kuliah '{c_name}' pada {day_str} jam {o_start.strftime('%H:%M')}-{o_end.strftime('%H:%M')}",
                     )
 
-    # Create KRS request
+    # Check class quota
+    active_count = db.scalar(
+        select(func.count(ClassEnrollment.id)).where(
+            ClassEnrollment.class_id == target_class.id,
+            ClassEnrollment.status == EnrollmentStatus.AKTIF,
+        )
+    ) or 0
+    max_quota = getattr(target_class, "kuota_maksimal", 40) or 40
+    if active_count >= max_quota:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Kuota kelas sudah penuh ({active_count}/{max_quota} mahasiswa). Tidak dapat mengajukan KRS.",
+        )
+
+    # Create KRS request (DRAFT or PENDING_APPROVAL)
+    initial_status = KrsRequestStatus.DRAFT if req.is_draft else KrsRequestStatus.PENDING_APPROVAL
     krs_obj = KrsRequest(
         student_id=student.id,
         class_id=req.class_id,
         request_type=req.request_type,
-        status=KrsRequestStatus.PENDING_APPROVAL,
+        status=initial_status,
         alasan=req.alasan,
         submitted_at=datetime.now(timezone.utc),
     )
@@ -559,13 +584,66 @@ def cancel_krs_request(
     if krs_obj.student_id != student.id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Anda tidak memiliki akses ke permohonan ini")
 
-    if krs_obj.status != KrsRequestStatus.PENDING_APPROVAL:
+    if krs_obj.status not in (KrsRequestStatus.PENDING_APPROVAL, KrsRequestStatus.DRAFT):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Permohonan tidak dapat dibatalkan karena statusnya sudah {krs_obj.status.value}",
         )
 
     krs_obj.status = KrsRequestStatus.CANCELLED
+    db.commit()
+    db.refresh(krs_obj)
+    return KrsRequestResponse.model_validate(krs_obj)
+
+
+@router.post(
+    "/krs/requests/{request_id}/submit",
+    response_model=KrsRequestResponse,
+    summary="Ajukan permohonan KRS yang masih berstatus DRAFT",
+)
+def submit_draft_krs_request(
+    request_id: int,
+    current: CurrentUser,
+    db: DBSession,
+) -> KrsRequestResponse:
+    student = StudentRepository.get_by_user_id(db, current.id)
+    if not student:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Hanya mahasiswa yang dapat mengajukan KRS",
+        )
+
+    krs_obj = db.scalar(select(KrsRequest).where(KrsRequest.id == request_id))
+    if not krs_obj:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Permohonan KRS tidak ditemukan")
+
+    if krs_obj.student_id != student.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Anda tidak memiliki akses ke permohonan ini")
+
+    if krs_obj.status != KrsRequestStatus.DRAFT:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Hanya permohonan berstatus DRAFT yang dapat diajukan (status saat ini: {krs_obj.status.value})",
+        )
+
+    # Check class quota before transitioning to PENDING_APPROVAL
+    target_class = AcademicRepository.get_class_by_id(db, krs_obj.class_id)
+    if target_class:
+        active_count = db.scalar(
+            select(func.count(ClassEnrollment.id)).where(
+                ClassEnrollment.class_id == target_class.id,
+                ClassEnrollment.status == EnrollmentStatus.AKTIF,
+            )
+        ) or 0
+        max_quota = getattr(target_class, "kuota_maksimal", 40) or 40
+        if active_count >= max_quota:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Kuota kelas sudah penuh ({active_count}/{max_quota} mahasiswa).",
+            )
+
+    krs_obj.status = KrsRequestStatus.PENDING_APPROVAL
+    krs_obj.submitted_at = datetime.now(timezone.utc)
     db.commit()
     db.refresh(krs_obj)
     return KrsRequestResponse.model_validate(krs_obj)
@@ -661,14 +739,14 @@ def review_krs_request(
             enr.status = EnrollmentStatus.AKTIF
             enr.enrollment_type = enr_type
         else:
-            enr = ClassEnrollment(
+            # Strictly validate class quota and room capacity via enroll_student
+            enr = AcademicRepository.enroll_student(
+                db,
                 class_id=krs_obj.class_id,
                 student_id=krs_obj.student_id,
-                status=EnrollmentStatus.AKTIF,
-                enrollment_type=enr_type,
+                status="AKTIF",
             )
-            db.add(enr)
-            db.flush()
+            enr.enrollment_type = enr_type
 
         krs_obj.enrollment_id = enr.id
     else:

@@ -1,0 +1,110 @@
+%% SADITA.ai — Activity Diagram Global
+%% Siklus satu semester perkuliahan (7 fase)
+
+stateDiagram-v2
+    direction TB
+
+    [*] --> SETUP_SISTEM
+
+    state "🛡️ FASE 1: Setup Sistem (Admin)" as SETUP_SISTEM {
+        [*] --> BuatProdi
+        BuatProdi --> BuatSemester
+        BuatSemester --> BuatMataKuliah
+        BuatMataKuliah --> BuatKelas
+        BuatKelas --> DaftarDevice
+        BuatKelas --> EnrollMahasiswa
+        EnrollMahasiswa --> TugaskanKetuaKelas
+        DaftarDevice --> [*]
+        TugaskanKetuaKelas --> [*]
+    }
+
+    SETUP_SISTEM --> PERSIAPAN_LMS
+
+    state "👩‍🏫 FASE 2: Persiapan Pembelajaran (Dosen)" as PERSIAPAN_LMS {
+        [*] --> BuatChapter
+        BuatChapter --> BuatLesson
+        BuatLesson --> UploadMateri
+        UploadMateri --> BuatTugas
+        BuatTugas --> BuatKuis
+        BuatKuis --> PublishKonten
+        PublishKonten --> [*]
+    }
+
+    PERSIAPAN_LMS --> SESI_PERKULIAHAN
+
+    state "📚 FASE 3: Sesi Perkuliahan (16 Pertemuan)" as SESI_PERKULIAHAN {
+        [*] --> DosenBukaSesi
+
+        state "🔓 Sesi Presensi Dibuka" as SESI_OPEN {
+            DosenBukaSesi --> MQTTKeDevice
+            MQTTKeDevice --> MahasiswaTapRFID
+            MahasiswaTapRFID --> ValidasiBackend
+
+            state ValidasiBackend <<choice>>
+            ValidasiBackend --> CatatHadir: UID Valid & Enrolled
+            ValidasiBackend --> CatatTerlambat: UID Valid & Lewat Batas
+            ValidasiBackend --> Tolak: UID Tidak Dikenal
+
+            CatatHadir --> FeedbackOK
+            CatatTerlambat --> FeedbackLate
+            Tolak --> FeedbackReject
+        }
+
+        FeedbackOK --> DosenTutupSesi
+        FeedbackLate --> DosenTutupSesi
+        FeedbackReject --> MahasiswaTapRFID
+        DosenTutupSesi --> MahasiswaAktiviatas
+
+        state "📖 Aktivitas Pembelajaran" as MahasiswaAktiviatas {
+            [*] --> AksesMateri
+            AksesMateri --> KerjakanTugas
+            KerjakanTugas --> SubmitTugas
+            SubmitTugas --> KerjakanKuis
+            KerjakanKuis --> SubmitKuis
+            SubmitKuis --> [*]
+        }
+
+        MahasiswaAktiviatas --> [*]
+    }
+
+    SESI_PERKULIAHAN --> MONITORING
+
+    state "👨‍🏫 FASE 4: Monitoring (Kaprodi & Ketua Kelas)" as MONITORING {
+        [*] --> KaprodiMonitorPresensi
+        KaprodiMonitorPresensi --> KaprodiLihatDosen
+        KaprodiLihatDosen --> KaprodiLihatMahasiswa
+        [*] --> KetuaMonitorRekan
+        KetuaMonitorRekan --> KetuaVerifikasiPresensi
+        KaprodiLihatMahasiswa --> [*]
+        KetuaVerifikasiPresensi --> [*]
+    }
+
+    MONITORING --> PENILAIAN
+
+    state "📝 FASE 5: Penilaian (Dosen)" as PENILAIAN {
+        [*] --> NilaiSubmissionTugas
+        NilaiSubmissionTugas --> NilaiKuis
+        NilaiKuis --> InputNilaiKomponen
+        InputNilaiKomponen --> HitungNilaiAkhir
+        HitungNilaiAkhir --> TentukanGrade
+        TentukanGrade --> [*]
+    }
+
+    PENILAIAN --> HASIL
+
+    state "🎓 FASE 6: Hasil (Mahasiswa)" as HASIL {
+        [*] --> LihatKHS
+        LihatKHS --> LihatRekapPresensi
+        LihatRekapPresensi --> LihatProgress
+        LihatProgress --> [*]
+    }
+
+    HASIL --> AUDIT_LOG
+
+    state "📝 FASE 7: Audit (Admin)" as AUDIT_LOG {
+        [*] --> LihatLogAktivitas
+        LihatLogAktivitas --> ReviewPerubahan
+        ReviewPerubahan --> [*]
+    }
+
+    AUDIT_LOG --> [*]

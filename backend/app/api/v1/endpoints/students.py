@@ -46,7 +46,7 @@ def list_students(
             students = [s for s in students if s.academic_cohort == cohort]
         if class_type is not None:
             students = [s for s in students if s.class_type == class_type]
-    elif current.role == UserRole.KETUA_KELAS:
+    elif current.role == UserRole.MAHASISWA:
         student = StudentRepository.get_by_user_id(db, current.id)
         if not student:
             return []
@@ -56,13 +56,7 @@ def list_students(
         ).all()
         target_class_ids = set(assignments)
         if not target_class_ids:
-            enrolled = db.scalars(
-                select(ClassEnrollment.class_id).where(ClassEnrollment.student_id == student.id)
-            ).all()
-            target_class_ids = set(enrolled)
-
-        if not target_class_ids:
-            return []
+            return [student]
 
         student_ids = db.scalars(
             select(ClassEnrollment.student_id)

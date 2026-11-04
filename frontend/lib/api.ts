@@ -127,6 +127,7 @@ export interface User {
   full_name: string;
   role: "ADMIN" | "KAPRODI" | "DOSEN" | "KETUA_KELAS" | "MAHASISWA";
   is_active: boolean;
+  is_class_leader?: boolean;
   student_profile?: StudentProfile;
   lecturer_profile?: LecturerProfile;
 }

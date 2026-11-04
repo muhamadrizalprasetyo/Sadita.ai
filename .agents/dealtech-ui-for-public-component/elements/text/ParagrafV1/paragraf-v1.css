@@ -1,0 +1,14 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+.paragraf-v1 {
+  --paragraf-v1-muted: #4b5563;
+
+  box-sizing: border-box;
+  margin: 16px auto 0;
+  max-width: 720px;
+  color: var(--paragraf-v1-muted);
+  font-family: 'Inter', sans-serif;
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  text-align: center;
+}

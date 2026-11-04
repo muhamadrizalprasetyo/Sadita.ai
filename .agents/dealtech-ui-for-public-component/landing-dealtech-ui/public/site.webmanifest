@@ -1,0 +1,22 @@
+{
+  "name": "Dealtech UI",
+  "short_name": "Dealtech UI",
+  "description": "Komponen UI React siap pakai untuk dashboard admin dan halaman publik.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#01498b",
+  "icons": [
+    {
+      "src": "/images/hexmark-180.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "/images/hexmark-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

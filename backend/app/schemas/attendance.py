@@ -23,8 +23,9 @@ class SessionCreateRequest(BaseModel):
 
 
 class SessionOpenRequest(BaseModel):
-    """Body untuk membuka sesi — opsional, dapat dipakai untuk menetapkan topik."""
+    """Body untuk membuka sesi — opsional menetapkan topik dan alasan keterlambatan jika terlambat."""
     topic: Optional[str] = Field(None, max_length=255)
+    delay_reason: Optional[str] = Field(None, max_length=500, description="Alasan keterlambatan (wajib jika dosen terlambat > 10 menit)")
 
 
 class SessionResponse(BaseModel):
@@ -36,6 +37,9 @@ class SessionResponse(BaseModel):
     status: SessionStatus
     opened_at: Optional[datetime]
     closed_at: Optional[datetime]
+    scheduled_start_at: Optional[datetime] = None
+    delay_minutes: Optional[int] = None
+    delay_reason: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
 

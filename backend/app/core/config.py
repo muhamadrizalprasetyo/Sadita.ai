@@ -85,6 +85,9 @@ class Settings(BaseSettings):
     UPLOAD_DIR: str = "uploads"
     MAX_UPLOAD_SIZE_MB: int = 10
 
+    # --- Academic & Attendance Policies ---
+    MIN_ATTENDANCE_PERCENTAGE_FOR_UAS: float = 75.0
+
     # --- Gemini ---
     GEMINI_API_KEY: str = ""
 

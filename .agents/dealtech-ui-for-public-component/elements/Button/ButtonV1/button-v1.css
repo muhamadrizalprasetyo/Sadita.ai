@@ -1,0 +1,75 @@
+/* ButtonV1 — pil, dua varian: primary dan outline. */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+.btn-v1,
+.btn-v1-group {
+  --btn-primary: #01498b;
+  --btn-primary-dark: #013a6f;
+  --btn-primary-soft: rgba(1, 73, 139, 0.08);
+  font-family: 'Inter', sans-serif;
+}
+
+.btn-v1 {
+  position: relative;
+  min-width: 240px;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 50px;
+  border-radius: 999px;
+  padding: 0 24px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+}
+
+.btn-v1:hover {
+  transform: translateY(-1px);
+}
+
+.btn-v1--primary {
+  border: 1px solid var(--btn-primary);
+  background: var(--btn-primary);
+  color: #ffffff;
+}
+
+.btn-v1--primary:hover {
+  background: var(--btn-primary-dark);
+  border-color: var(--btn-primary-dark);
+}
+
+.btn-v1--outline {
+  border: 1px solid var(--btn-primary);
+  background: #ffffff;
+  color: var(--btn-primary);
+}
+
+.btn-v1--outline:hover {
+  background: var(--btn-primary-soft);
+}
+
+/* Pembungkus opsional bila tombol berjajar */
+.btn-v1-group {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+@media (max-width: 640px) {
+  .btn-v1-group {
+    flex-direction: column;
+    width: 100%;
+  }
+  .btn-v1-group .btn-v1 {
+    width: 100%;
+    min-width: 0;
+  }
+}

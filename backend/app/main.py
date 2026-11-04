@@ -30,11 +30,12 @@ logger = logging.getLogger(__name__)
 def ensure_database_ready() -> None:
     """Ensure schema and seed data exist before serving requests.
 
-    This is intentionally defensive: some direct app usage patterns (for example
-    TestClient(app) without an explicit context manager) skip the ASGI lifespan,
-    so a startup-only bootstrap would otherwise be missed.
+    Per P0-15 & enterprise standards: in production, database schema must be
+    managed exclusively via Alembic migrations. create_all is only allowed in
+    development/test environments.
     """
-    Base.metadata.create_all(bind=engine)
+    if settings.APP_ENV != "production":
+        Base.metadata.create_all(bind=engine)
     seed_database()
     try:
         seed_schedule()

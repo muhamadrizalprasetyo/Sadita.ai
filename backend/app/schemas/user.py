@@ -117,6 +117,7 @@ class UserResponse(UserBase):
     id: int
     created_at: datetime
     updated_at: datetime
+    is_class_leader: bool = False
     student_profile: Optional[StudentProfileResponse] = None
     lecturer_profile: Optional[LecturerProfileResponse] = None
 

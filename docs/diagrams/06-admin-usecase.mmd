@@ -1,0 +1,63 @@
+%% SADITA.ai — Use Case Diagram Admin
+
+graph TB
+    ADMIN["🛡️ Admin"]
+
+    subgraph SADITA["Sistem SADITA.ai — Admin Module"]
+        direction TB
+        subgraph AUTH["Autentikasi"]
+            A1["Login ke Sistem"]
+            A2["Logout"]
+        end
+        subgraph USER_MGMT["Manajemen Pengguna"]
+            B1["Buat Akun Pengguna"]
+            B2["Edit Akun Pengguna"]
+            B3["Nonaktifkan Akun"]
+            B4["Lihat Daftar Pengguna"]
+            B5["Atur Role Pengguna"]
+        end
+        subgraph AKADEMIK["Manajemen Akademik"]
+            C1["Kelola Program Studi"]
+            C2["Kelola Semester/Tahun Akademik"]
+            C3["Kelola Mata Kuliah"]
+            C4["Kelola Kelas Perkuliahan"]
+            C5["Kelola Ruangan"]
+            C6["Kelola Enrollment Mahasiswa"]
+            C7["Tugaskan Ketua Kelas"]
+        end
+        subgraph DEVICE["Manajemen Perangkat"]
+            D1["Daftarkan Perangkat IoT"]
+            D2["Monitor Status Perangkat"]
+            D3["Nonaktifkan Perangkat"]
+            D4["Lihat Detail Perangkat"]
+        end
+        subgraph MONITORING["Monitoring Sistem"]
+            E1["Lihat Dashboard Admin"]
+            E2["Monitor Presensi Global"]
+            E3["Lihat Audit Log"]
+            E4["Monitor LMS"]
+        end
+    end
+
+    ADMIN --> A1
+    ADMIN --> A2
+    ADMIN --> B1
+    ADMIN --> B2
+    ADMIN --> B3
+    ADMIN --> B4
+    ADMIN --> B5
+    ADMIN --> C1
+    ADMIN --> C2
+    ADMIN --> C3
+    ADMIN --> C4
+    ADMIN --> C5
+    ADMIN --> C6
+    ADMIN --> C7
+    ADMIN --> D1
+    ADMIN --> D2
+    ADMIN --> D3
+    ADMIN --> D4
+    ADMIN --> E1
+    ADMIN --> E2
+    ADMIN --> E3
+    ADMIN --> E4

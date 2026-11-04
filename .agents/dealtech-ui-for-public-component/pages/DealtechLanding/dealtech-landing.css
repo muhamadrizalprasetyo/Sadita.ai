@@ -1,0 +1,334 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+.dealtech-landing-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+}
+
+.dealtech-landing-page__main {
+  flex: 1;
+}
+
+.model-test__visual-frame {
+  min-height: 340px;
+  display: grid;
+  align-content: center;
+  gap: 12px;
+  padding: 22px;
+}
+
+.model-test__brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: 0 10px 24px rgba(0, 36, 70, 0.08);
+  color: #111111;
+}
+
+.model-test__brand strong {
+  font-size: 1rem;
+  line-height: 1.3;
+  font-weight: 700;
+}
+
+.model-test__brand-icon {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 48px;
+  border-radius: 14px;
+}
+
+.model-test__brand--gemini .model-test__brand-icon {
+  background: linear-gradient(135deg, rgba(66, 133, 244, 0.14), rgba(139, 92, 246, 0.14));
+  color: #4f46e5;
+}
+
+.model-test__brand--claude .model-test__brand-icon {
+  background: rgba(204, 120, 92, 0.12);
+  color: #b85c38;
+}
+
+.model-test__brand--codex .model-test__brand-icon {
+  background: rgba(1, 73, 139, 0.1);
+  color: #01498b;
+}
+
+.model-test__checklist {
+  gap: 12px;
+}
+
+.model-test__checklist .about-v6__benefit {
+  align-items: center;
+}
+
+.hero-v6 {
+  --hero-v6-primary: #01498b;
+  --hero-v6-primary-dark: #013a6f;
+
+  box-sizing: border-box;
+  width: 100%;
+  padding-bottom: 14px;
+  background: #ffffff;
+  font-family: 'Inter', sans-serif;
+}
+
+.hero-v6 *,
+.hero-v6 *::before,
+.hero-v6 *::after {
+  box-sizing: border-box;
+}
+
+.hero-v6__surface {
+  width: 100%;
+  margin: 0 auto;
+  overflow: hidden;
+  border-radius: 0 0 44px 44px;
+  background: var(--hero-v6-primary);
+  box-shadow: 0 12px 0 rgba(1, 73, 139, 0.18);
+}
+
+.hero-v6__shell {
+  width: min(1160px, calc(100% - 44px));
+  min-height: 560px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  align-items: center;
+  gap: clamp(36px, 5vw, 72px);
+  padding: 45px 0;
+}
+
+.hero-v6__content {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.hero-v6__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 12px;
+  padding: 5px 13px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.hero-v6__title {
+  margin: 0;
+  color: #ffffff;
+  font-size: clamp(2.15rem, 4vw, 3.05rem);
+  line-height: 1.24;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+}
+
+.hero-v6__title-accent {
+  color: var(--hero-v6-primary);
+  background: #ffffff;
+  padding: 2px 10px;
+  border-radius: 6px;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+.hero-v6__description {
+  margin: 16px 0 0;
+  max-width: 620px;
+  color: rgba(255, 255, 255, 0.76);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+}
+
+.hero-v6__actions {
+  margin-top: 26px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.hero-v6__button {
+  min-width: 210px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 50px;
+  border-radius: 999px;
+  padding: 0 24px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.hero-v6__button:hover {
+  transform: translateY(-1px);
+}
+
+.hero-v6__button--primary {
+  border: 1px solid #ffffff;
+  background: #ffffff;
+  color: var(--hero-v6-primary);
+}
+
+.hero-v6__button--primary:hover {
+  background: #eef7ff;
+}
+
+.hero-v6__button--secondary {
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  background: transparent;
+  color: #ffffff;
+}
+
+.hero-v6__button--secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.hero-v6__visual {
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 28px 70px rgba(0, 28, 55, 0.28);
+  transform: perspective(1200px) rotateY(-3deg) rotateX(1deg);
+}
+
+.hero-v6__visual img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+}
+
+.hero-v6__hidden {
+  opacity: 0;
+}
+
+.hero-v6__reveal {
+  will-change: opacity;
+}
+
+.hero-v6__visible {
+  animation: heroV6FadeIn 0.5s ease forwards;
+}
+
+.hero-v6__visual.hero-v6__visible {
+  animation-name: heroV6VisualIn;
+}
+
+@keyframes heroV6FadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes heroV6VisualIn {
+  from {
+    opacity: 0;
+    transform: perspective(1200px) translateY(12px) rotateY(-3deg) rotateX(1deg);
+  }
+  to {
+    opacity: 1;
+    transform: perspective(1200px) rotateY(-3deg) rotateX(1deg);
+  }
+}
+
+@media (max-width: 900px) {
+  .hero-v6__surface {
+    border-radius: 0 0 34px 34px;
+  }
+
+  .hero-v6__shell {
+    min-height: 0;
+    grid-template-columns: 1fr;
+    gap: 36px;
+    padding: 45px 0;
+  }
+
+  .hero-v6__title {
+    max-width: 720px;
+    font-size: clamp(1.85rem, 6vw, 2.7rem);
+  }
+
+  .hero-v6__visual {
+    width: 100%;
+    transform: none;
+  }
+
+  .hero-v6__visual.hero-v6__visible {
+    animation-name: heroV6FadeIn;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero-v6 {
+    padding-bottom: 10px;
+  }
+
+  .hero-v6__surface {
+    width: 100%;
+    border-radius: 0 0 26px 26px;
+    box-shadow: 0 8px 0 rgba(1, 73, 139, 0.18);
+  }
+
+  .hero-v6__shell {
+    width: min(calc(100% - 36px), 1160px);
+    padding: 36px 0 32px;
+  }
+
+  .hero-v6__actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .hero-v6__button {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .model-test__visual-frame {
+    min-height: 0;
+    padding: 16px;
+  }
+
+  .model-test__brand {
+    padding: 13px 14px;
+  }
+
+  .model-test__brand-icon {
+    width: 42px;
+    height: 42px;
+    flex-basis: 42px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-v6__visible {
+    animation: none;
+    opacity: 1;
+  }
+}
