@@ -87,39 +87,6 @@ const navigation: Record<Role, NavItem[]> = {
   ],
 };
 
-const bottomNavConfig: Record<Role, NavItem[]> = {
-  ADMIN: [
-    { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/admin/users", label: "User", icon: Users },
-    { href: "/admin/akademik", label: "Akademik", icon: Building2 },
-    { href: "/admin/presensi", label: "Presensi", icon: Clock },
-  ],
-  KAPRODI: [
-    { href: "/kaprodi/dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/kaprodi/dosen", label: "Dosen", icon: Users },
-    { href: "/kaprodi/mahasiswa", label: "Mahasiswa", icon: GraduationCap },
-    { href: "/kaprodi/presensi", label: "Presensi", icon: Clock },
-  ],
-  DOSEN: [
-    { href: "/dosen/dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/dosen/kelas", label: "Kelas", icon: BookOpen },
-    { href: "/dosen/presensi", label: "Presensi", icon: Clock },
-    { href: "/dosen/tugas", label: "Tugas", icon: CheckSquare },
-  ],
-  KETUA_KELAS: [
-    { href: "/ketua-kelas/dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/ketua-kelas/presensi", label: "Verifikasi", icon: Clock },
-    { href: "/ketua-kelas/rekan", label: "Rekan", icon: Users },
-    { href: "/ketua-kelas/jadwal", label: "Jadwal", icon: Calendar },
-  ],
-  MAHASISWA: [
-    { href: "/mahasiswa/dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/mahasiswa/krs", label: "KRS", icon: Calendar },
-    { href: "/mahasiswa/presensi", label: "Presensi", icon: Clock },
-    { href: "/mahasiswa/tugas", label: "Tugas", icon: CheckSquare },
-  ],
-};
-
 export function homeFor(role: Role): string {
   switch (role) {
     case "ADMIN": return "/admin/dashboard";
@@ -288,8 +255,6 @@ export function RoleShell({ role, children }: { role: Role; children: ReactNode 
     .join("")
     .slice(0, 2)
     .toUpperCase();
-
-  const quickBottomItems = bottomNavConfig[role] || baseItems.slice(0, 4);
 
   return (
     <div className="app-shell relative">
@@ -627,57 +592,7 @@ export function RoleShell({ role, children }: { role: Role; children: ReactNode 
       </main>
 
       {/* =========================================================================
-          5. MOBILE BOTTOM NAVIGATION (Ergonomic Thumb Zone, iPhone Safe Area)
-          ========================================================================= */}
-      <nav
-        className="flex md:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-[#eceef2] dark:border-slate-800 pb-safe pt-1 px-1 shadow-lg"
-        aria-label="Navigasi Bawah Seluler"
-      >
-        <div className="grid grid-cols-5 w-full items-center">
-          {quickBottomItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = pathname === item.href || (item.href !== homeFor(role) && pathname.startsWith(item.href + "/"));
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`touch-target flex flex-col items-center justify-center gap-0.5 py-1 px-1 transition-all rounded-md ${isActive
-                  ? "text-blue-600 dark:text-blue-400 font-semibold"
-                  : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
-                  }`}
-              >
-                <div className={`p-1 rounded-full transition-transform ${isActive ? "scale-105 bg-blue-50 dark:bg-blue-950/50" : ""}`}>
-                  <Icon size={19} strokeWidth={isActive ? 2.4 : 1.8} />
-                </div>
-                <span className="text-[10px] leading-tight truncate max-w-16 text-center">
-                  {item.label}
-                </span>
-              </Link>
-            );
-          })}
-
-          {/* 5th Button: Drawer / Menu Toggle */}
-          <button
-            type="button"
-            onClick={() => setMobileDrawerOpen((prev) => !prev)}
-            className={`touch-target flex flex-col items-center justify-center gap-0.5 py-1 px-1 transition-all rounded-md ${mobileDrawerOpen
-              ? "text-blue-600 dark:text-blue-400 font-semibold"
-              : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
-              }`}
-            aria-label="Buka menu lengkap"
-          >
-            <div className={`p-1 rounded-full transition-transform ${mobileDrawerOpen ? "scale-105 bg-blue-50 dark:bg-blue-950/50" : ""}`}>
-              <MenuIcon size={19} strokeWidth={mobileDrawerOpen ? 2.4 : 1.8} />
-            </div>
-            <span className="text-[10px] leading-tight truncate max-w-16 text-center">
-              Menu
-            </span>
-          </button>
-        </div>
-      </nav>
-
-      {/* =========================================================================
-          6. FLOATING CONTROLS: SI KOBAR AI Assistant & Back to Top
+          5. FLOATING CONTROLS: SI KOBAR AI Assistant & Back to Top
           ========================================================================= */}
       <KobarAssistant user={user} />
       <BackToTop />

@@ -377,7 +377,7 @@ html {
 
 /* ---------- Main Content ---------- */
 .content-area {
-  @apply py-3.5 px-5 pb-8 min-w-0 overflow-x-hidden max-w-[1600px] w-full mx-auto max-md:px-3 max-md:pt-2.5 max-md:pb-[calc(7.25rem+env(safe-area-inset-bottom))];
+  @apply py-3.5 px-5 pb-8 min-w-0 overflow-x-hidden max-w-[1600px] w-full mx-auto max-md:px-3 max-md:pt-2.5 max-md:pb-[calc(2.5rem+env(safe-area-inset-bottom))];
 }
 
 /* ---------- Topbar ---------- */
@@ -1017,15 +1017,15 @@ html {
    SI KOBAR AI Assistant Widget & Floating Controls
    ========================================================================== */
 .kobar-fab {
-  @apply fixed bottom-8 right-8 max-md:bottom-[calc(4.5rem+env(safe-area-inset-bottom))] max-md:right-3.5 w-14 h-14 max-sm:w-11 max-sm:h-11 rounded-full text-white flex items-center justify-center cursor-pointer z-30 transition-transform hover:scale-105 active:scale-95 bg-linear-to-br from-[#0a7fd8] to-[#35a4f2] shadow-lg min-w-11 min-h-11;
+  @apply fixed bottom-8 right-8 max-md:bottom-[calc(1rem+env(safe-area-inset-bottom))] max-md:right-3.5 w-14 h-14 max-sm:w-11 max-sm:h-11 rounded-full text-white flex items-center justify-center cursor-pointer z-30 transition-transform hover:scale-105 active:scale-95 bg-linear-to-br from-[#0a7fd8] to-[#35a4f2] shadow-lg min-w-11 min-h-11;
 }
 
 .back-to-top-btn {
-  @apply fixed bottom-25 right-9.5 max-md:bottom-[calc(7.75rem+env(safe-area-inset-bottom))] max-md:right-4 w-11 h-11 max-sm:w-9.5 max-sm:h-9.5 rounded-full bg-white border border-slate-200 text-blue-600 flex items-center justify-center cursor-pointer z-30 transition-all hover:-translate-y-0.5 hover:bg-blue-600 hover:text-white active:scale-95 shadow-md min-w-9.5 min-h-9.5;
+  @apply fixed bottom-25 right-9.5 max-md:bottom-[calc(4.25rem+env(safe-area-inset-bottom))] max-md:right-4 w-11 h-11 max-sm:w-9.5 max-sm:h-9.5 rounded-full bg-white border border-slate-200 text-blue-600 flex items-center justify-center cursor-pointer z-30 transition-all hover:-translate-y-0.5 hover:bg-blue-600 hover:text-white active:scale-95 shadow-md min-w-9.5 min-h-9.5;
 }
 
 .kobar-window {
-  @apply fixed right-8 bottom-26 w-95 h-130 max-md:fixed max-md:inset-x-2.5 max-md:bottom-[calc(4.75rem+env(safe-area-inset-bottom))] max-md:w-auto max-md:max-h-[75vh] max-md:h-auto rounded-lg flex flex-col z-50 overflow-hidden border border-[#eceef2] bg-white shadow-app max-w-[calc(100vw-1.25rem)] max-h-[calc(100vh-6rem)];
+  @apply fixed right-8 bottom-26 w-95 h-130 max-md:fixed max-md:inset-x-2.5 max-md:bottom-[calc(1rem+env(safe-area-inset-bottom))] max-md:w-auto max-md:max-h-[75vh] max-md:h-auto rounded-lg flex flex-col z-50 overflow-hidden border border-[#eceef2] bg-white shadow-app max-w-[calc(100vw-1.25rem)] max-h-[calc(100vh-6rem)];
   animation: slideUp 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
