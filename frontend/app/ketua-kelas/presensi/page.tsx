@@ -1,12 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   ShieldCheck,
   CheckCircle,
-  XCircle,
   Clock,
-  Users,
   AlertCircle
 } from "lucide-react";
 import { academicApi, attendanceApi, workflowApi, CourseClass, AttendanceSession, AttendanceRecord, AttendanceRequest } from "@/lib/api";
@@ -24,10 +22,10 @@ export default function KetuaKelasPresensiPage() {
   const [verifyingId, setVerifyingId] = useState<number | null>(null);
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
-  const reloadPending = async (classId: number) => {
+  const reloadPending = useCallback(async (classId: number) => {
     const res = await workflowApi.pendingPresence(classId);
     setPendingRequests(res.data ?? []);
-  };
+  }, []);
 
   useEffect(() => {
     void academicApi.getClasses().then(r => {
@@ -38,30 +36,34 @@ export default function KetuaKelasPresensiPage() {
   }, []);
 
   useEffect(() => {
-    if (selected) {
-      void attendanceApi.getSessions(selected).then(r => {
-        const sess = r.data ?? [];
-        setSessions(sess);
-        const open = sess.find(s => s.status === "OPEN");
-        setActiveSession(open || null);
-        if (open) {
-          void attendanceApi.getSessionRecords(open.id).then(rr => setRecords(rr.data ?? []));
-        } else {
-          setRecords([]);
-        }
-      });
-      void reloadPending(selected);
-      void academicApi.getClassStudents(selected).then(r => {
-        const map: Record<number, { name: string; nim: string }> = {};
-        for (const enr of r.data ?? []) {
-          map[enr.student_id] = {
-            name: enr.student?.full_name ?? "—",
-            nim: enr.student?.nim ?? String(enr.student_id),
-          };
-        }
-        setStudents(map);
-      });
-    }
+    if (!selected) return;
+
+    void attendanceApi.getSessions(selected).then(r => {
+      const sess = r.data ?? [];
+      setSessions(sess);
+      const open = sess.find(s => s.status === "OPEN");
+      setActiveSession(open || null);
+      if (open) {
+        void attendanceApi.getSessionRecords(open.id).then(rr => setRecords(rr.data ?? []));
+      } else {
+        setRecords([]);
+      }
+    });
+
+    void workflowApi.pendingPresence(selected).then((res) => {
+      setPendingRequests(res.data ?? []);
+    });
+
+    void academicApi.getClassStudents(selected).then(r => {
+      const map: Record<number, { name: string; nim: string }> = {};
+      for (const enr of r.data ?? []) {
+        map[enr.student_id] = {
+          name: enr.student?.full_name ?? "—",
+          nim: enr.student?.nim ?? String(enr.student_id),
+        };
+      }
+      setStudents(map);
+    });
   }, [selected]);
 
   const handleVerify = async (requestId: number) => {

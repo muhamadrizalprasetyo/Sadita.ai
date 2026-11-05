@@ -93,22 +93,32 @@ export function DosenAttendanceWorkspace() {
   }, []);
 
   const loadSessions = useCallback(async (id: number) => {
-    setSessionsLoading(true);
-    setSessionsError(undefined);
     const res = await attendanceApi.getSessions(id);
     if (res.error) {
       setSessionsError(res.error);
       setSessions([]);
     } else {
       setSessions(res.data ?? []);
+      setSessionsError(undefined);
     }
     setSessionsLoading(false);
     void loadRequests(id);
   }, [loadRequests]);
 
   useEffect(() => {
-    if (classId) void loadSessions(classId);
-  }, [classId, loadSessions]);
+    if (!classId) return;
+    void attendanceApi.getSessions(classId).then((res) => {
+      if (res.error) {
+        setSessionsError(res.error);
+        setSessions([]);
+      } else {
+        setSessions(res.data ?? []);
+        setSessionsError(undefined);
+      }
+      setSessionsLoading(false);
+      void loadRequests(classId);
+    });
+  }, [classId, loadRequests]);
 
   const openDetail = async (session: AttendanceSession) => {
     setDetailSession(session);

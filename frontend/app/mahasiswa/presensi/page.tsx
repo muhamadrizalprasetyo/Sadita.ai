@@ -43,6 +43,7 @@ export default function MahasiswaPresensiPage() {
       setClasses(classList);
       if (classList.length > 0) {
         setSelectedClass(classList[0].id);
+        setSessionsLoading(true);
       }
       setLoading(false);
     }
@@ -51,7 +52,6 @@ export default function MahasiswaPresensiPage() {
 
   useEffect(() => {
     if (!selectedClass || !user) return;
-    setSessionsLoading(true);
     void attendanceApi.getSessions(selectedClass).then(async (r) => {
       const list = r.data ?? [];
       setSessions(list);
@@ -130,7 +130,10 @@ export default function MahasiswaPresensiPage() {
           className="form-select"
           style={{ maxWidth: "24rem", flex: 1 }}
           value={selectedClass ?? ""}
-          onChange={(e) => setSelectedClass(Number(e.target.value))}
+          onChange={(e) => {
+            setSelectedClass(Number(e.target.value));
+            setSessionsLoading(true);
+          }}
         >
           {classes.map((c) => (
             <option key={c.id} value={c.id}>

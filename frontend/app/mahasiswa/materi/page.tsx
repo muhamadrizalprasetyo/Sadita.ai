@@ -34,14 +34,16 @@ export default function MahasiswaMateriPage() {
     void academicApi.getClasses().then((r) => {
       const list = r.data ?? [];
       setClasses(list);
-      if (list.length > 0) setSelectedClass(list[0].id);
+      if (list.length > 0) {
+        setSelectedClass(list[0].id);
+        setMatLoading(true);
+      }
       setLoading(false);
     });
   }, []);
 
   useEffect(() => {
     if (!selectedClass) return;
-    setMatLoading(true);
     void lmsApi.getMaterials(selectedClass).then((r) => {
       setMaterials(r.data ?? []);
       setMatLoading(false);
@@ -66,7 +68,10 @@ export default function MahasiswaMateriPage() {
           className="form-select"
           style={{ maxWidth: "24rem", flex: 1 }}
           value={selectedClass ?? ""}
-          onChange={(e) => setSelectedClass(Number(e.target.value))}
+          onChange={(e) => {
+            setSelectedClass(Number(e.target.value));
+            setMatLoading(true);
+          }}
         >
           {classes.map((c) => (
             <option key={c.id} value={c.id}>

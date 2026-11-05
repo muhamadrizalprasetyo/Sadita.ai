@@ -1,16 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import Link from "next/link";
 import { 
   Search, 
   Users, 
   BookOpen, 
   CheckCircle, 
-  XCircle, 
   Check, 
   X, 
-  Clock, 
   AlertCircle,
   FileCheck2
 } from "lucide-react";
@@ -47,7 +45,7 @@ export function DosenClassesPage() {
   const [submittingReview, setSubmittingReview] = useState(false);
   const [reviewError, setReviewError] = useState<string | null>(null);
 
-  const loadCounts = () => {
+  const loadCounts = useCallback(() => {
     if (classes.length === 0) return;
     void Promise.all(
       classes.map(async (c) => {
@@ -61,22 +59,25 @@ export function DosenClassesPage() {
       });
       setCounts(map);
     });
-  };
+  }, [classes]);
 
   useEffect(() => {
     loadCounts();
-  }, [classes]);
+  }, [loadCounts]);
 
-  const loadKrsRequests = async () => {
-    setKrsLoading(true);
+  const loadKrsRequests = useCallback(async () => {
     const param = statusFilter !== "all" ? statusFilter : undefined;
     const res = await krsApi.getLecturerRequests(param);
     if (res.data) setKrsRequests(res.data);
     setKrsLoading(false);
-  };
+  }, [statusFilter]);
 
   useEffect(() => {
-    void loadKrsRequests();
+    const param = statusFilter !== "all" ? statusFilter : undefined;
+    void krsApi.getLecturerRequests(param).then((res) => {
+      if (res.data) setKrsRequests(res.data);
+      setKrsLoading(false);
+    });
   }, [statusFilter]);
 
   const pendingCount = useMemo(() => {

@@ -201,7 +201,7 @@ class AcademicService(BaseService[AcademicRepository]):
             if current.role == UserRole.DOSEN:
                 lecturer = LecturerRepository.get_by_user_id(db, current.id)
                 classes = [item for item in classes if lecturer and item.lecturer_id == lecturer.id]
-            elif current.role in (UserRole.MAHASISWA, UserRole.KETUA_KELAS):
+            elif current.role == UserRole.MAHASISWA:
                 student = StudentRepository.get_by_user_id(db, current.id)
                 if student:
                     enrolled_ids = {
@@ -244,7 +244,7 @@ class AcademicService(BaseService[AcademicRepository]):
                 students = [s for s in students if s.class_type == class_type]
             return students
 
-        if current.role in (UserRole.KETUA_KELAS, UserRole.MAHASISWA):
+        if current.role == UserRole.MAHASISWA:
             student = StudentRepository.get_by_user_id(db, current.id)
             if not student:
                 return []

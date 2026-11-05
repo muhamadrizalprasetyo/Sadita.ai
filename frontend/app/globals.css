@@ -184,6 +184,7 @@ html {
   }
 
   @media (min-width: 640px) {
+
     input::placeholder,
     textarea::placeholder,
     select::placeholder {
@@ -202,7 +203,7 @@ html {
 
 /* Touch target & Apple Human Interface Guidelines helper */
 @utility touch-target {
-  @apply min-h-[44px] min-w-[44px] inline-flex items-center justify-center;
+  @apply min-h-11 min-w-11 inline-flex items-center justify-center;
 }
 
 @utility pt-safe {
@@ -464,7 +465,7 @@ html {
 }
 
 .stat {
-  @apply rounded-lg py-2 px-2.5 sm:py-2.5 sm:px-3 text-white relative flex flex-col justify-between min-h-[72px] sm:min-h-20 transition-all shadow-xs hover:-translate-y-px hover:shadow-md;
+  @apply rounded-lg py-2 px-2.5 sm:py-2.5 sm:px-3 text-white relative flex flex-col justify-between min-h-18 sm:min-h-20 transition-all shadow-xs hover:-translate-y-px hover:shadow-md;
 }
 
 .stat.stat-green {

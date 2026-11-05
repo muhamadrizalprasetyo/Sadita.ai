@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { 
   LayoutDashboard, 
@@ -70,7 +71,7 @@ export default function Sidebar({ role, className = "" }: SidebarProps) {
       }}
     >
       <div style={{ borderBottom: "1px solid #e2e8f0", padding: "1.5rem" }}>
-        <img src="/logo.png" alt="SADITA.ai" style={{ width: "9rem", height: "auto", objectFit: "contain", display: "block" }} />
+        <Image src="/logo.png" alt="SADITA.ai" width={144} height={36} priority style={{ width: "9rem", height: "auto", objectFit: "contain", display: "block" }} />
         <p style={{ marginTop: "0.5rem", fontSize: "0.7rem", fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: "#64748b" }}>{role} Portal</p>
       </div>
       <nav style={{ padding: "1rem" }}>

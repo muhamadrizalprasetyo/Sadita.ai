@@ -1,10 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
-import { BookOpen, Users, ArrowRight, Plus } from "lucide-react";
-import { academicApi, CourseClass, Course, AcademicTerm } from "@/lib/api";
-import { StatCard, LoadingSpinner } from "@/components/ui";
+import { useState } from "react";
 import { CoursesPage, ClassesPage, TermsPage } from "@/components/operational-pages";
 
 type Tab = "kelas" | "matakuliah" | "semester";

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Calendar, Clock, MapPin } from "lucide-react";
+import { Calendar, Clock } from "lucide-react";
 import { academicApi, CourseClass } from "@/lib/api";
 import { LoadingSpinner, StatusBadge } from "@/components/ui";
 

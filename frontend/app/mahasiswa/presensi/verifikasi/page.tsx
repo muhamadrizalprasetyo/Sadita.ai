@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Clock, CheckCircle, AlertCircle } from "lucide-react";
+import { Clock } from "lucide-react";
 import { academicApi, attendanceApi, CourseClass, AttendanceSession } from "@/lib/api";
 import { LoadingSpinner, StatusBadge } from "@/components/ui";
 
