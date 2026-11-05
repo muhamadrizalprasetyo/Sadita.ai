@@ -27,6 +27,7 @@ from app.models.workflow import AuditLog
 from app.repositories.academic_repo import AcademicRepository
 from app.repositories.user_repo import LecturerRepository, StudentRepository
 from app.models.user import User, UserRole
+from app.services.academic_service import AcademicService
 from app.services.authorization_service import require_class_access
 from app.schemas.academic import (
     AcademicTermCreate,
@@ -49,131 +50,12 @@ from app.schemas.academic import (
 )
 
 router = APIRouter(prefix="/academic", tags=["Academic"])
+academic_service = AcademicService()
 
 
 @router.get("/dashboard", response_model=AdminDashboardResponse, summary="Ringkasan operasional admin")
 def admin_dashboard(_: RequireAdmin, db: DBSession) -> AdminDashboardResponse:
-    today = date.today()
-
-    total_students = db.scalar(select(func.count(StudentProfile.id))) or 0
-    total_lecturers = db.scalar(select(func.count(LecturerProfile.id))) or 0
-    total_classes = db.scalar(select(func.count(CourseClass.id))) or 0
-    total_courses = db.scalar(select(func.count(Course.id))) or 0
-    open_sessions = (
-        db.scalar(
-            select(func.count(AttendanceSession.id)).where(
-                AttendanceSession.status == SessionStatus.OPEN
-            )
-        )
-        or 0
-    )
-    # Check device liveness (offline if last_seen_at exceeded 5 min or None)
-    devices = db.scalars(select(SaditaDevice)).all()
-    cutoff = datetime.now(timezone.utc) - timedelta(minutes=5)
-    devices_offline = 0
-    for d in devices:
-        if d.status != DeviceStatus.ACTIVE:
-            devices_offline += 1
-        elif not d.last_seen_at or (d.last_seen_at.tzinfo is None and d.last_seen_at.replace(tzinfo=timezone.utc) < cutoff) or (d.last_seen_at.tzinfo and d.last_seen_at < cutoff):
-            d.status = DeviceStatus.OFFLINE
-            devices_offline += 1
-    db.commit()
-    pending_approvals = (
-        db.scalar(
-            select(func.count(ClassEnrollment.id)).where(
-                ClassEnrollment.status != EnrollmentStatus.AKTIF
-            )
-        )
-        or 0
-    )
-    today_attendance = (
-        db.scalar(
-            select(func.count(AttendanceRecord.id)).where(
-                AttendanceRecord.check_in_time >= datetime.combine(today, datetime.min.time())
-            )
-        )
-        or 0
-    )
-
-    # Active session details (if any open session exists)
-    active_session_info: Optional[ActiveSessionInfo] = None
-    open_sess = db.scalars(
-        select(AttendanceSession)
-        .where(AttendanceSession.status == SessionStatus.OPEN)
-        .order_by(AttendanceSession.id.desc())
-    ).first()
-    if open_sess:
-        cls = db.scalar(select(CourseClass).where(CourseClass.id == open_sess.class_id))
-        present_count = (
-            db.scalar(
-                select(func.count(AttendanceRecord.id)).where(
-                    AttendanceRecord.session_id == open_sess.id
-                )
-            )
-            or 0
-        )
-        active_session_info = ActiveSessionInfo(
-            id=open_sess.id,
-            class_id=open_sess.class_id,
-            class_name=cls.name if cls else f"Kelas #{open_sess.class_id}",
-            course_name=cls.course.name if cls and cls.course else "Mata Kuliah",
-            lecturer_name=(
-                cls.lecturer.user.full_name
-                if cls and cls.lecturer and cls.lecturer.user
-                else "Dosen Pengampu"
-            ),
-            room_name=cls.room.name if cls and cls.room else "Ruang Kelas",
-            session_number=open_sess.session_number,
-            topic=open_sess.topic or "Sesi Perkuliahan Berlangsung",
-            opened_at=open_sess.opened_at,
-            present_count=present_count,
-        )
-
-    # Recent activities (from audit trail or recent attendance taps)
-    recent_activities: List[RecentActivityItem] = []
-    audits = db.scalars(select(AuditLog).order_by(AuditLog.created_at.desc()).limit(5)).all()
-    for a in audits:
-        recent_activities.append(
-            RecentActivityItem(
-                id=a.id,
-                action=a.action,
-                description=f"{a.action} pada {a.entity} #{a.entity_id or ''}",
-                created_at=a.created_at,
-            )
-        )
-    if not recent_activities:
-        recent_recs = db.scalars(
-            select(AttendanceRecord).order_by(AttendanceRecord.id.desc()).limit(5)
-        ).all()
-        for r in recent_recs:
-            student_name = (
-                r.student.user.full_name
-                if r.student and r.student.user
-                else f"Mahasiswa #{r.student_id}"
-            )
-            method_str = r.method.value if r.method else "RFID"
-            recent_activities.append(
-                RecentActivityItem(
-                    id=r.id,
-                    action=f"PRESENSI_{r.status.value}",
-                    description=f"{student_name} ({method_str.upper()}) - {r.status.value}",
-                    created_at=r.check_in_time or datetime.now(timezone.utc),
-                )
-            )
-
-    return AdminDashboardResponse(
-        total_students=total_students,
-        total_lecturers=total_lecturers,
-        total_classes=total_classes,
-        total_courses=total_courses,
-        open_sessions=open_sessions,
-        devices_offline=devices_offline,
-        pending_approvals=pending_approvals,
-        today_attendance=today_attendance,
-        generated_at=datetime.now(timezone.utc),
-        active_session=active_session_info,
-        recent_activities=recent_activities,
-    )
+    return academic_service.get_admin_dashboard(db)
 
 
 
@@ -230,15 +112,9 @@ def list_classes(
     term_id: Optional[int] = None,
     lecturer_id: Optional[int] = None,
 ) -> List[CourseClassResponse]:
-    classes = AcademicRepository.list_classes(db, term_id=term_id, lecturer_id=lecturer_id)
-    if current is not None:
-        if current.role == UserRole.DOSEN:
-            lecturer = LecturerRepository.get_by_user_id(db, current.id)
-            classes = [item for item in classes if lecturer and item.lecturer_id == lecturer.id]
-        elif current.role in (UserRole.MAHASISWA, UserRole.KETUA_KELAS):
-            student = StudentRepository.get_by_user_id(db, current.id)
-            enrolled_ids = {item.class_id for item in db.scalars(select(ClassEnrollment).where(ClassEnrollment.student_id == student.id, ClassEnrollment.status == EnrollmentStatus.AKTIF)).all()} if student else set()
-            classes = [item for item in classes if item.id in enrolled_ids]
+    classes = academic_service.list_classes_for_user(
+        db, current=current, term_id=term_id, lecturer_id=lecturer_id
+    )
     return [CourseClassResponse.model_validate(c) for c in classes]
 
 

@@ -14,9 +14,11 @@ from app.models.user import User, UserRole
 from app.models.workflow import ClassLeaderAssignment
 from app.repositories.user_repo import StudentRepository
 from app.schemas.user import HardwareAssignRequest, StudentProfileResponse, StudentProfileUpdate
+from app.services.academic_service import AcademicService
 from app.services.user_service import UserService
 
 router = APIRouter(prefix="/students", tags=["Students"])
+academic_service = AcademicService()
 
 
 @router.get(
@@ -33,55 +35,15 @@ def list_students(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=200),
 ) -> List[StudentProfileResponse]:
-    if class_id:
-        enrollments = db.scalars(
-            select(ClassEnrollment)
-            .where(ClassEnrollment.class_id == class_id)
-            .options(joinedload(ClassEnrollment.student).joinedload(StudentProfile.user))
-            .offset(skip)
-            .limit(limit)
-        ).all()
-        students = [e.student for e in enrollments if e.student]
-        if cohort is not None:
-            students = [s for s in students if s.academic_cohort == cohort]
-        if class_type is not None:
-            students = [s for s in students if s.class_type == class_type]
-    elif current.role == UserRole.KETUA_KELAS:
-        student = StudentRepository.get_by_user_id(db, current.id)
-        if not student:
-            return []
-        assignments = db.scalars(
-            select(ClassLeaderAssignment.class_id)
-            .where(ClassLeaderAssignment.student_id == student.id, ClassLeaderAssignment.is_active.is_(True))
-        ).all()
-        target_class_ids = set(assignments)
-        if not target_class_ids:
-            enrolled = db.scalars(
-                select(ClassEnrollment.class_id).where(ClassEnrollment.student_id == student.id)
-            ).all()
-            target_class_ids = set(enrolled)
-
-        if not target_class_ids:
-            return []
-
-        student_ids = db.scalars(
-            select(ClassEnrollment.student_id)
-            .where(ClassEnrollment.class_id.in_(target_class_ids))
-        ).all()
-        q = (
-            select(StudentProfile)
-            .where(StudentProfile.id.in_(student_ids))
-            .options(joinedload(StudentProfile.user))
-            .order_by(StudentProfile.nim)
-        )
-        if cohort is not None:
-            q = q.where(StudentProfile.academic_cohort == cohort)
-        if class_type is not None:
-            q = q.where(StudentProfile.class_type == class_type)
-        students = db.scalars(q.offset(skip).limit(limit)).unique().all()
-    else:
-        students = StudentRepository.list(db, skip=skip, limit=limit, cohort=cohort, class_type=class_type)
-
+    students = academic_service.list_students_with_filters(
+        db,
+        current=current,
+        class_id=class_id,
+        cohort=cohort,
+        class_type=class_type,
+        skip=skip,
+        limit=limit,
+    )
     return [StudentProfileResponse.model_validate(s) for s in students]
 
 
