@@ -481,7 +481,7 @@ export function DataTable<T extends { id?: string | number }>({
           {/* Right area: Search, Filter popover button, Column Toggle button */}
           <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end sm:ml-auto">
             {searchable && (
-              <div className="relative flex-1 sm:flex-initial sm:w-[230px]">
+              <div className="relative flex-1 sm:flex-initial sm:w-57.5">
                 <Search
                   size={14}
                   style={{
@@ -497,6 +497,7 @@ export function DataTable<T extends { id?: string | number }>({
                   placeholder={searchPlaceholder}
                   value={searchQuery ?? ""}
                   onChange={(e) => onSearchChange?.(e.target.value)}
+                  className="placeholder:text-[11px] sm:placeholder:text-[11.5px] max-md:text-[16px]"
                   style={{
                     width: "100%",
                     padding: "6px 10px 6px 30px",
@@ -1052,73 +1053,65 @@ export function DataTable<T extends { id?: string | number }>({
         </div>
       )}
 
-      {/* 6. Filament Table Footer & Pagination (Responsive Stacking for Mobile) */}
+      {/* 6. Filament Table Footer & Pagination (Single Horizontal Row) */}
       {pagination && (
         <div
-          className="flex flex-col sm:flex-row items-center justify-between p-3 sm:px-4 sm:py-2.5 gap-2.5 border-t border-slate-100 bg-white text-xs text-slate-500 rounded-b-lg"
+          className="flex flex-row items-center justify-between p-2.5 sm:px-4 sm:py-2.5 gap-2 border-t border-slate-100 bg-white text-xs text-slate-500 rounded-b-lg overflow-x-auto"
         >
           {/* Sisi Kiri: Result Count */}
-          <div className="w-full sm:w-auto text-center sm:text-left text-slate-600">
-            Showing{" "}
+          <div className="shrink-0 text-slate-600 text-[11px] sm:text-xs whitespace-nowrap">
+            <span className="hidden sm:inline">Showing </span>
             <strong className="text-slate-900 font-semibold">
               {pagination.totalRecords ? (pagination.currentPage - 1) * perPage + 1 : 1}
             </strong>{" "}
-            to{" "}
+            <span className="text-slate-400">to</span>{" "}
             <strong className="text-slate-900 font-semibold">
               {pagination.totalRecords
                 ? Math.min(pagination.currentPage * perPage, pagination.totalRecords)
                 : data.length}
             </strong>{" "}
-            of{" "}
+            <span className="text-slate-400">of</span>{" "}
             <strong className="text-slate-900 font-semibold">
               {pagination.totalRecords ?? data.length}
-            </strong>{" "}
-            results
+            </strong>
+            <span className="hidden md:inline text-slate-400"> results</span>
           </div>
 
-          {/* Sisi Tengah: Per page selector */}
-          <div className="flex items-center justify-center gap-1.5">
-            <span className="text-[11.5px] text-slate-500">Per page</span>
-            <select
-              value={perPage}
-              onChange={(e) => {
-                const val = Number(e.target.value);
-                setPerPage(val);
-                pagination.onPerPageChange?.(val);
-              }}
-              className="py-1 px-2 text-[11.5px] rounded-md border border-slate-200 bg-white text-slate-700 cursor-pointer outline-none focus:border-blue-500"
-            >
-              {(pagination.perPageOptions || [10, 25, 50, 100]).map((opt) => (
-                <option key={opt} value={opt}>
-                  {opt}
-                </option>
-              ))}
-            </select>
-          </div>
+          {/* Sisi Kanan: Per Page + Segmented Page Numbers in ONE Single Row */}
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            {/* Per page selector */}
+            <div className="flex items-center gap-1.5 shrink-0">
+              <span className="hidden md:inline text-[11px] text-slate-400">Per page</span>
+              <select
+                value={perPage}
+                onChange={(e) => {
+                  const val = Number(e.target.value);
+                  setPerPage(val);
+                  pagination.onPerPageChange?.(val);
+                }}
+                className="py-1 px-1.5 sm:px-2 text-[11px] sm:text-[11.5px] rounded border border-slate-200 bg-white text-slate-700 cursor-pointer outline-none focus:border-blue-500 font-medium"
+                title="Jumlah data per halaman"
+              >
+                {(pagination.perPageOptions || [10, 25, 50, 100]).map((opt) => (
+                  <option key={opt} value={opt}>
+                    {opt}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-          {/* Sisi Kanan: Segmented Page Numbers Box (Centered on Mobile to avoid FAB collision) */}
-          <div className="w-full sm:w-auto flex justify-center sm:justify-end items-center">
             {/* Segmented Page Numbers Box */}
             {pagination.totalPages > 1 && (
-              <div className="inline-flex items-center border border-slate-200 rounded-lg overflow-hidden bg-white shadow-2xs">
+              <div className="inline-flex items-center border border-slate-200 rounded-md overflow-hidden bg-white shadow-2xs shrink-0">
                 {/* Previous Button (only when page > 1) */}
                 {pagination.currentPage > 1 && (
                   <button
                     type="button"
                     onClick={() => pagination.onPageChange(pagination.currentPage - 1)}
-                    style={{
-                      border: "none",
-                      borderRight: "1px solid #e5e7eb",
-                      background: "#ffffff",
-                      color: "#374151",
-                      padding: "5px 8px",
-                      cursor: "pointer",
-                      display: "grid",
-                      placeItems: "center",
-                    }}
+                    className="border-0 border-r border-slate-200 bg-white text-slate-700 hover:bg-slate-50 px-2 py-1 sm:px-2.5 sm:py-1 cursor-pointer grid place-items-center transition-colors"
                     title="Previous page"
                   >
-                    <ChevronLeft size={14} />
+                    <ChevronLeft size={13} />
                   </button>
                 )}
 
@@ -1128,13 +1121,7 @@ export function DataTable<T extends { id?: string | number }>({
                     return (
                       <span
                         key={`ellipsis-${pIdx}`}
-                        style={{
-                          padding: "4px 8px",
-                          fontSize: "11.5px",
-                          color: "#9ca3af",
-                          borderRight: "1px solid #e5e7eb",
-                          userSelect: "none",
-                        }}
+                        className="px-1.5 py-1 sm:px-2 sm:py-1 text-[11px] text-slate-400 border-r border-slate-200 select-none"
                       >
                         …
                       </span>
@@ -1149,18 +1136,10 @@ export function DataTable<T extends { id?: string | number }>({
                       key={pageNum}
                       type="button"
                       onClick={() => pagination.onPageChange(pageNum)}
-                      style={{
-                        border: "none",
-                        borderRight: "1px solid #e5e7eb",
-                        background: isActive ? "#eff6ff" : "#ffffff",
-                        color: isActive ? "#2563eb" : "#374151",
-                        fontWeight: isActive ? 700 : 500,
-                        fontSize: "12px",
-                        padding: "5px 10px",
-                        cursor: "pointer",
-                        minWidth: "30px",
-                        transition: "background 0.1s ease",
-                      }}
+                      className={`border-0 border-r border-slate-200 px-2 py-1 sm:px-2.5 sm:py-1 text-[11px] sm:text-xs cursor-pointer min-w-6 sm:min-w-7 font-mono transition-colors ${isActive
+                        ? "bg-blue-50 text-blue-600 font-bold"
+                        : "bg-white text-slate-700 hover:bg-slate-50 font-medium"
+                        }`}
                     >
                       {pageNum}
                     </button>
@@ -1172,18 +1151,10 @@ export function DataTable<T extends { id?: string | number }>({
                   <button
                     type="button"
                     onClick={() => pagination.onPageChange(pagination.currentPage + 1)}
-                    style={{
-                      border: "none",
-                      background: "#ffffff",
-                      color: "#374151",
-                      padding: "5px 8px",
-                      cursor: "pointer",
-                      display: "grid",
-                      placeItems: "center",
-                    }}
+                    className="border-0 bg-white text-slate-700 hover:bg-slate-50 px-2 py-1 sm:px-2.5 sm:py-1 cursor-pointer grid place-items-center transition-colors"
                     title="Next page"
                   >
-                    <ChevronRight size={14} />
+                    <ChevronRight size={13} />
                   </button>
                 )}
               </div>

@@ -47,7 +47,7 @@ export function TableToolbar({
               placeholder={searchPlaceholder}
               value={searchQuery ?? ""}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="w-full py-1.5 pl-7 pr-2.5 text-[11.5px] max-md:text-[16px] rounded-md border border-[#eceef2] bg-slate-50 text-slate-800 outline-none focus:border-blue-500 focus:bg-white transition-colors"
+              className="w-full py-1.5 pl-7 pr-2.5 text-[11.5px] max-md:text-[16px] rounded-md border border-[#eceef2] bg-slate-50 text-slate-800 outline-none focus:border-blue-500 focus:bg-white transition-colors placeholder:text-[11px] sm:placeholder:text-[11.5px]"
             />
           </div>
         )}

@@ -227,7 +227,7 @@ export default function AdminDashboardPage() {
           <button
             onClick={() => loadData(true)}
             disabled={refreshing}
-            className="btn btn-secondary btn-sm min-h-[38px] sm:min-h-8"
+            className="btn btn-secondary btn-sm min-h-9.5 sm:min-h-8"
             title="Segarkan data operasional"
           >
             <RefreshCw size={13} className={refreshing ? "spin" : ""} />
@@ -235,7 +235,7 @@ export default function AdminDashboardPage() {
           </button>
           <Link
             href="/admin/presensi"
-            className="btn btn-primary btn-sm min-h-[38px] sm:min-h-8"
+            className="btn btn-primary btn-sm min-h-9.5 sm:min-h-8"
             title="Buka sesi presensi perkuliahan"
           >
             <Plus size={13} />
@@ -369,36 +369,36 @@ export default function AdminDashboardPage() {
             </span>
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "14px", flexWrap: "wrap" }}>
-            <div style={{ minWidth: "260px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5 flex-wrap">
                 <span className="badge-class-code" style={{ background: "#ffffff", borderColor: "#a7f3d0" }}>
                   {stats.active_session.class_name}
                 </span>
-                <span style={{ fontWeight: 700, fontSize: "13.5px", color: "#0f172a" }}>
+                <span className="font-bold text-[13.5px] text-slate-900">
                   {stats.active_session.course_name}
                 </span>
               </div>
-              <div style={{ fontSize: "11.5px", color: "#475569", marginTop: "3px" }}>
-                <strong>Topik:</strong> {stats.active_session.topic}
+              <div className="text-[11.5px] text-slate-600 mt-1">
+                <strong className="text-slate-700">Topik:</strong> {stats.active_session.topic}
               </div>
-              <div style={{ fontSize: "11px", color: "#64748b", marginTop: "2px" }}>
-                Pengampu: <span style={{ fontWeight: 600, color: "#1e293b" }}>{stats.active_session.lecturer_name}</span> • Ruang: <span style={{ fontWeight: 600, color: "#1e293b" }}>{stats.active_session.room_name || "Lab IoT"}</span>
+              <div className="text-[11px] text-slate-500 mt-0.5">
+                Pengampu: <span className="font-semibold text-slate-800">{stats.active_session.lecturer_name}</span> • Ruang: <span className="font-semibold text-slate-800">{stats.active_session.room_name || "Lab IoT"}</span>
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 w-full mt-2 sm:mt-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-emerald-200/50">
-              <div>
-                <div className="text-lg font-extrabold text-emerald-600 font-mono">
+            <div className="flex flex-row items-center justify-between md:justify-end gap-3.5 pt-2.5 md:pt-0 border-t md:border-t-0 border-emerald-200/60 shrink-0">
+              <div className="text-left md:text-right">
+                <div className="text-xl font-extrabold text-emerald-600 font-mono leading-none">
                   {stats.active_session.present_count}
                 </div>
-                <div className="text-[10px] text-emerald-800 uppercase font-semibold">
+                <div className="text-[10px] text-emerald-800 uppercase font-semibold tracking-wider mt-0.5 whitespace-nowrap">
                   Mahasiswa Hadir
                 </div>
               </div>
               <Link
                 href="/admin/presensi"
-                className="btn btn-sm bg-emerald-600 text-white hover:bg-emerald-700 border-0 py-1.5 px-3 text-[11.5px] font-semibold flex items-center gap-1.5"
+                className="btn btn-sm bg-emerald-600 text-white hover:bg-emerald-700 border-0 py-1.5 px-3.5 text-[11.5px] font-semibold flex items-center gap-1.5 shrink-0 rounded-md"
               >
                 <span>Pantau Presensi</span>
                 <ArrowRight size={13} />

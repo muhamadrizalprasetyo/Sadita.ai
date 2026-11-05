@@ -173,6 +173,24 @@ html {
     -webkit-appearance: none;
   }
 
+  /* Compact & Responsive Placeholder Sizes across all devices */
+  input::placeholder,
+  textarea::placeholder,
+  select::placeholder {
+    font-size: 11px !important;
+    color: #94a3b8 !important;
+    opacity: 0.85 !important;
+    font-weight: 400 !important;
+  }
+
+  @media (min-width: 640px) {
+    input::placeholder,
+    textarea::placeholder,
+    select::placeholder {
+      font-size: 11.5px !important;
+    }
+  }
+
   button {
     @apply cursor-pointer;
   }
@@ -416,7 +434,7 @@ html {
 }
 
 .topbar-search input {
-  @apply border-none outline-none bg-transparent text-[12px] w-full text-slate-800 placeholder:text-slate-400;
+  @apply border-none outline-none bg-transparent text-[12px] max-md:text-[16px] w-full text-slate-800 placeholder:text-[11px] sm:placeholder:text-[11.5px] placeholder:text-slate-400;
 }
 
 .topbar-avatar {
@@ -689,7 +707,7 @@ html {
 .form-input,
 .form-select,
 .form-textarea {
-  @apply border border-[#eceef2] bg-white text-slate-800 rounded-md py-1.25 px-2.25 text-[11.5px] outline-none transition-all w-full font-sans placeholder:text-slate-400 focus:border-navy-accent focus:ring-3 focus:ring-navy-accent/20;
+  @apply border border-[#eceef2] bg-white text-slate-800 rounded-md py-1.25 px-2.25 text-[11.5px] max-md:text-[16px] outline-none transition-all w-full font-sans placeholder:text-[11px] sm:placeholder:text-[11.5px] placeholder:text-slate-400 focus:border-navy-accent focus:ring-3 focus:ring-navy-accent/20;
 }
 
 /* ==========================================================================
