@@ -15,7 +15,7 @@ import {
   Search,
   type LucideIcon,
 } from "lucide-react";
-import { authApi, clearStoredToken, getStoredToken, type User } from "@/lib/api";
+import { authApi, clearStoredToken, getStoredToken, getStoredUser, type User } from "@/lib/api";
 import { KobarAssistant } from "@/components/kobar-assistant";
 import { homeFor } from "@/components/role-shell";
 
@@ -40,7 +40,10 @@ function getGreeting() {
 export function DosenShell({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(() => {
+    const cached = getStoredUser();
+    return cached && cached.role === "DOSEN" ? cached : null;
+  });
 
   useEffect(() => {
     if (!getStoredToken()) {

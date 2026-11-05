@@ -16,7 +16,7 @@ import {
   MessageCircle,
   Sparkles,
 } from "lucide-react";
-import { authApi, setStoredToken } from "@/lib/api";
+import { authApi, setStoredToken, setStoredUser } from "@/lib/api";
 import { homeFor, Role } from "@/components/role-shell";
 
 interface DemoAccount {
@@ -163,6 +163,7 @@ export default function LoginPage() {
     }
 
     setStoredToken(r.data.access_token);
+    setStoredUser(r.data.user);
 
     if (rememberMe && typeof window !== "undefined") {
       localStorage.setItem("sadita_remember_user", email);

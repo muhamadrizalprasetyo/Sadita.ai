@@ -29,7 +29,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { useConfirm } from "@/components/ui";
-import { authApi, clearStoredToken, getStoredToken, type User } from "@/lib/api";
+import { authApi, clearStoredToken, getStoredToken, getStoredUser, type User } from "@/lib/api";
 import { KobarAssistant } from "./kobar-assistant";
 import { BackToTop } from "@/components/ui";
 
@@ -107,7 +107,10 @@ export function RoleShell({ role, children }: { role: Role; children: ReactNode 
   const router = useRouter();
   const pathname = usePathname();
   const confirm = useConfirm();
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(() => {
+    const cached = getStoredUser();
+    return cached && cached.role === role ? cached : null;
+  });
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [theme, setTheme] = useState<"light" | "dark" | "system">("system");
   const menuRef = useRef<HTMLDivElement>(null);

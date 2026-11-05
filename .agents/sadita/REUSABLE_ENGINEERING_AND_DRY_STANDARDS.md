@@ -442,3 +442,23 @@ export function useTableData<T>({ fetcher, initialLimit = 15 }: UseTableDataOpti
 1. **Pengurangan Baris Kode**: Menurunkan volume boilerplate hingga 60% pada penulisan endpoint CRUD dan halaman dashboard.
 2. **Kesesuaian Standar**: Mengubah aturan paginasi, format tanggal, atau enkapsulasi error di satu tempat (`common.py` atau `data-table.tsx`) otomatis memperbarui seluruh modul.
 3. **Peningkatan Kualitas Pengujian**: Komponen inti yang sering dipakai ulang memiliki cakupan pengujian unit yang kuat dan teruji di lingkungan produksi.
+
+---
+
+## 5. Standar Optimasi Performa Frontend (Zero-Latency Navigation & Anti-Waterfall)
+
+Untuk memastikan pengalaman pengguna berkecepatan tinggi tanpa lag atau kedipan loading spinner (*render-blocking waterfall*), frontend menerapkan protokol performa:
+
+1. **Optimistic Session Hydration (Stale-While-Revalidate)**:
+   - Status otentikasi pengguna disimpan aman pada `localStorage.sadita_user` saat login berhasil (`setStoredUser`).
+   - Setiap Shell (`RoleShell`, `DosenShell`) menginisialisasi state pengguna secara sinkron melalui `useState(() => getStoredUser())`.
+   - UI langsung dirender seketika (0ms) tanpa menampilkan spinner blocking, sementara validasi keabsahan token berjalan di latar belakang via `authApi.getMe()`.
+2. **In-Flight API Request Deduplication**:
+   - Panggilan berulang atau konkuren ke endpoint sesi pengguna (`/api/v1/auth/me`) digabungkan ke dalam satu Promise bersama (`inFlightMePromise`), mengeliminasi banjir request ganda ke server FastAPI.
+3. **Pemberantasan Network Waterfall (Parallel Promise Batching)**:
+   - Dashboard peran (Dosen, Mahasiswa, Admin) dilarang menggunakan serial `for await` untuk fetching data relasi (seperti sesi, tugas, submission, dan kuis).
+   - Seluruh data relasional wajib diagregasi dan diambil secara paralel melalui `Promise.all` hierarkis.
+4. **Tree-Shaking & Package Optimization**:
+   - Konfigurasi `next.config.ts` mewajibkan `experimental.optimizePackageImports: ["lucide-react"]` untuk mencegah parsing dan pembundelan ribuan ikon yang tidak terpakai.
+5. **Targeted Latin Font Subsets**:
+   - Pemuatan font keluarga `@fontsource/poppins` difokuskan pada subset alfabet latin (`latin-400.css` s.d. `latin-700.css`), memangkas waktu unduh glyph skrip asing yang tidak diperlukan.

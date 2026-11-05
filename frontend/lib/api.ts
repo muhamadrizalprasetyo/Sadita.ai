@@ -131,6 +131,26 @@ export interface User {
   lecturer_profile?: LecturerProfile;
 }
 
+export function getStoredUser(): User | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem("sadita_user");
+    return raw ? (JSON.parse(raw) as User) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function setStoredUser(user: User): void {
+  if (typeof window !== "undefined") {
+    try {
+      localStorage.setItem("sadita_user", JSON.stringify(user));
+    } catch {
+      // ignore quota / parse errors
+    }
+  }
+}
+
 export interface TokenResponse {
   access_token: string;
   refresh_token: string;
@@ -270,13 +290,33 @@ export interface KrsRequest {
 // ---------------------------------------------------------------------------
 // API Modules
 // ---------------------------------------------------------------------------
+let inFlightMePromise: Promise<ApiResponse<User>> | null = null;
+
 export const authApi = {
-  login: (email: string, password: string) =>
-    apiFetch<TokenResponse>("/api/v1/auth/login", {
+  login: async (email: string, password: string) => {
+    const res = await apiFetch<TokenResponse>("/api/v1/auth/login", {
       method: "POST",
       body: JSON.stringify({ email, password }),
-    }),
-  getMe: () => apiFetch<User>("/api/v1/auth/me"),
+    });
+    if (res.data?.user) {
+      setStoredUser(res.data.user);
+    }
+    return res;
+  },
+  getMe: () => {
+    if (inFlightMePromise) return inFlightMePromise;
+    inFlightMePromise = apiFetch<User>("/api/v1/auth/me")
+      .then((res) => {
+        if (res.data) {
+          setStoredUser(res.data);
+        }
+        return res;
+      })
+      .finally(() => {
+        inFlightMePromise = null;
+      });
+    return inFlightMePromise;
+  },
   refresh: (refresh_token: string) =>
     apiFetch<TokenResponse>("/api/v1/auth/refresh", {
       method: "POST",
@@ -468,7 +508,7 @@ export interface UploadResponse {
 
 export const uploadApi = {
   upload: async (file: File): Promise<{ status: number; data?: UploadResponse; error?: string }> => {
-    const token = typeof window !== "undefined" ? localStorage.getItem("sadita_access_token") : null;
+    const token = getStoredToken();
     const formData = new FormData();
     formData.append("file", file);
     try {

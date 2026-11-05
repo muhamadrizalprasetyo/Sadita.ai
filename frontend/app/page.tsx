@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { authApi, getStoredToken } from "@/lib/api";
+import { authApi, getStoredToken, getStoredUser } from "@/lib/api";
 import { homeFor, Role } from "@/components/role-shell";
 
 export default function Home() {
@@ -10,6 +10,11 @@ export default function Home() {
   useEffect(() => {
     if (!getStoredToken()) {
       router.replace("/login");
+      return;
+    }
+    const cachedUser = getStoredUser();
+    if (cachedUser?.role) {
+      router.replace(homeFor(cachedUser.role as Role));
       return;
     }
     void authApi.getMe().then((r) => {

@@ -49,12 +49,27 @@ export default function DosenDashboardPage() {
         return;
       }
 
-      const sessionResults = await Promise.all(
-        classList.map(async (c) => {
-          const s = await attendanceApi.getSessions(c.id);
-          return { class: c, sessions: s.data ?? [] };
-        })
-      );
+      // Parallel fetch sessions, assignments, and quizzes across all classes
+      const [sessionResults, assignResults, quizResults] = await Promise.all([
+        Promise.all(
+          classList.map(async (c) => {
+            const s = await attendanceApi.getSessions(c.id);
+            return { class: c, sessions: s.data ?? [] };
+          })
+        ),
+        Promise.all(
+          classList.map(async (c) => {
+            const a = await lmsApi.getAssignments(c.id);
+            return { class: c, assignments: a.data ?? [] };
+          })
+        ),
+        Promise.all(
+          classList.map(async (c) => {
+            const q = await lmsApi.getQuizzes(c.id);
+            return { class: c, quizzes: q.data ?? [] };
+          })
+        ),
+      ]);
 
       const open: (AttendanceSession & { className: string })[] = [];
       sessionResults.forEach(({ class: c, sessions }) => {
@@ -64,37 +79,27 @@ export default function DosenDashboardPage() {
       });
       setOpenSessions(open);
 
-      const assignResults = await Promise.all(
-        classList.map(async (c) => {
-          const a = await lmsApi.getAssignments(c.id);
-          return { class: c, assignments: a.data ?? [] };
-        })
+      const allAssignmentsWithClass = assignResults.flatMap(({ class: c, assignments }) =>
+        assignments.map((a) => ({ c, a }))
       );
 
-      const pending: PendingGrade[] = [];
-      for (const { class: c, assignments } of assignResults) {
-        for (const a of assignments) {
+      const submissionResults = await Promise.all(
+        allAssignmentsWithClass.map(async ({ c, a }) => {
           const subRes = await lmsApi.listSubmissions(a.id);
           const subs = subRes.data ?? [];
           const ungraded = subs.filter((s: AssignmentSubmission) => s.status !== "GRADED").length;
-          if (ungraded > 0) {
-            pending.push({
-              assignmentId: a.id,
-              assignmentTitle: a.title,
-              className: c.name,
-              count: ungraded,
-            });
-          }
-        }
-      }
-      setPendingGrades(pending);
-
-      const quizResults = await Promise.all(
-        classList.map(async (c) => {
-          const q = await lmsApi.getQuizzes(c.id);
-          return { class: c, quizzes: q.data ?? [] };
+          return ungraded > 0
+            ? {
+                assignmentId: a.id,
+                assignmentTitle: a.title,
+                className: c.name,
+                count: ungraded,
+              }
+            : null;
         })
       );
+      setPendingGrades(submissionResults.filter((p): p is PendingGrade => p !== null));
+
       const quizzes: (Quiz & { className: string })[] = [];
       quizResults.forEach(({ class: c, quizzes: list }) => {
         list.filter((q) => q.is_published).forEach((q) => quizzes.push({ ...q, className: c.name }));
