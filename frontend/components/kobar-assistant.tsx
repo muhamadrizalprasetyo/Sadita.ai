@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { MessageSquare, X, Send, Bot, Sparkles, Database, Wifi, Award, BookOpen, Clock } from "lucide-react";
-import { User, academicApi, deviceApi, lmsApi } from "@/lib/api";
+import { X, Send, Bot, Sparkles } from "lucide-react";
+import { User, academicApi, deviceApi } from "@/lib/api";
 
 interface Message {
   id: string;

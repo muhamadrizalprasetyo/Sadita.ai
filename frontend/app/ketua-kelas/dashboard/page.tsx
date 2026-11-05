@@ -6,16 +6,16 @@ import {
   Users,
   Clock,
   FileText,
-  Calendar,
-  CheckCircle,
-  AlertTriangle,
   ArrowRight,
   RefreshCw,
   ShieldCheck,
-  BookOpen
+  BookOpen,
+  Calendar,
 } from "lucide-react";
 import { academicApi, CourseClass, attendanceApi, authApi, User, AttendanceSession } from "@/lib/api";
 import { StatCard, LoadingSpinner } from "@/components/ui";
+
+const DAY_NAMES = ["", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"];
 
 export default function KetuaKelasDashboardPage() {
   const [user, setUser] = useState<User | null>(null);
@@ -25,7 +25,6 @@ export default function KetuaKelasDashboardPage() {
 
   const loadData = useCallback(async () => {
     try {
-      setLoading(true);
       const [userRes, classesRes] = await Promise.all([
         authApi.getMe(),
         academicApi.getClasses(),
@@ -44,30 +43,37 @@ export default function KetuaKelasDashboardPage() {
     }
   }, []);
 
-  useEffect(() => { loadData(); }, [loadData]);
+  useEffect(() => {
+    void loadData();
+  }, [loadData]);
 
   if (loading) return <LoadingSpinner text="Memuat dashboard Ketua Kelas..." />;
 
-  const dayNames = ["", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"];
   const openSessions = sessions.filter(s => s.status === "OPEN");
 
   return (
-    <div style={{ display: "grid", gap: "2rem" }}>
+    <div className="flex flex-col gap-4 sm:gap-6">
       {/* Header */}
-      <div className="page-header">
+      <div className="page-header mb-0 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="page-title">Dashboard Ketua Kelas</h1>
-          <p className="page-subtitle">
+          <h1 className="page-title m-0">Dashboard Ketua Kelas</h1>
+          <p className="page-subtitle mt-0.5">
             Koordinasi presensi, verifikasi kehadiran rekan kelas, dan monitoring kelas
           </p>
         </div>
-        <div style={{ display: "flex", gap: "0.75rem" }}>
-          <button onClick={loadData} className="btn btn-secondary">
-            <RefreshCw size={16} />
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={() => {
+              setLoading(true);
+              void loadData();
+            }}
+            className="btn btn-secondary btn-sm min-h-[38px] sm:min-h-8"
+          >
+            <RefreshCw size={14} />
             <span>Segarkan</span>
           </button>
-          <Link href="/ketua-kelas/presensi" className="btn btn-primary">
-            <ShieldCheck size={16} />
+          <Link href="/ketua-kelas/presensi" className="btn btn-primary btn-sm min-h-[38px] sm:min-h-8">
+            <ShieldCheck size={14} />
             <span>Verifikasi Presensi</span>
           </Link>
         </div>
@@ -153,7 +159,7 @@ export default function KetuaKelasDashboardPage() {
                   </p>
                   <p style={{ fontSize: "0.75rem", color: "var(--primary-light)", marginTop: "0.2rem" }}>
                     <Calendar size={12} style={{ display: "inline", marginRight: "4px" }} />
-                    {dayNames[c.day_of_week] || "Senin"}, {c.start_time.slice(0, 5)} - {c.end_time.slice(0, 5)} WIB
+                    {DAY_NAMES[c.day_of_week] || "Senin"}, {c.start_time.slice(0, 5)} - {c.end_time.slice(0, 5)} WIB
                   </p>
                 </div>
                 <Link href="/ketua-kelas/presensi" className="btn btn-secondary btn-sm">

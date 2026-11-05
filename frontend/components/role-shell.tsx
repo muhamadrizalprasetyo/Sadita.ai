@@ -164,11 +164,13 @@ export function RoleShell({ role, children }: { role: Role; children: ReactNode 
     }
   }, [userMenuOpen]);
 
-  // Close mobile drawer on route change
-  useEffect(() => {
+  // Close mobile drawer and popovers on route change (React-recommended pattern for prop change)
+  const [prevPathname, setPrevPathname] = useState(pathname);
+  if (prevPathname !== pathname) {
+    setPrevPathname(pathname);
     setMobileDrawerOpen(false);
     setUserMenuOpen(false);
-  }, [pathname]);
+  }
 
   // Lock body scroll when mobile drawer is open
   useEffect(() => {

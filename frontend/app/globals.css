@@ -165,15 +165,12 @@ html {
     color: inherit;
   }
 
-  /* Prevent Safari auto-zoom on iPhone / mobile while preserving desktop size */
-  @media (max-width: 767px) {
-
-    input,
-    select,
-    textarea {
-      font-size: 16px !important;
-      -webkit-appearance: none;
-    }
+  /* Prevent Safari auto-zoom on iPhone / mobile while preserving desktop size via Tailwind utility */
+  input,
+  select,
+  textarea {
+    @apply max-md:text-[16px];
+    -webkit-appearance: none;
   }
 
   button {
@@ -187,11 +184,7 @@ html {
 
 /* Touch target & Apple Human Interface Guidelines helper */
 @utility touch-target {
-  min-height: 44px;
-  min-width: 44px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  @apply min-h-[44px] min-w-[44px] inline-flex items-center justify-center;
 }
 
 @utility pt-safe {

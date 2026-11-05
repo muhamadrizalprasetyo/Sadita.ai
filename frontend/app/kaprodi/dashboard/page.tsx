@@ -1,24 +1,16 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import {
   Users,
   BookOpen,
   Clock,
-  Award,
   ArrowRight,
   RefreshCw,
   BarChart3,
-  TrendingUp,
   GraduationCap,
   CheckCircle,
-  AlertCircle,
   Filter,
-  Monitor,
-  Building,
-  CreditCard,
-  Calendar,
-  Layers
 } from "lucide-react";
 import Link from "next/link";
 import {
@@ -32,6 +24,8 @@ import {
 } from "@/lib/api";
 import { StatCard, LoadingSpinner } from "@/components/ui";
 
+const DAY_NAMES = ["", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"];
+
 export default function KaprodiDashboardPage() {
   const [stats, setStats] = useState<AdminDashboard | null>(null);
   const [classes, setClasses] = useState<CourseClass[]>([]);
@@ -44,29 +38,26 @@ export default function KaprodiDashboardPage() {
   const [classTypeFilter, setClassTypeFilter] = useState<string>("ALL");
   const [dayFilter, setDayFilter] = useState<string>("ALL");
 
-  function loadData() {
-    setLoading(true);
-    void Promise.all([
-      academicApi.getDashboard(),
-      academicApi.getClasses(),
-      lecturerApi.list({ limit: 100 }),
-      studentApi.list(0, 500),
-    ])
-      .then(([statsRes, classesRes, lecRes, stuRes]) => {
-        if (statsRes.data) setStats(statsRes.data);
-        if (classesRes.data) setClasses(classesRes.data);
-        if (lecRes.data) setLecturers(lecRes.data);
-        if (stuRes.data) setStudents(stuRes.data);
-      })
-      .finally(() => setLoading(false));
-  }
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => {
-    loadData();
+  const fetchData = useCallback(async () => {
+    try {
+      const [statsRes, classesRes, lecRes, stuRes] = await Promise.all([
+        academicApi.getDashboard(),
+        academicApi.getClasses(),
+        lecturerApi.list({ limit: 100 }),
+        studentApi.list(0, 500),
+      ]);
+      if (statsRes.data) setStats(statsRes.data);
+      if (classesRes.data) setClasses(classesRes.data);
+      if (lecRes.data) setLecturers(lecRes.data);
+      if (stuRes.data) setStudents(stuRes.data);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  const dayNames = ["", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"];
+  useEffect(() => {
+    void fetchData();
+  }, [fetchData]);
 
   // Filtered classes
   const filteredClasses = useMemo(() => {
@@ -113,7 +104,7 @@ export default function KaprodiDashboardPage() {
       const onlineCount = dayClasses.length - offlineCount;
       return {
         dayNum: d,
-        dayName: dayNames[d],
+        dayName: DAY_NAMES[d],
         total: dayClasses.length,
         offline: offlineCount,
         online: onlineCount,
@@ -149,7 +140,7 @@ export default function KaprodiDashboardPage() {
           </p>
         </div>
         <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
-          <button onClick={loadData} className="btn btn-secondary">
+          <button onClick={() => { setLoading(true); void fetchData(); }} className="btn btn-secondary">
             <RefreshCw size={16} />
             <span>Segarkan</span>
           </button>
@@ -292,7 +283,7 @@ export default function KaprodiDashboardPage() {
           </div>
 
           <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-            {filteredClasses.slice(0, 7).map((c, idx) => {
+            {filteredClasses.slice(0, 7).map((c) => {
               // Simulated realistic attendance percentage for visual representation
               const basePct = 82 + ((c.id * 7) % 16);
               const isMorning = c.name.toUpperCase().includes("PAGI");

@@ -40,35 +40,20 @@ export function TableToolbar({
           <div className="relative flex-1 min-w-[180px] sm:max-w-[280px] w-full">
             <Search
               size={13}
-              style={{
-                position: "absolute",
-                left: "9px",
-                top: "50%",
-                transform: "translateY(-50%)",
-                color: "#94a3b8",
-              }}
+              className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
             />
             <input
               type="text"
               placeholder={searchPlaceholder}
               value={searchQuery ?? ""}
               onChange={(e) => onSearchChange(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "4px 8px 4px 28px",
-                fontSize: "11.5px",
-                borderRadius: "6px",
-                border: "1px solid var(--line)",
-                background: "#f8fafc",
-                color: "var(--text)",
-                outline: "none",
-              }}
+              className="w-full py-1.5 pl-7 pr-2.5 text-[11.5px] max-md:text-[16px] rounded-md border border-[#eceef2] bg-slate-50 text-slate-800 outline-none focus:border-blue-500 focus:bg-white transition-colors"
             />
           </div>
         )}
 
         {filterTabs && (
-          <div style={{ display: "flex", gap: "4px" }}>
+          <div className="flex items-center gap-1 flex-wrap">
             {filterTabs.options.map((opt) => (
               <button
                 key={opt.key}
@@ -78,7 +63,7 @@ export function TableToolbar({
               >
                 <span>{opt.label}</span>
                 {opt.count !== undefined && (
-                  <span style={{ opacity: 0.8, fontSize: "10px", marginLeft: "3px" }}>
+                  <span className="opacity-80 text-[10px] ml-0.75">
                     ({opt.count})
                   </span>
                 )}
@@ -88,7 +73,7 @@ export function TableToolbar({
         )}
       </div>
 
-      {actions && <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>{actions}</div>}
+      {actions && <div className="flex items-center gap-1.5">{actions}</div>}
     </div>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Award, BookOpen, Printer, CheckCircle, AlertCircle, FileText } from "lucide-react";
+import { Award, BookOpen, Printer, CheckCircle, FileText } from "lucide-react";
 import { academicApi, CourseClass, gradingApi, StudentGrade, authApi, User } from "@/lib/api";
 import { LoadingSpinner, StatusBadge, StatCard } from "@/components/ui";
 

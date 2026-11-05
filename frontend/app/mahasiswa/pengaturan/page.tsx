@@ -2,14 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { 
-  User, 
   Lock, 
   ShieldCheck, 
   GraduationCap, 
-  CreditCard, 
   Mail, 
-  Phone, 
-  Calendar, 
   CheckCircle, 
   AlertCircle,
   Eye,
