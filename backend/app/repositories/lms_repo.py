@@ -278,3 +278,7 @@ class LMSRepository:
         if class_id:
             stmt = stmt.join(Assignment).where(Assignment.class_id == class_id)
         return list(db.scalars(stmt).unique().all())
+
+
+# Alias for consistent naming
+LmsRepository = LMSRepository

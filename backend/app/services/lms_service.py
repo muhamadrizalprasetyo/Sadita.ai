@@ -274,3 +274,7 @@ class LMSService:
             "highest_score": max(scores) if scores else None,
             "lowest_score": min(scores) if scores else None,
         }
+
+
+# Alias for consistent naming
+LmsService = LMSService

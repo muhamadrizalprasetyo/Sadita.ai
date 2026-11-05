@@ -187,3 +187,7 @@ class GradingService:
             StudentGrade.class_id == class_id,
             StudentGrade.student_id == student_id
         ).first()
+
+
+# Alias for consistent naming
+GradingEngine = GradingService
