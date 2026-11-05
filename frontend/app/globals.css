@@ -202,13 +202,13 @@ html {
   @apply min-h-screen w-full m-0 rounded-none shadow-none bg-slate-50 flex flex-col md:grid md:grid-cols-[228px_1fr];
 }
 
-/* ---------- Sidebar ---------- */
+/* ---------- Sidebar (Desktop Only) ---------- */
 .sidebar {
-  @apply bg-white flex flex-col sticky top-0 h-screen max-h-screen overflow-hidden z-20 border-r border-[#eceef2] py-3.5 px-2.5 overscroll-contain max-md:flex-row max-md:items-center max-md:py-3 max-md:px-4 max-md:h-auto max-md:relative max-md:overflow-x-auto max-md:gap-2;
+  @apply bg-white flex flex-col sticky top-0 h-screen max-h-screen overflow-hidden z-20 border-r border-[#eceef2] py-3.5 px-2.5 overscroll-contain hidden md:flex;
 }
 
 .sidebar-brand {
-  @apply shrink-0 mb-3 flex flex-col items-start gap-0.75 border-b border-[#eceef2] px-1 pb-2.5 max-md:mb-0 max-md:mr-3 max-md:pr-0 max-md:border-b-0;
+  @apply shrink-0 mb-3 flex flex-col items-start gap-0.75 border-b border-[#eceef2] px-1 pb-2.5;
 }
 
 .brand-logo {
@@ -248,7 +248,7 @@ html {
 }
 
 .sidebar-nav {
-  @apply list-none flex flex-col gap-1.5 flex-1 min-h-0 overflow-y-auto overflow-x-hidden m-0 pt-0.5 pr-0.5 pb-2 pl-0 overscroll-contain max-md:flex-row max-md:flex-none;
+  @apply list-none flex flex-col gap-1.5 flex-1 min-h-0 overflow-y-auto overflow-x-hidden m-0 pt-0.5 pr-0.5 pb-2 pl-0 overscroll-contain;
   scrollbar-width: thin;
   scrollbar-color: #cbd5e1 transparent;
 }
@@ -270,7 +270,7 @@ html {
 }
 
 .nav-link {
-  @apply flex items-center gap-2 py-1.75 px-2.25 text-slate-600 text-[12.5px] font-medium relative rounded-md transition-all hover:bg-slate-100 hover:text-slate-900 hover:no-underline max-md:rounded-lg max-md:whitespace-nowrap max-md:py-2.5 max-md:px-3;
+  @apply flex items-center gap-2 py-1.75 px-2.25 text-slate-600 text-[12.5px] font-medium relative rounded-md transition-all hover:bg-slate-100 hover:text-slate-900 hover:no-underline;
 }
 
 .nav-link.active {
@@ -279,7 +279,7 @@ html {
 
 .nav-link.active::before {
   content: "";
-  @apply absolute left-0 top-1 bottom-1 w-0.75 rounded-r-xs bg-navy max-md:hidden;
+  @apply absolute left-0 top-1 bottom-1 w-0.75 rounded-r-xs bg-navy;
 }
 
 .nav-link svg {
@@ -287,7 +287,7 @@ html {
 }
 
 .sidebar-footer {
-  @apply shrink-0 pt-2.5 mt-auto flex flex-col gap-1 relative bg-white border-t border-[#eceef2] max-md:hidden;
+  @apply shrink-0 pt-2.5 mt-auto flex flex-col gap-1 relative bg-white border-t border-[#eceef2];
 }
 
 .sidebar-footer .nav-link {
@@ -358,12 +358,12 @@ html {
 
 /* ---------- Main Content ---------- */
 .content-area {
-  @apply py-3.5 px-5 pb-8 min-w-0 overflow-x-hidden max-w-[1600px] w-full mx-auto max-md:px-3.5 max-md:pt-2.5 max-md:pb-[calc(5.5rem+env(safe-area-inset-bottom))];
+  @apply py-3.5 px-5 pb-8 min-w-0 overflow-x-hidden max-w-[1600px] w-full mx-auto max-md:px-3 max-md:pt-2.5 max-md:pb-[calc(7.25rem+env(safe-area-inset-bottom))];
 }
 
 /* ---------- Topbar ---------- */
 .topbar {
-  @apply flex items-center justify-between gap-2.5 mb-3 rounded-lg py-1.5 px-3.75 border border-[#eceef2] bg-white shadow-xs max-md:flex-wrap;
+  @apply flex items-center justify-between gap-2.5 mb-3 rounded-lg py-1.5 px-3.75 border border-[#eceef2] bg-white shadow-xs max-md:flex-wrap max-md:p-2 max-md:gap-1.5 max-md:mb-2.5;
 }
 
 .topbar-greeting {
@@ -408,7 +408,7 @@ html {
 }
 
 .topbar-search {
-  @apply flex items-center gap-2 bg-slate-50 border border-[#eceef2] rounded-md py-1.25 px-2.75 w-60 shadow-none max-md:order-5 max-md:w-full;
+  @apply flex items-center gap-2 bg-slate-50 border border-[#eceef2] rounded-md py-1.25 px-2.75 w-60 shadow-none max-md:order-5 max-md:w-full max-md:py-1 max-md:px-2.5;
 }
 
 .topbar-search svg {
@@ -442,11 +442,11 @@ html {
    Stat Cards
    ========================================================================== */
 .stats {
-  @apply grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-2.25 mb-0;
+  @apply grid grid-cols-2 md:grid-cols-2 xl:grid-cols-4 gap-2 mb-0;
 }
 
 .stat {
-  @apply rounded-lg py-2.5 px-3 pb-2 text-white relative flex flex-col justify-between min-h-20 transition-all shadow-xs hover:-translate-y-px hover:shadow-md;
+  @apply rounded-lg py-2 px-2.5 sm:py-2.5 sm:px-3 text-white relative flex flex-col justify-between min-h-[72px] sm:min-h-20 transition-all shadow-xs hover:-translate-y-px hover:shadow-md;
 }
 
 .stat.stat-green {
@@ -998,11 +998,11 @@ html {
    SI KOBAR AI Assistant Widget & Floating Controls
    ========================================================================== */
 .kobar-fab {
-  @apply fixed bottom-8 right-8 max-md:bottom-[calc(4.75rem+env(safe-area-inset-bottom))] max-md:right-4 w-14 h-14 max-sm:w-12 max-sm:h-12 rounded-full text-white flex items-center justify-center cursor-pointer z-30 transition-transform hover:scale-105 active:scale-95 bg-linear-to-br from-[#0a7fd8] to-[#35a4f2] shadow-lg min-w-11 min-h-11;
+  @apply fixed bottom-8 right-8 max-md:bottom-[calc(4.5rem+env(safe-area-inset-bottom))] max-md:right-3.5 w-14 h-14 max-sm:w-11 max-sm:h-11 rounded-full text-white flex items-center justify-center cursor-pointer z-30 transition-transform hover:scale-105 active:scale-95 bg-linear-to-br from-[#0a7fd8] to-[#35a4f2] shadow-lg min-w-11 min-h-11;
 }
 
 .back-to-top-btn {
-  @apply fixed bottom-25 right-9.5 max-md:bottom-[calc(8.5rem+env(safe-area-inset-bottom))] max-md:right-4.5 w-11 h-11 max-sm:w-10 max-sm:h-10 rounded-full bg-white border border-slate-200 text-blue-600 flex items-center justify-center cursor-pointer z-30 transition-all hover:-translate-y-0.5 hover:bg-blue-600 hover:text-white active:scale-95 shadow-md min-w-11 min-h-11;
+  @apply fixed bottom-25 right-9.5 max-md:bottom-[calc(7.75rem+env(safe-area-inset-bottom))] max-md:right-4 w-11 h-11 max-sm:w-9.5 max-sm:h-9.5 rounded-full bg-white border border-slate-200 text-blue-600 flex items-center justify-center cursor-pointer z-30 transition-all hover:-translate-y-0.5 hover:bg-blue-600 hover:text-white active:scale-95 shadow-md min-w-9.5 min-h-9.5;
 }
 
 .kobar-window {

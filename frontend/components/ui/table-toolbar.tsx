@@ -35,9 +35,9 @@ export function TableToolbar({
       className="flex flex-wrap items-center justify-between gap-2 mb-2.5"
       style={style}
     >
-      <div className="flex flex-wrap items-center gap-2 flex-1 min-w-[200px] w-full">
+      <div className="flex flex-wrap items-center gap-2 flex-1 min-w-50 w-full">
         {onSearchChange !== undefined && (
-          <div className="relative flex-1 min-w-[180px] sm:max-w-[280px] w-full">
+          <div className="relative flex-1 min-w-45 sm:max-w-70 w-full">
             <Search
               size={13}
               className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"

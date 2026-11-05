@@ -387,29 +387,18 @@ export default function AdminDashboardPage() {
               </div>
             </div>
 
-            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-              <div style={{ textAlign: "right" }}>
-                <div style={{ fontSize: "18px", fontWeight: 800, color: "#059669", fontFamily: "var(--font-mono)" }}>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 w-full mt-2 sm:mt-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-emerald-200/50">
+              <div>
+                <div className="text-lg font-extrabold text-emerald-600 font-mono">
                   {stats.active_session.present_count}
                 </div>
-                <div style={{ fontSize: "10px", color: "#065f46", textTransform: "uppercase", fontWeight: 600 }}>
+                <div className="text-[10px] text-emerald-800 uppercase font-semibold">
                   Mahasiswa Hadir
                 </div>
               </div>
               <Link
                 href="/admin/presensi"
-                className="btn btn-sm"
-                style={{
-                  background: "#059669",
-                  color: "#ffffff",
-                  border: "none",
-                  padding: "6px 12px",
-                  fontSize: "11.5px",
-                  fontWeight: 600,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "6px",
-                }}
+                className="btn btn-sm bg-emerald-600 text-white hover:bg-emerald-700 border-0 py-1.5 px-3 text-[11.5px] font-semibold flex items-center gap-1.5"
               >
                 <span>Pantau Presensi</span>
                 <ArrowRight size={13} />
@@ -490,29 +479,20 @@ export default function AdminDashboardPage() {
                 devices.map((d) => (
                   <div
                     key={d.id}
-                    style={{
-                      padding: "8px 10px",
-                      borderRadius: "6px",
-                      background: "#f8fafc",
-                      border: "1px solid var(--line)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      gap: "8px",
-                    }}
+                    className="p-2 sm:p-2.5 rounded-md bg-slate-50 border border-[#eceef2] flex flex-col sm:flex-row sm:items-center justify-between gap-2"
                   >
-                    <div style={{ minWidth: 0 }}>
-                      <p style={{ fontWeight: 600, fontSize: "12px", color: "var(--text)", margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-semibold text-xs text-slate-800 m-0 truncate">
                         {d.nama}
                       </p>
-                      <p style={{ fontSize: "10.5px", color: "var(--muted)", margin: "1px 0 0" }}>
-                        ID: <span style={{ fontFamily: "var(--font-mono)" }}>{d.device_id}</span> • IP: {d.ip_address || "192.168.1.150"}
+                      <p className="text-[10.5px] text-slate-500 mt-0.5">
+                        ID: <span className="font-mono">{d.device_id}</span> • IP: {d.ip_address || "192.168.1.150"}
                       </p>
                     </div>
 
-                    <div style={{ display: "flex", alignItems: "center", gap: "6px", flexShrink: 0 }}>
+                    <div className="flex items-center gap-1.5 shrink-0 self-start sm:self-auto">
                       {pingResult[d.id] ? (
-                        <span style={{ fontSize: "10px", color: "var(--green)", fontWeight: 600 }}>
+                        <span className="text-[10px] text-emerald-600 font-semibold">
                           {pingResult[d.id]}
                         </span>
                       ) : (
@@ -520,8 +500,7 @@ export default function AdminDashboardPage() {
                           type="button"
                           onClick={() => handlePingDevice(d.id)}
                           disabled={pingingDeviceId === d.id}
-                          className="btn btn-secondary btn-sm"
-                          style={{ padding: "2px 7px", fontSize: "10px" }}
+                          className="btn btn-secondary btn-sm py-1 px-2 text-[10px]"
                           title="Cek koneksi perangkat langsung"
                         >
                           <Zap size={10} className={pingingDeviceId === d.id ? "spin" : ""} />
@@ -571,24 +550,15 @@ export default function AdminDashboardPage() {
                 stats.recent_activities.map((act) => (
                   <div
                     key={act.id}
-                    style={{
-                      padding: "6px 8px",
-                      borderRadius: "6px",
-                      background: "#f8fafc",
-                      border: "1px solid #f1f5f9",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      gap: "6px",
-                    }}
+                    className="p-2 rounded-md bg-slate-50 border border-slate-100 flex items-center justify-between gap-2 min-w-0"
                   >
-                    <div style={{ display: "flex", alignItems: "center", gap: "7px", minWidth: 0 }}>
-                      <Radio size={12} style={{ color: "var(--navy-accent)", flexShrink: 0 }} />
-                      <span style={{ fontSize: "11px", color: "#1e293b", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                      <Radio size={12} className="text-blue-500 shrink-0" />
+                      <span className="text-[11px] text-slate-800 font-medium truncate">
                         {act.description}
                       </span>
                     </div>
-                    <span className="badge badge-neutral" style={{ fontSize: "9.5px", padding: "1px 6px", flexShrink: 0 }}>
+                    <span className="badge badge-neutral text-[9.5px] py-0.5 px-1.5 shrink-0">
                       {act.action.replace("PRESENSI_", "")}
                     </span>
                   </div>

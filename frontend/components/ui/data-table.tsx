@@ -1052,55 +1052,33 @@ export function DataTable<T extends { id?: string | number }>({
         </div>
       )}
 
-      {/* 6. Filament Table Footer & Pagination */}
+      {/* 6. Filament Table Footer & Pagination (Responsive Stacking for Mobile) */}
       {pagination && (
         <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            padding: "11px 16px",
-            borderTop: "1px solid #f3f4f6",
-            background: "#ffffff",
-            fontSize: "12px",
-            color: "#6b7280",
-            flexWrap: "wrap",
-            gap: "10px",
-            borderBottomLeftRadius: "8px",
-            borderBottomRightRadius: "8px",
-          }}
+          className="flex flex-col sm:flex-row items-center justify-between p-3 sm:px-4 sm:py-2.5 gap-2.5 border-t border-slate-100 bg-white text-xs text-slate-500 rounded-b-lg"
         >
           {/* Sisi Kiri: Result Count */}
-          <div style={{ flex: 1, minWidth: "160px" }}>
+          <div className="w-full sm:w-auto text-center sm:text-left text-slate-600">
             Showing{" "}
-            <strong style={{ color: "#111827", fontWeight: 600 }}>
+            <strong className="text-slate-900 font-semibold">
               {pagination.totalRecords ? (pagination.currentPage - 1) * perPage + 1 : 1}
             </strong>{" "}
             to{" "}
-            <strong style={{ color: "#111827", fontWeight: 600 }}>
+            <strong className="text-slate-900 font-semibold">
               {pagination.totalRecords
                 ? Math.min(pagination.currentPage * perPage, pagination.totalRecords)
                 : data.length}
             </strong>{" "}
             of{" "}
-            <strong style={{ color: "#111827", fontWeight: 600 }}>
+            <strong className="text-slate-900 font-semibold">
               {pagination.totalRecords ?? data.length}
             </strong>{" "}
             results
           </div>
 
           {/* Sisi Tengah: Per page selector */}
-          <div
-            style={{
-              flex: 1,
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              gap: "6px",
-              minWidth: "140px",
-            }}
-          >
-            <span style={{ fontSize: "11.5px" }}>Per page</span>
+          <div className="flex items-center justify-center gap-1.5">
+            <span className="text-[11.5px] text-slate-500">Per page</span>
             <select
               value={perPage}
               onChange={(e) => {
@@ -1108,16 +1086,7 @@ export function DataTable<T extends { id?: string | number }>({
                 setPerPage(val);
                 pagination.onPerPageChange?.(val);
               }}
-              style={{
-                padding: "3px 6px",
-                fontSize: "11.5px",
-                borderRadius: "6px",
-                border: "1px solid #e5e7eb",
-                background: "#ffffff",
-                color: "#374151",
-                cursor: "pointer",
-                outline: "none",
-              }}
+              className="py-1 px-2 text-[11.5px] rounded-md border border-slate-200 bg-white text-slate-700 cursor-pointer outline-none focus:border-blue-500"
             >
               {(pagination.perPageOptions || [10, 25, 50, 100]).map((opt) => (
                 <option key={opt} value={opt}>
@@ -1127,29 +1096,11 @@ export function DataTable<T extends { id?: string | number }>({
             </select>
           </div>
 
-          {/* Sisi Kanan: Segmented Page Numbers Box */}
-          <div
-            style={{
-              flex: 1,
-              display: "flex",
-              justifyContent: "flex-end",
-              alignItems: "center",
-              minWidth: "160px",
-            }}
-          >
-
+          {/* Sisi Kanan: Segmented Page Numbers Box (Centered on Mobile to avoid FAB collision) */}
+          <div className="w-full sm:w-auto flex justify-center sm:justify-end items-center">
             {/* Segmented Page Numbers Box */}
             {pagination.totalPages > 1 && (
-              <div
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  border: "1px solid #e5e7eb",
-                  borderRadius: "7px",
-                  overflow: "hidden",
-                  background: "#ffffff",
-                }}
-              >
+              <div className="inline-flex items-center border border-slate-200 rounded-lg overflow-hidden bg-white shadow-2xs">
                 {/* Previous Button (only when page > 1) */}
                 {pagination.currentPage > 1 && (
                   <button

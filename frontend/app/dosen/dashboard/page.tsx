@@ -90,11 +90,11 @@ export default function DosenDashboardPage() {
           const ungraded = subs.filter((s: AssignmentSubmission) => s.status !== "GRADED").length;
           return ungraded > 0
             ? {
-                assignmentId: a.id,
-                assignmentTitle: a.title,
-                className: c.name,
-                count: ungraded,
-              }
+              assignmentId: a.id,
+              assignmentTitle: a.title,
+              className: c.name,
+              count: ungraded,
+            }
             : null;
         })
       );
@@ -129,7 +129,7 @@ export default function DosenDashboardPage() {
             Ringkasan kelas yang Anda ampu dan pekerjaan yang memerlukan tindakan.
           </p>
         </div>
-        <Link href="/dosen/presensi" className="btn btn-primary min-h-[38px] sm:min-h-8 w-full sm:w-auto">
+        <Link href="/dosen/presensi" className="btn btn-primary min-h-9.5 sm:min-h-8 w-full sm:w-auto">
           Kelola presensi
         </Link>
       </div>

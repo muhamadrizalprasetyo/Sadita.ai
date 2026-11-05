@@ -67,12 +67,12 @@ export default function KetuaKelasDashboardPage() {
               setLoading(true);
               void loadData();
             }}
-            className="btn btn-secondary btn-sm min-h-[38px] sm:min-h-8"
+            className="btn btn-secondary btn-sm min-h-9.5 sm:min-h-8"
           >
             <RefreshCw size={14} />
             <span>Segarkan</span>
           </button>
-          <Link href="/ketua-kelas/presensi" className="btn btn-primary btn-sm min-h-[38px] sm:min-h-8">
+          <Link href="/ketua-kelas/presensi" className="btn btn-primary btn-sm min-h-9.5 sm:min-h-8">
             <ShieldCheck size={14} />
             <span>Verifikasi Presensi</span>
           </Link>
