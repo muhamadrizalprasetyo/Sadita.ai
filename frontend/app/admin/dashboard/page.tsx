@@ -75,29 +75,23 @@ export default function AdminDashboardPage() {
   }, []);
 
   useEffect(() => {
-    let isMounted = true;
-    Promise.all([
+    void Promise.all([
       academicApi.getDashboard(),
       academicApi.getClasses(),
       deviceApi.list(),
     ])
       .then(([statsRes, classesRes, devicesRes]) => {
-        if (!isMounted) return;
         if (statsRes.data) setStats(statsRes.data);
         if (classesRes.data) setClasses(classesRes.data);
         if (devicesRes.data) setDevices(devicesRes.data);
         setError(null);
       })
       .catch(() => {
-        if (isMounted) setError("Gagal memuat data dashboard operasional. Pastikan backend terhubung.");
+        setError("Gagal memuat data dashboard operasional. Pastikan backend terhubung.");
       })
       .finally(() => {
-        if (isMounted) setLoading(false);
+        setLoading(false);
       });
-
-    return () => {
-      isMounted = false;
-    };
   }, []);
 
   const handlePingDevice = (deviceId: number) => {

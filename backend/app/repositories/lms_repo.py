@@ -350,3 +350,7 @@ class LMSRepository:
                 AssignmentGroupMember.student_id == student_id,
             )
         )
+
+
+# Alias for consistent naming
+LmsRepository = LMSRepository

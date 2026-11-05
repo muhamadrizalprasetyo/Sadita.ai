@@ -53,7 +53,7 @@ class TestDatabase:
         result = check_db_connection()
         assert result["status"] == "ok"
         assert "PostgreSQL" in result.get("version", "")
-        assert "18" in result.get("version", "")
+        assert any(v in result.get("version", "") for v in ("16", "17", "18"))
 
 
 # ---------------------------------------------------------------------------

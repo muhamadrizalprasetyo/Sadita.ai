@@ -332,3 +332,7 @@ class LMSService:
                     "email": student.user.email if student.user else None,
                 })
         return unsubmitted
+
+
+# Alias for consistent naming
+LmsService = LMSService

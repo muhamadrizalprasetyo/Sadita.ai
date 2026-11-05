@@ -50,34 +50,29 @@ export default function MahasiswaDashboardPage() {
         if (uRes.data) setUser(uRes.data);
 
         const studentId = uRes.data?.student_profile?.id;
-        if (studentId) {
-          const attRes = await attendanceApi.getStudentHistory(studentId);
-          if (attRes.data && attRes.data.length > 0) {
-            const records = attRes.data;
-            const attended = records.filter((r: AttendanceRecord) => r.status === "HADIR" || r.status === "TERLAMBAT").length;
-            const pct = Math.round((attended / records.length) * 100);
-            setAttendancePercent(`${pct}%`);
-            setAttendanceSubtext(`${attended} dari ${records.length} pertemuan`);
-          } else {
-            setAttendancePercent("100%");
-            setAttendanceSubtext("Presensi optimal");
-          }
+
+        // Fetch attendance history, assignments, and quizzes across student classes concurrently
+        const [attRes, assignResults, quizResults] = await Promise.all([
+          studentId ? attendanceApi.getStudentHistory(studentId) : Promise.resolve({ data: [] }),
+          classList.length > 0 ? Promise.all(classList.map(c => lmsApi.getAssignments(c.id))) : Promise.resolve([]),
+          classList.length > 0 ? Promise.all(classList.map(c => lmsApi.getQuizzes(c.id))) : Promise.resolve([]),
+        ]);
+
+        if (attRes.data && attRes.data.length > 0) {
+          const records = attRes.data;
+          const attended = records.filter((r: AttendanceRecord) => r.status === "HADIR" || r.status === "TERLAMBAT").length;
+          const pct = Math.round((attended / records.length) * 100);
+          setAttendancePercent(`${pct}%`);
+          setAttendanceSubtext(`${attended} dari ${records.length} pertemuan`);
+        } else {
+          setAttendancePercent("100%");
+          setAttendanceSubtext("Presensi optimal");
         }
 
-        // Fetch assignments & quizzes across student classes
-        if (classList.length > 0) {
-          const assignmentPromises = classList.map(c => lmsApi.getAssignments(c.id));
-          const quizPromises = classList.map(c => lmsApi.getQuizzes(c.id));
-          const [assignResults, quizResults] = await Promise.all([
-            Promise.all(assignmentPromises),
-            Promise.all(quizPromises),
-          ]);
-
-          const totalA = assignResults.reduce((acc: number, curr: { data?: Assignment[] }) => acc + (curr.data?.length ?? 0), 0);
-          const totalQ = quizResults.reduce((acc: number, curr: { data?: Quiz[] }) => acc + (curr.data?.length ?? 0), 0);
-          setTotalAssignments(totalA);
-          setTotalQuizzes(totalQ);
-        }
+        const totalA = assignResults.reduce((acc: number, curr: { data?: Assignment[] }) => acc + (curr.data?.length ?? 0), 0);
+        const totalQ = quizResults.reduce((acc: number, curr: { data?: Quiz[] }) => acc + (curr.data?.length ?? 0), 0);
+        setTotalAssignments(totalA);
+        setTotalQuizzes(totalQ);
       } catch {
         // Fallback gracefully
       } finally {
