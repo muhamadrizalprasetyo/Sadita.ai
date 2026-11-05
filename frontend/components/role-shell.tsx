@@ -333,10 +333,6 @@ export function RoleShell({ role, children }: { role: Role; children: ReactNode 
             <span className="wave">👋</span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <div className="badge badge-success" style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "4px 9px", fontSize: "11px", fontWeight: 500 }}>
-              <span className="pulse-dot" style={{ width: "6px", height: "6px" }} />
-              <span>SADITA Enterprise Live</span>
-            </div>
             <label className="topbar-search">
               <Search size={14} />
               <input type="text" placeholder="Cari data operasional..." />
