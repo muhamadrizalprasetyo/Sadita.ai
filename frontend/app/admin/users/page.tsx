@@ -365,16 +365,16 @@ export default function UserManagementPage() {
   );
 
   return (
-    <div style={{ display: "grid", gap: "12px" }}>
+    <div className="flex flex-col gap-3">
       {/* Top Page Header */}
-      <div className="page-header" style={{ marginBottom: 0 }}>
+      <div className="page-header mb-0 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
         <div>
-          <h1 className="page-title">Manajemen Pengguna</h1>
-          <p className="page-subtitle">
+          <h1 className="page-title m-0">Manajemen Pengguna</h1>
+          <p className="page-subtitle mt-0.5">
             Kelola akun Administrator, Dosen Pengampu, dan Mahasiswa sistem SADITA
           </p>
         </div>
-        <button className="btn btn-primary" onClick={() => setCreateOpen(true)}>
+        <button className="btn btn-primary min-h-[40px] sm:min-h-9 w-full sm:w-auto" onClick={() => setCreateOpen(true)}>
           <Plus size={15} /> Tambah Pengguna Baru
         </button>
       </div>
@@ -494,7 +494,7 @@ export default function UserManagementPage() {
               />
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div className="form-group">
                 <label className="form-label">Email Akun (Login)</label>
                 <input
@@ -520,7 +520,7 @@ export default function UserManagementPage() {
             </div>
 
             {createForm.role === "DOSEN" && (
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div className="form-group">
                   <label className="form-label">NIDN (Nomor Induk Dosen)</label>
                   <input
@@ -543,7 +543,7 @@ export default function UserManagementPage() {
             )}
 
             {(createForm.role === "MAHASISWA" || createForm.role === "KETUA_KELAS") && (
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div className="form-group">
                   <label className="form-label">NPM / NIM Mahasiswa</label>
                   <input
@@ -603,7 +603,7 @@ export default function UserManagementPage() {
               />
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div className="form-group">
                 <label className="form-label">Peran (Role)</label>
                 <select
@@ -727,7 +727,7 @@ export default function UserManagementPage() {
             </div>
 
             {/* Information Grid */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div
                 style={{
                   padding: "0.85rem 1rem",

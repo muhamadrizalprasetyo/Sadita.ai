@@ -90,7 +90,7 @@ export default function KetuaKelasDashboardPage() {
       </div>
 
       {/* Metric Cards */}
-      <div className="stats">
+      <div className="stats grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 mb-0">
         <StatCard
           label="Mata Kuliah Diambil"
           value={classes.length}
@@ -122,7 +122,7 @@ export default function KetuaKelasDashboardPage() {
       </div>
 
       {/* Main Grid */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(22rem, 1fr))", gap: "20px" }}>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Classes List */}
         <div className="card">
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "14px" }}>

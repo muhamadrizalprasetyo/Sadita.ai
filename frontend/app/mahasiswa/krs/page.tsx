@@ -232,7 +232,7 @@ export default function MahasiswaKrsPage() {
       {activeTab === "krs_saya" && (
         <div>
           {/* Summary Cards */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "1rem", marginBottom: "1.5rem" }}>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
             <div className="card" style={{ padding: "1.25rem" }}>
               <div style={{ fontSize: "0.85rem", color: "var(--text-secondary)", fontWeight: 600 }}>Total SKS Diambil</div>
               <div style={{ fontSize: "1.75rem", fontWeight: 700, color: "var(--green)", marginTop: "0.25rem" }}>
@@ -370,8 +370,8 @@ export default function MahasiswaKrsPage() {
           </div>
 
           {/* Filters */}
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem", marginBottom: "1.5rem", alignItems: "center" }}>
-            <div style={{ position: "relative", flex: 1, minWidth: "16rem", maxWidth: "24rem" }}>
+          <div className="flex flex-wrap gap-3 mb-4 items-center">
+            <div className="relative flex-1 min-w-[200px] w-full sm:max-w-sm">
               <input
                 type="text"
                 placeholder="Cari mata kuliah, nama kelas, atau dosen..."

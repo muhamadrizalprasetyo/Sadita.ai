@@ -146,25 +146,25 @@ export default function MahasiswaDashboardPage() {
   };
 
   return (
-    <div style={{ display: "grid", gap: "2rem" }}>
+    <div className="flex flex-col gap-4 sm:gap-6">
       {/* Header */}
-      <div className="page-header">
+      <div className="page-header mb-0 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="page-title">Selamat Datang, {user?.full_name}</h1>
-          <p className="page-subtitle">Portal Akademik Mahasiswa S1 Teknologi Informasi • Tahun 2026/2027</p>
+          <h1 className="page-title m-0">Selamat Datang, {user?.full_name}</h1>
+          <p className="page-subtitle mt-0.5">Portal Akademik Mahasiswa S1 Teknologi Informasi • Tahun 2026/2027</p>
         </div>
-        <div style={{ display: "flex", gap: "0.75rem" }}>
-          <Link href="/mahasiswa/presensi" className="btn btn-secondary">
+        <div className="flex flex-wrap items-center gap-2">
+          <Link href="/mahasiswa/presensi" className="btn btn-secondary btn-sm min-h-[38px] sm:min-h-8">
             <Clock size={16} /> Riwayat Presensi
           </Link>
-          <Link href="/mahasiswa/kuis" className="btn btn-primary">
+          <Link href="/mahasiswa/kuis" className="btn btn-primary btn-sm min-h-[38px] sm:min-h-8">
             <HelpCircle size={16} /> Kuis Aktif
           </Link>
         </div>
       </div>
 
       {/* Metrics */}
-      <div className="stats">
+      <div className="stats grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 mb-0">
         <StatCard
           label="Mata Kuliah Diambil"
           value={classes.length}
@@ -196,7 +196,7 @@ export default function MahasiswaDashboardPage() {
       </div>
 
       {/* Main Content Grid */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(22rem, 1fr))", gap: "1.5rem" }}>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Classes List */}
         <div className="card">
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.25rem" }}>

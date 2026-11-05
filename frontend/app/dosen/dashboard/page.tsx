@@ -121,15 +121,15 @@ export default function DosenDashboardPage() {
   if (loading) return <LoadingSpinner text="Memuat ringkasan perkuliahan…" />;
 
   return (
-    <div style={{ display: "grid", gap: "1.5rem" }}>
-      <div className="page-header">
+    <div className="flex flex-col gap-4 sm:gap-6">
+      <div className="page-header mb-0 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
         <div>
-          <h1 className="page-title">Dashboard</h1>
-          <p className="page-subtitle">
+          <h1 className="page-title m-0">Dashboard</h1>
+          <p className="page-subtitle mt-0.5">
             Ringkasan kelas yang Anda ampu dan pekerjaan yang memerlukan tindakan.
           </p>
         </div>
-        <Link href="/dosen/presensi" className="btn btn-primary">
+        <Link href="/dosen/presensi" className="btn btn-primary min-h-[38px] sm:min-h-8 w-full sm:w-auto">
           Kelola presensi
         </Link>
       </div>
@@ -144,7 +144,7 @@ export default function DosenDashboardPage() {
         />
       ) : (
         <>
-          <div className="stats">
+          <div className="stats grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 mb-0">
             <StatCard
               label="Kelas Diampu"
               value={classes.length}

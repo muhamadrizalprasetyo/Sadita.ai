@@ -265,7 +265,7 @@ export default function DosenKuisPage() {
             <label className="form-label">Instruksi</label>
             <textarea className="form-textarea" rows={2} value={quizForm.description} onChange={(e) => setQuizForm({ ...quizForm, description: e.target.value })} />
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "1rem" }}>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="form-group">
               <label className="form-label">Nilai lulus</label>
               <input type="number" min={0} max={100} className="form-input" value={quizForm.passing_score} onChange={(e) => setQuizForm({ ...quizForm, passing_score: Number(e.target.value) })} />

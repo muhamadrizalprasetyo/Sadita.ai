@@ -56,7 +56,7 @@ export default function AdminAkademikIndex() {
         </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(16rem, 1fr))", gap: "0.85rem" }}>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {sections.map(s => {
           const Icon = s.icon;
           return (

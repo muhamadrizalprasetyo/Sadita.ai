@@ -260,10 +260,10 @@ export function ConfirmDialog({
             type="button"
             onClick={onClose}
             disabled={loading}
-            className="w-7 h-7 rounded-md flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 cursor-pointer shrink-0 ml-2"
+            className="touch-target w-9 h-9 sm:w-7 sm:h-7 rounded-md flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 cursor-pointer shrink-0 ml-2"
             aria-label="Tutup dialog"
           >
-            <X size={15} />
+            <X size={16} />
           </button>
         </div>
 
@@ -276,14 +276,14 @@ export function ConfirmDialog({
           ) : null}
         </div>
 
-        {/* Footer actions bar: Batal & Konfirmasi */}
-        <div className="px-6 py-3.5 bg-slate-50 dark:bg-slate-800/60 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-2.5">
+        {/* Footer actions bar: Batal & Konfirmasi (Responsive Stacking on Mobile) */}
+        <div className="px-6 py-3.5 bg-slate-50 dark:bg-slate-800/60 border-t border-slate-100 dark:border-slate-800 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2.5">
           {shouldShowCancel && (
             <button
               type="button"
               onClick={onClose}
               disabled={loading}
-              className={`min-h-9 px-4 rounded-md text-[13px] font-medium border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors disabled:opacity-50 cursor-pointer shadow-xs select-none inline-flex items-center justify-center ${cancelButtonClassName}`}
+              className={`min-h-[44px] sm:min-h-9 px-4 rounded-md text-[13px] font-medium border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors disabled:opacity-50 cursor-pointer shadow-xs select-none inline-flex items-center justify-center ${cancelButtonClassName}`}
             >
               {cancelText || "Batal"}
             </button>
@@ -293,7 +293,7 @@ export function ConfirmDialog({
             type="button"
             onClick={onConfirm}
             disabled={loading}
-            className={`min-h-9 px-4.5 rounded-md text-[13px] font-semibold text-white transition-all shadow-xs inline-flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 select-none border border-transparent hover:brightness-95 active:brightness-90 active:translate-y-px ${styles.confirmBtn} ${confirmButtonClassName}`}
+            className={`min-h-[44px] sm:min-h-9 px-4.5 rounded-md text-[13px] font-semibold text-white transition-all shadow-xs inline-flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 select-none border border-transparent hover:brightness-95 active:brightness-90 active:translate-y-px ${styles.confirmBtn} ${confirmButtonClassName}`}
           >
             {loading && <Loader2 size={13} className="animate-spin" />}
             <span>{confirmText}</span>

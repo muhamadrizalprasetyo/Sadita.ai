@@ -388,18 +388,7 @@ export function DataTable<T extends { id?: string | number }>({
       {/* 1. Filament Topbar */}
       {hasTopBar && (
         <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            padding: "10px 14px",
-            gap: "8px",
-            borderBottom: "1px solid #f3f4f6",
-            background: "#ffffff",
-            position: "relative",
-            borderTopLeftRadius: "8px",
-            borderTopRightRadius: "8px",
-          }}
+          className="flex flex-col sm:flex-row sm:items-center justify-between p-2.5 sm:px-3.5 sm:py-2.5 gap-2.5 border-b border-[#f3f4f6] bg-white relative rounded-t-lg"
         >
           {/* Left area: Bulk actions or custom toolbar actions */}
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
@@ -490,9 +479,9 @@ export function DataTable<T extends { id?: string | number }>({
           </div>
 
           {/* Right area: Search, Filter popover button, Column Toggle button */}
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginLeft: "auto" }}>
+          <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end sm:ml-auto">
             {searchable && (
-              <div style={{ position: "relative", width: "230px" }}>
+              <div className="relative flex-1 sm:flex-initial sm:w-[230px]">
                 <Search
                   size={14}
                   style={{
@@ -926,7 +915,7 @@ export function DataTable<T extends { id?: string | number }>({
         </div>
       ) : (
         /* 5. Table Body */
-        <div style={{ overflowX: "auto", width: "100%" }}>
+        <div className="overflow-x-auto w-full overscroll-x-contain" style={{ WebkitOverflowScrolling: "touch" }}>
           <table
             style={{
               width: "100%",

@@ -276,7 +276,7 @@ export default function KaprodiDashboardPage() {
       </div>
 
       {/* Main Monitoring Section: Analytics & Breakdown */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(28rem, 1fr))", gap: "1.5rem" }}>
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
         {/* Visual Card 1: Statistik Kehadiran per Mata Kuliah & Kelas */}
         <div className="card" style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -358,17 +358,7 @@ export default function KaprodiDashboardPage() {
           </div>
 
           {/* Ratio Comparison Box */}
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: "1rem",
-              padding: "1rem",
-              borderRadius: "var(--radius-md)",
-              background: "rgba(56, 189, 248, 0.05)",
-              border: "1px solid rgba(56, 189, 248, 0.15)",
-            }}
-          >
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg bg-sky-500/5 border border-sky-500/15">
             <div>
               <div style={{ fontSize: "0.75rem", color: "var(--text-secondary)", textTransform: "uppercase", fontWeight: 600 }}>
                 Mahasiswa Terdaftar
@@ -399,7 +389,7 @@ export default function KaprodiDashboardPage() {
             <h3 style={{ fontSize: "0.9rem", fontWeight: 600, marginBottom: "0.75rem", color: "var(--text-primary)" }}>
               Distribusi Jadwal Mingguan (Offline vs Online)
             </h3>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: "0.5rem" }}>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
               {dayDistribution.map((d) => (
                 <div
                   key={d.dayNum}

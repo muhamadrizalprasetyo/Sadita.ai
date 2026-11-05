@@ -212,22 +212,22 @@ export default function AdminDashboardPage() {
   }
 
   return (
-    <div style={{ display: "grid", gap: "10px" }}>
+    <div className="flex flex-col gap-2.5">
       {/* 1. Header */}
-      <div className="page-header" style={{ marginBottom: 0, padding: 0 }}>
+      <div className="page-header mb-0 p-0 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
         <div>
-          <h1 className="page-title" style={{ margin: 0 }}>
+          <h1 className="page-title m-0">
             Dashboard Administrator
           </h1>
-          <p className="page-subtitle" style={{ margin: "1px 0 0" }}>
+          <p className="page-subtitle mt-0.5">
             Sistem Akademik Terintegrasi & Monitoring Presensi IoT
           </p>
         </div>
-        <div style={{ display: "flex", gap: "6px" }}>
+        <div className="flex flex-wrap items-center gap-1.5">
           <button
             onClick={() => loadData(true)}
             disabled={refreshing}
-            className="btn btn-secondary btn-sm"
+            className="btn btn-secondary btn-sm min-h-[38px] sm:min-h-8"
             title="Segarkan data operasional"
           >
             <RefreshCw size={13} className={refreshing ? "spin" : ""} />
@@ -235,7 +235,7 @@ export default function AdminDashboardPage() {
           </button>
           <Link
             href="/admin/presensi"
-            className="btn btn-primary btn-sm"
+            className="btn btn-primary btn-sm min-h-[38px] sm:min-h-8"
             title="Buka sesi presensi perkuliahan"
           >
             <Plus size={13} />
@@ -245,51 +245,32 @@ export default function AdminDashboardPage() {
       </div>
 
       {error && (
-        <div className="rounded-lg" style={{ padding: "8px 12px", background: "var(--error-bg)", border: "1px solid var(--error-border)", color: "var(--error)", fontSize: "11px" }}>
+        <div className="rounded-lg p-2.5 bg-red-50 border border-red-200 text-red-600 text-[11px]">
           {error}
         </div>
       )}
 
       {/* 2. Operational Attention Banner (Kebutuhan Perhatian as per AGENTS.md) */}
       {stats && stats.devices_offline > 0 && (
-        <div
-          className="rounded-lg"
-          style={{
-            padding: "9px 12px",
-            background: "rgba(239, 68, 68, 0.08)",
-            border: "1px solid rgba(239, 68, 68, 0.25)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: "10px",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <AlertTriangle size={16} color="var(--error)" style={{ flexShrink: 0 }} />
-            <div style={{ fontSize: "12px", color: "#991b1b" }}>
+        <div className="rounded-lg p-2.5 sm:p-3 bg-red-500/10 border border-red-500/25 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+          <div className="flex items-start sm:items-center gap-2">
+            <AlertTriangle size={16} className="text-red-600 shrink-0 mt-0.5 sm:mt-0" />
+            <div className="text-xs text-red-800">
               <strong>Perhatian Operasional:</strong> Terdeteksi {stats.devices_offline} perangkat presensi IoT offline (ESP32 Meja Dosen). Periksa koneksi broker MQTT port 1883 atau catu daya perangkat.
             </div>
           </div>
           <Link
             href="/admin/perangkat"
-            className="btn btn-sm rounded-md"
-            style={{
-              background: "#ef4444",
-              color: "#ffffff",
-              border: "none",
-              padding: "3px 10px",
-              fontSize: "11px",
-              flexShrink: 0,
-            }}
+            className="btn btn-sm rounded-md bg-red-600 text-white border-0 py-1 px-2.5 text-[11px] shrink-0 self-start sm:self-auto"
           >
             Periksa Perangkat
           </Link>
         </div>
       )}
 
-      {/* 3. Metrics Stat Grid (8 Interactive KPI Cards - No Duplicate Icons) */}
+      {/* 3. Metrics Stat Grid (8 Interactive KPI Cards - Responsive 2 cols on mobile, 4 on desktop) */}
       {stats && (
-        <div className="stats" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "8px", marginBottom: 0 }}>
+        <div className="stats grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 mb-0">
           <Link href="/admin/users" className="stat-card-link" title="Buka Manajemen Mahasiswa">
             <StatCard
               label="Total Mahasiswa"
@@ -439,7 +420,7 @@ export default function AdminDashboardPage() {
       )}
 
       {/* 5. Realtime Overview Section (Classes Table & IoT Devices) using Reusable Components */}
-      <div style={{ display: "grid", gridTemplateColumns: "1.45fr 1fr", gap: "10px", alignItems: "start" }}>
+      <div className="grid grid-cols-1 lg:grid-cols-[1.45fr_1fr] gap-2.5 items-start">
 
         {/* Classes Reusable SectionCard + TableToolbar + DataTable */}
         <SectionCard

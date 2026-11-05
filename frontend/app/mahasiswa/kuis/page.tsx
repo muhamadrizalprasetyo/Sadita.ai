@@ -171,17 +171,7 @@ export default function MahasiswaKuisPage() {
               Kuis: <strong>{activeQuiz.title}</strong>
             </p>
 
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(3, 1fr)",
-                gap: "1rem",
-                background: "rgba(0,0,0,0.2)",
-                padding: "1.25rem",
-                borderRadius: "var(--radius-md)",
-                marginBottom: "2rem"
-              }}
-            >
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-black/10 dark:bg-black/30 p-4 rounded-lg mb-6">
               <div>
                 <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>Skor Perolehan</span>
                 <div
@@ -437,7 +427,7 @@ export default function MahasiswaKuisPage() {
           description="Dosen pengampu belum mempublikasikan kuis online pada kelas ini."
         />
       ) : (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(22rem, 1fr))", gap: "1.25rem" }}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
           {quizzes.map(quiz => {
             const subs = userSubmissions[quiz.id] || [];
             const attemptsMade = subs.length;
@@ -465,18 +455,7 @@ export default function MahasiswaKuisPage() {
                   )}
                 </div>
 
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(2, 1fr)",
-                    gap: "0.75rem",
-                    background: "rgba(0,0,0,0.2)",
-                    padding: "0.85rem",
-                    borderRadius: "var(--radius-md)",
-                    fontSize: "0.825rem",
-                    color: "var(--text-secondary)"
-                  }}
-                >
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 p-3 rounded-lg bg-black/5 dark:bg-black/25 text-xs text-slate-500">
                   <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
                     <Award size={15} color="var(--primary-light)" />
                     <span>Passing: <strong>{quiz.passing_score}</strong></span>

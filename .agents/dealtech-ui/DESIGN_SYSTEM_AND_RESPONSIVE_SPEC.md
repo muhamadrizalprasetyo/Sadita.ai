@@ -114,50 +114,14 @@ Sebagian besar mahasiswa dan dosen mengoperasikan ponsel cerdas dengan satu tang
 +-----------------------------------+
 ```
 
-### 3.1 Komponen Navigasi Bawah Khusus Ponsel
-Pada layar `< 768px`, sidebar kiri desktop disembunyikan dan digantikan oleh bilah navigasi bawah (*Bottom Navigation Bar*) yang ramping, elegan, dan dilengkapi ikon SVG presisi.
-
-```tsx
-// File: frontend/components/layout/mobile-nav.tsx
-'use client';
-
-import React from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Calendar, QrCode, BookOpen, User } from 'lucide-react';
-import styles from './mobile-nav.module.css';
-
-interface NavItem {
-  label: string;
-  href: string;
-  icon: React.ElementType;
-}
-
-const MAHASISWA_NAV: NavItem[] = [
-  { label: 'Beranda', href: '/mahasiswa', icon: LayoutDashboard },
-  { label: 'Jadwal', href: '/mahasiswa/jadwal', icon: Calendar },
-  { label: 'Presensi', href: '/mahasiswa/presensi', icon: QrCode },
-  { label: 'LMS', href: '/mahasiswa/kelas', icon: BookOpen },
-  { label: 'Profil', href: '/mahasiswa/profil', icon: User },
-];
-
-export function MobileNav() {
-  const pathname = usePathname();
-
-  return (
-    <nav className={styles.bottomNav} aria-label="Navigasi Bawah Seluler">
-      {MAHASISWA_NAV.map((item) => {
-        const Icon = item.icon;
-        const isActive = pathname === item.href;
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={`${styles.navItem} ${isActive ? styles.active : ''}`}
-          >
-            <Icon className={styles.icon} size={22} strokeWidth={isActive ? 2.2 : 1.7} />
-            <span className={styles.label}>{item.label}</span>
-          </Link>
+### 3.1 Arsitektur Terpadu Shell Responsif (`RoleShell`)
+Pada SADITA.ai, tata letak adaptif seluruh peran (Admin, Kaprodi, Dosen, Mahasiswa, Ketua Kelas) dikelola terpusat di dalam `components/role-shell.tsx`:
+1. **Desktop Sidebar (`hidden md:flex`)**: Lebar tetap 228px, navigasi lengkap, pill notifikasi, dan user popover menu dengan switcher tema (Light/Dark/System) serta konfirmasi logout modal.
+2. **Mobile Top Header (`flex md:hidden sticky top-0 z-30 pt-safe`)**: Mengakomodasi Notch/Dynamic Island dengan `pt-safe`, tombol drawer menu hamburger, logo brand, dan badge notifikasi.
+3. **Ergonomic Bottom Navigation (`flex md:hidden fixed bottom-0 inset-x-0 z-40 pb-safe`)**: Menampilkan 4 pintasan utama peran + 1 tombol menu offcanvas dengan target sentuh $\ge 44$px di dalam area jangkauan alami ibu jari (*Thumb Zone*).
+4. **Slide-Over Mobile Drawer (`fixed inset-0 z-50 md:hidden`)**: Offcanvas menu dengan backdrop lembut `bg-black/45`, daftar menu navigasi lengkap, switcher tema, profil ringkas pengguna, dan penguncian scroll layar (`document.body.style.overflow = "hidden"`).
+5. **Stacking Grids Dashboard**: Metrik KPI pada dashboard mengadopsi 2 kolom di ponsel (`grid-cols-2`), 3 kolom di tablet (`md:grid-cols-3`), dan 4 kolom di desktop (`lg:grid-cols-4`), meniadakan layout 4-kolom kaku yang rawan patah di layar ponsel sempit.
+6. **Split Overview Responsive**: Bagian ikhtisar terbagi mengadopsi `grid-cols-1 lg:grid-cols-[1.45fr_1fr]` sehingga bertumpuk rapi di mobile/tablet dan berdampingan elegan di layar monitor lebar.
         );
       })}
     </nav>

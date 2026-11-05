@@ -177,10 +177,8 @@ export function Modal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md"
+            className="rounded-md touch-target w-9 h-9 sm:w-8 sm:h-8"
             style={{
-              width: "32px",
-              height: "32px",
               background: "var(--bg)",
               border: "1px solid var(--line)",
               display: "flex",

@@ -52,6 +52,13 @@
   *::before,
   *::after {
     @apply box-border;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html,
+  body {
+    @apply overflow-x-hidden;
+    -webkit-overflow-scrolling: touch;
   }
 }
 
@@ -158,6 +165,17 @@ html {
     color: inherit;
   }
 
+  /* Prevent Safari auto-zoom on iPhone / mobile while preserving desktop size */
+  @media (max-width: 767px) {
+
+    input,
+    select,
+    textarea {
+      font-size: 16px !important;
+      -webkit-appearance: none;
+    }
+  }
+
   button {
     @apply cursor-pointer;
   }
@@ -167,11 +185,28 @@ html {
   }
 }
 
+/* Touch target & Apple Human Interface Guidelines helper */
+@utility touch-target {
+  min-height: 44px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@utility pt-safe {
+  padding-top: max(0.75rem, env(safe-area-inset-top));
+}
+
+@utility pb-safe {
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+}
+
 /* ==========================================================================
    App Shell Layout (Enterprise Full-Viewport)
    ========================================================================== */
 .app-shell {
-  @apply grid min-h-screen w-full m-0 rounded-none shadow-none bg-slate-50 grid-cols-1 md:grid-cols-[228px_1fr];
+  @apply min-h-screen w-full m-0 rounded-none shadow-none bg-slate-50 flex flex-col md:grid md:grid-cols-[228px_1fr];
 }
 
 /* ---------- Sidebar ---------- */
@@ -330,7 +365,7 @@ html {
 
 /* ---------- Main Content ---------- */
 .content-area {
-  @apply py-3.5 px-5 pb-7 min-w-0 overflow-x-hidden max-md:p-4;
+  @apply py-3.5 px-5 pb-8 min-w-0 overflow-x-hidden max-w-[1600px] w-full mx-auto max-md:px-3.5 max-md:pt-2.5 max-md:pb-[calc(5.5rem+env(safe-area-inset-bottom))];
 }
 
 /* ---------- Topbar ---------- */
@@ -919,11 +954,11 @@ html {
    Modal
    ========================================================================== */
 .modal-overlay {
-  @apply fixed inset-0 flex items-center justify-center z-1000 p-6 bg-black/40 overscroll-contain touch-none;
+  @apply fixed inset-0 flex items-center justify-center z-1000 p-3 sm:p-6 bg-black/40 overscroll-contain touch-none pt-safe pb-safe;
 }
 
 .modal-box {
-  @apply rounded-lg p-7 w-full max-w-135 max-h-[90vh] overflow-y-auto shadow-2xl bg-white overscroll-contain;
+  @apply rounded-lg p-4 sm:p-6.5 w-full max-w-135 max-h-[90dvh] overflow-y-auto shadow-2xl bg-white overscroll-contain;
   -webkit-overflow-scrolling: touch;
   touch-action: pan-y;
 }
@@ -970,15 +1005,15 @@ html {
    SI KOBAR AI Assistant Widget & Floating Controls
    ========================================================================== */
 .kobar-fab {
-  @apply fixed bottom-8 right-8 max-sm:bottom-6 max-sm:right-6 w-14 h-14 rounded-full text-white flex items-center justify-center cursor-pointer z-999 transition-transform hover:scale-105 bg-linear-to-br from-[#0a7fd8] to-[#35a4f2] shadow-lg;
+  @apply fixed bottom-8 right-8 max-md:bottom-[calc(4.75rem+env(safe-area-inset-bottom))] max-md:right-4 w-14 h-14 max-sm:w-12 max-sm:h-12 rounded-full text-white flex items-center justify-center cursor-pointer z-30 transition-transform hover:scale-105 active:scale-95 bg-linear-to-br from-[#0a7fd8] to-[#35a4f2] shadow-lg min-w-11 min-h-11;
 }
 
 .back-to-top-btn {
-  @apply fixed bottom-25 right-9.5 max-sm:bottom-24 max-sm:right-7.5 w-11 h-11 rounded-full bg-white border border-slate-200 text-blue-600 flex items-center justify-center cursor-pointer z-998 transition-all hover:-translate-y-0.5 hover:bg-blue-600 hover:text-white active:scale-95 shadow-md;
+  @apply fixed bottom-25 right-9.5 max-md:bottom-[calc(8.5rem+env(safe-area-inset-bottom))] max-md:right-4.5 w-11 h-11 max-sm:w-10 max-sm:h-10 rounded-full bg-white border border-slate-200 text-blue-600 flex items-center justify-center cursor-pointer z-30 transition-all hover:-translate-y-0.5 hover:bg-blue-600 hover:text-white active:scale-95 shadow-md min-w-11 min-h-11;
 }
 
 .kobar-window {
-  @apply fixed right-8 w-95 h-130 rounded-lg flex flex-col z-1000 overflow-hidden border border-[#eceef2] bg-white shadow-app bottom-26 max-w-[calc(100vw-2.5rem)] max-h-[calc(100vh-8rem)];
+  @apply fixed right-8 bottom-26 w-95 h-130 max-md:fixed max-md:inset-x-2.5 max-md:bottom-[calc(4.75rem+env(safe-area-inset-bottom))] max-md:w-auto max-md:max-h-[75vh] max-md:h-auto rounded-lg flex flex-col z-50 overflow-hidden border border-[#eceef2] bg-white shadow-app max-w-[calc(100vw-1.25rem)] max-h-[calc(100vh-6rem)];
   animation: slideUp 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 

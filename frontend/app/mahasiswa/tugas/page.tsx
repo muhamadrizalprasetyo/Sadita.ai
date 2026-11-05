@@ -155,7 +155,7 @@ export default function MahasiswaTugasPage() {
       </div>
 
       {/* Stats summary */}
-      <div className="stat-grid" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(12rem, 1fr))" }}>
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-2.5 mb-3">
         <div className="card" style={{ textAlign: "center", padding: "1.25rem 1rem" }}>
           <div style={{ fontSize: "1.75rem", fontWeight: 800, color: "var(--text-primary)" }}>{assignments.length}</div>
           <div style={{ fontSize: "0.8rem", color: "var(--text-secondary)", marginTop: "0.25rem" }}>Total Tugas</div>

@@ -1,5 +1,5 @@
 import { Suspense, type ReactNode } from "react";
-import { DosenShell } from "@/components/dosen/dosen-shell";
+import { RoleShell } from "@/components/role-shell";
 
 function DosenFallback() {
   return (
@@ -11,8 +11,8 @@ function DosenFallback() {
 
 export default function Layout({ children }: { children: ReactNode }) {
   return (
-    <DosenShell>
+    <RoleShell role="DOSEN">
       <Suspense fallback={<DosenFallback />}>{children}</Suspense>
-    </DosenShell>
+    </RoleShell>
   );
 }

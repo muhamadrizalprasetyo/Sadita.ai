@@ -30,16 +30,8 @@ export function SectionCard({
       }}
     >
       {(title || action) && (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginBottom: subtitle ? "10px" : "8px",
-            gap: "8px",
-          }}
-        >
-          <div>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2 sm:mb-2.5">
+          <div className="min-w-0 flex-1">
             {typeof title === "string" ? (
               <h2 style={{ fontSize: "13.5px", fontWeight: 700, color: "var(--text)", margin: 0 }}>
                 {title}
@@ -53,7 +45,7 @@ export function SectionCard({
               </p>
             )}
           </div>
-          {action && <div style={{ flexShrink: 0 }}>{action}</div>}
+          {action && <div className="shrink-0 self-start sm:self-auto">{action}</div>}
         </div>
       )}
       {children}

@@ -109,7 +109,7 @@ export default function MahasiswaNilaiPage() {
       )}
 
       {/* Student Academic Info Card */}
-      <div className="card" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(14rem, 1fr))", gap: "1.25rem" }}>
+      <div className="card grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <div>
           <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>NAMA MAHASISWA</span>
           <div style={{ fontWeight: 700, fontSize: "1.05rem" }}>{user?.full_name}</div>

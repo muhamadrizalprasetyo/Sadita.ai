@@ -162,7 +162,12 @@ export function KobarAssistant({ user }: { user: User }) {
                 <p style={{ fontSize: "11px", opacity: 0.85 }}>Asisten Pintar SADITA.ai</p>
               </div>
             </div>
-            <button onClick={() => setIsOpen(false)} style={{ color: "rgba(255,255,255,0.7)", lineHeight: 1 }}>
+            <button
+              type="button"
+              onClick={() => setIsOpen(false)}
+              className="touch-target w-9 h-9 flex items-center justify-center text-white/80 hover:text-white"
+              aria-label="Tutup SI KOBAR"
+            >
               <X size={20} />
             </button>
           </div>

@@ -32,19 +32,12 @@ export function TableToolbar({
 }: TableToolbarProps) {
   return (
     <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        gap: "8px",
-        marginBottom: "10px",
-        flexWrap: "wrap",
-        ...style,
-      }}
+      className="flex flex-wrap items-center justify-between gap-2 mb-2.5"
+      style={style}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: "8px", flex: 1, minWidth: "220px" }}>
+      <div className="flex flex-wrap items-center gap-2 flex-1 min-w-[200px] w-full">
         {onSearchChange !== undefined && (
-          <div style={{ position: "relative", flex: 1, maxWidth: "280px" }}>
+          <div className="relative flex-1 min-w-[180px] sm:max-w-[280px] w-full">
             <Search
               size={13}
               style={{
